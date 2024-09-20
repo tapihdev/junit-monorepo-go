@@ -1,5 +1,10 @@
+import * as fs from 'fs'
 import * as core from '@actions/core'
-import { wait } from './wait'
+import * as github from '@actions/github'
+import glob from 'fast-glob'
+
+import { getFilename, getGitHubToken } from './input'
+import { JunitReport } from './junit'
 
 /**
  * The main function for the action.
@@ -7,18 +12,73 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const filename = getFilename()
+    const token = getGitHubToken()
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    core.info(`* search junit reports: ${filename}`)
+    const contents = new Map<string, JunitReport>();
+    for (const file of await glob(`**/${filename}`, {dot: true})) {
+      const junit = JunitReport.fromXml(file)
+      contents.set(file, junit)
+    }
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const reporter = new MarkdownReporter(contents)
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const mark = "<!-- commented by junit-monorepo-go -->"
+    const body = `${mark}\n${reporter.table()}`
+
+    const octokit = github.getOctokit(token)
+    const { owner, repo } = github.context.repo
+
+    core.info('* get all comments and update if exists')
+    const allComments = await octokit.paginate(
+      octokit.rest.issues.listComments,
+      {
+        owner,
+        repo,
+        issue_number: github.context.issue.number,
+      },
+    )
+    const pastComments = allComments.filter(
+      c => c.body !== undefined && c.body.startsWith(mark),
+    )
+    if (pastComments.length > 0) {
+      core.info(`update past comment: ${pastComments[0].id}`)
+      await octokit.rest.issues.updateComment({
+        owner,
+        repo,
+        comment_id: pastComments[0].id,
+        body,
+      })
+    } else {
+      core.info('create new comment')
+      await octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: github.context.issue.number,
+        body,
+      })
+    }
+
+    core.info('* post summary to summary page')
+    core.summary.addRaw(body)
+
+    core.info('* annotate failed tests')
+    for (const [file, junit] of contents) {
+      if (junit.testsuites.testsuite === undefined) {
+        continue
+      }
+      for (const suite of junit.testsuites.testsuite) {
+        if (suite.testcase === undefined) {
+          continue
+        }
+        for (const testcase of suite.testcase) {
+          if (testcase.failure !== undefined) {
+            core.info(`::notice file=${file},line={line},endLine={endLine},title={title}::{message}`)
+          }
+        }
+      }
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
