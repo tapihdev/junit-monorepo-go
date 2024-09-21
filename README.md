@@ -1,6 +1,7 @@
 # junit-monorepo-go
 
-This action comments CI results of Go multi-module monorepo to a PR and a Actons summary page.
+This action comments CI results of Go multi-module monorepo to a PR and a Actons
+summary page.
 
 ## Setup
 
@@ -40,7 +41,7 @@ jobs:
           gotestsum \
             --junitfile junit.xml \
             --junitfile-testcase-classname relative \
-            --junitfile-testsuite-name relative
+            --junitfile-testsuite-name relative \
             ./...
       - name: Update artifacts
         uses: actions/upload-artifact@v4
@@ -59,7 +60,8 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: junit-*
+          pattern: junit-*
+          merge-multiple: true
       - name: Comment PR
         uses: tapihdev/junit-monorepo-go@v1
         with:
@@ -86,4 +88,5 @@ A full set list of possible output values for this action.
 
 ### PR run permissions
 
-This action requires the `issues: write` and `actions: write` permission to push tags.
+This action requires the `issues: write` and `actions: write` permission to push
+tags.
