@@ -24,7 +24,9 @@ jobs:
   check-dist:
     name: Check dist/
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         id: checkout

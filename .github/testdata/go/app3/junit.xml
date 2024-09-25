@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="0" errors="0" time="0.469151">
+	<testsuite tests="4" failures="0" time="0.004000" name="pkg" timestamp="2024-09-26T16:24:14+09:00">
+		<properties>
+			<property name="go.version" value="go1.22.0 linux/amd64"></property>
+		</properties>
+		<testcase classname="pkg" name="TestMax/Normal_case" time="0.000000"></testcase>
+		<testcase classname="pkg" name="TestMax/All_negative_numbers" time="0.000000"></testcase>
+		<testcase classname="pkg" name="TestMax/Single_element" time="0.000000"></testcase>
+		<testcase classname="pkg" name="TestMax" time="0.000000"></testcase>
+	</testsuite>
+</testsuites>

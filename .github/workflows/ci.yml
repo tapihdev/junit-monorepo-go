@@ -15,7 +15,9 @@ jobs:
   test-typescript:
     name: TypeScript Tests
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         id: checkout
@@ -47,18 +49,35 @@ jobs:
   test-action:
     name: GitHub Actions Test
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: write
     steps:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
 
-      - name: Test Local Action
-        id: test-action
+      - name: Create Comment
+        id: create
         uses: ./
         with:
-          milliseconds: 2000
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          filename: 'junit.xml'
+          pull-request-number: ${{ github.event.pull_request.number }}
+
+      - name: Update Comment
+        id: update
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          filename: 'junit.xml'
+          pull-request-number: ${{ github.event.pull_request.number }}
 
       - name: Print Output
         id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run: |
+          echo "${{ steps.create.outputs.body }}"
+          echo "${{ steps.update.outputs.body }}"
