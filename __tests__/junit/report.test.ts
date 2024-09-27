@@ -31,6 +31,7 @@ describe('reporter', () => {
     expect(report.failed).toBe(2)
     expect(report.skipped).toBe(0)
     expect(report.time).toBe(0.001)
+    expect(report.version).toBe('1.22.1')
     expect(report.failures).toEqual([
       {
         moduleDir: 'path/to',

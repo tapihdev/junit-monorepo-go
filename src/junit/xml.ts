@@ -27,6 +27,16 @@ type TestSuite = {
     timestamp?: Date
   }
   testcase?: TestCase[]
+  properties?: Property[]
+}
+
+type Property = {
+  property: {
+    $: {
+      name: string
+      value: string
+    }[]
+  }
 }
 
 type TestCase = {
