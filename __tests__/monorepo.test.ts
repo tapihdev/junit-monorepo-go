@@ -9,6 +9,7 @@ const reportableMock1: Reportable = {
   failed: 1,
   skipped: 0,
   time: 0.2,
+  version: 'go1.22 linux/amd64',
   failures: [
     new TestCase('go/app1', '.', 'foo_test.go', 1, 'Test1/Case', 'failed')
   ]
@@ -22,6 +23,7 @@ const reportableMock2: Reportable = {
   failed: 0,
   skipped: 0,
   time: 0.1,
+  version: 'go1.22 linux/amd64',
   failures: []
 }
 
