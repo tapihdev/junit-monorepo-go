@@ -40,6 +40,9 @@ inputs:
   pull-request-number:
     description: 'The pull request number to comment on'
     required: true
+  sha:
+    description: 'The commit SHA to comment on'
+    required: true
 
 outputs:
   body:

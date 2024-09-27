@@ -1,7 +1,12 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import { getFilename, getGitHubToken, getPullRequestNumber } from './input'
+import {
+  getFilename,
+  getGitHubToken,
+  getPullRequestNumber,
+  getSha
+} from './input'
 import { Client as GitHubClient } from './github'
 import { Monorepo } from './monorepo'
 
@@ -16,13 +21,14 @@ export async function run(): Promise<void> {
     const filename = getFilename()
     const token = getGitHubToken()
     const pullNumber = getPullRequestNumber()
+    const sha = getSha()
 
     core.info(`* search and read junit reports: ${filename}`)
     const monorepo = await Monorepo.fromFilename(filename)
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo
-    const { sha, runId, actor } = github.context
+    const { runId, actor } = github.context
     const body = monorepo.makeMarkdownReport({
       owner,
       repo,

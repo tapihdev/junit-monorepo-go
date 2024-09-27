@@ -67,6 +67,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           filename: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
+          sha: ${{ github.event.pull_request.head.sha }}
 
       - name: Update Comment
         id: update
@@ -75,6 +76,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           filename: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
+          sha: ${{ github.event.pull_request.head.sha }}
 
       - name: Print Output
         id: output

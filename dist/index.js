@@ -43107,6 +43107,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getGitHubToken = getGitHubToken;
 exports.getFilename = getFilename;
 exports.getPullRequestNumber = getPullRequestNumber;
+exports.getSha = getSha;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
@@ -43127,6 +43128,9 @@ function getPullRequestNumber() {
         throw new Error('`pull-request-number` must be a number');
     }
     return Number(raw);
+}
+function getSha() {
+    return core.getInput('sha', { required: true });
 }
 
 
@@ -43337,11 +43341,12 @@ async function run() {
         const filename = (0, input_1.getFilename)();
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
+        const sha = (0, input_1.getSha)();
         core.info(`* search and read junit reports: ${filename}`);
         const monorepo = await monorepo_1.Monorepo.fromFilename(filename);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
-        const { sha, runId, actor } = github.context;
+        const { runId, actor } = github.context;
         const body = monorepo.makeMarkdownReport({
             owner,
             repo,
