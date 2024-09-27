@@ -9,7 +9,7 @@ const reportableMock1: Reportable = {
   failed: 1,
   skipped: 0,
   time: 0.2,
-  version: 'go1.22 linux/amd64',
+  version: '1.22.1',
   failures: [
     new TestCase('go/app1', '.', 'foo_test.go', 1, 'Test1/Case', 'failed')
   ]
@@ -23,7 +23,7 @@ const reportableMock2: Reportable = {
   failed: 0,
   skipped: 0,
   time: 0.1,
-  version: 'go1.22 linux/amd64',
+  version: '1.22.2',
   failures: []
 }
 
@@ -63,10 +63,10 @@ No test results found.
 
 #### Result: \`Failed\`🙅‍♂️
 
-| Module | Result | Passed | Failed | Skipped | Time |
-| :----- | :----- | -----: | -----: | ------: | ---: |
-| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | ❌Failed | 1 | 1 | 0 | 0.2s |
-| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | ✅Passed | 1 | 0 | 0 | 0.1s |
+| Module | Version | Result | Passed | Failed | Skipped | Time |
+| :----- | :------ | :----- | -----: | -----: | ------: | ---: |
+| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0 | 0.2s |
+| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0 | 0.1s |
 
 <br/>
 
@@ -94,9 +94,9 @@ No test results found.
 
 #### Result: \`Passed\`🙆‍♀️
 
-| Module | Result | Passed | Failed | Skipped | Time |
-| :----- | :----- | -----: | -----: | ------: | ---: |
-| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | ✅Passed | 1 | 0 | 0 | 0.1s |
+| Module | Version | Result | Passed | Failed | Skipped | Time |
+| :----- | :------ | :----- | -----: | -----: | ------: | ---: |
+| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0 | 0.1s |
 
 ---
 *This comment is created for the commit [abcdef1](https://github.com/owner/repo/pull/123/commits/abcdef123456) pushed by @actor.*

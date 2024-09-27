@@ -24,7 +24,7 @@ export interface Reportable {
 
 export class JunitReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
-  private static goVersoinRegex = /go([\d.]+) ([\w\d])+/
+  private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
   constructor(
     private readonly _path: string,
@@ -78,11 +78,15 @@ export class JunitReport implements Reportable {
   }
 
   get version(): string {
-    const filtered = this._junit.testsuites.testsuite
-      ?.map(testsuite => testsuite.properties ?? [])
-      .flat()
-      .filter(property => property.$?.name === 'go.version')
-      ?? []
+    const filtered =
+      this._junit.testsuites.testsuite
+        ?.map(testsuite => testsuite.properties ?? [])
+        .flat()
+        .map(({ property }) => property)
+        .flat()
+        .map(({ $ }) => $)
+        .flat()
+        .filter(({ name }) => name === 'go.version') ?? []
 
     const na = 'N/A'
     if (filtered.length === 0) {
@@ -93,11 +97,12 @@ export class JunitReport implements Reportable {
       throw new Error('go.version is duplicated')
     }
 
-    const match = filtered[0].$.value.match(JunitReport.goVersoinRegex)
+    const property = filtered[0]
+    const match = property.value.match(JunitReport.goVersoinRegex)
     if (match !== null && match.length !== 3) {
       // This should never happen
       throw new Error(
-        `go.version does match the regex but length is not 3: ${filtered[0].$.value}`
+        `go.version does match the regex but length is not 3: ${property.value}`
       )
     }
     return match !== null ? match[1] : na

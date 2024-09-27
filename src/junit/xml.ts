@@ -31,9 +31,11 @@ type TestSuite = {
 }
 
 type Property = {
-  $: {
-    name: string
-    value: string
+  property: {
+    $: {
+      name: string
+      value: string
+    }[]
   }
 }
 

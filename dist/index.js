@@ -43178,6 +43178,7 @@ class JunitReport {
     _path;
     _junit;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
+    static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
     constructor(_path, _junit) {
         this._path = _path;
         this._junit = _junit;
@@ -43217,6 +43218,30 @@ class JunitReport {
     }
     get time() {
         return parseFloat(this._junit.testsuites.$.time);
+    }
+    get version() {
+        const filtered = this._junit.testsuites.testsuite
+            ?.map(testsuite => testsuite.properties ?? [])
+            .flat()
+            .map(({ property }) => property)
+            .flat()
+            .map(({ $ }) => $)
+            .flat()
+            .filter(({ name }) => name === 'go.version') ?? [];
+        const na = 'N/A';
+        if (filtered.length === 0) {
+            return na;
+        }
+        if (filtered.length > 1) {
+            throw new Error('go.version is duplicated');
+        }
+        const property = filtered[0];
+        const match = property.value.match(JunitReport.goVersoinRegex);
+        if (match !== null && match.length !== 3) {
+            // This should never happen
+            throw new Error(`go.version does match the regex but length is not 3: ${property.value}`);
+        }
+        return match !== null ? match[1] : na;
     }
     get failures() {
         const testsuite = this._junit.testsuites.testsuite;
@@ -43419,14 +43444,14 @@ ${failedTestTable}
         }
         const { owner, repo, sha } = context;
         return `
-| Module | Result | Passed | Failed | Skipped | Time |
-| :----- | :----- | -----: | -----: | ------: | ---: |
+| Module | Version | Result | Passed | Failed | Skipped | Time |
+| :----- | :------ | :----- | -----: | -----: | ------: | ---: |
 ${this._reporters
-            .map(({ directory, result, passed, failed, skipped, time }) => {
+            .map(({ directory, result, passed, failed, skipped, time, version }) => {
             const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
             const resultEmoji = result === report_1.TestResult.Failed ? '❌Failed' : '✅Passed';
             const timeStr = `${time.toFixed(1)}s`;
-            return `| ${moduleName} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
+            return `| ${moduleName} | ${version} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
         })
             .join('\n')}
 `.slice(1, -1);

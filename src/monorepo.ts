@@ -83,14 +83,14 @@ ${failedTestTable}
 
     const { owner, repo, sha } = context
     return `
-| Module | Result | Passed | Failed | Skipped | Time |
-| :----- | :----- | -----: | -----: | ------: | ---: |
+| Module | Version | Result | Passed | Failed | Skipped | Time |
+| :----- | :------ | :----- | -----: | -----: | ------: | ---: |
 ${this._reporters
-  .map(({ directory, result, passed, failed, skipped, time }) => {
+  .map(({ directory, result, passed, failed, skipped, time, version }) => {
     const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`
     const resultEmoji = result === TestResult.Failed ? '❌Failed' : '✅Passed'
     const timeStr = `${time.toFixed(1)}s`
-    return `| ${moduleName} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
+    return `| ${moduleName} | ${version} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
   })
   .join('\n')}
 `.slice(1, -1)
