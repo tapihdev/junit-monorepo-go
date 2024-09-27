@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="4" failures="4" errors="0" time="0.238208">
+	<testsuite tests="4" failures="4" time="0.001000" name="pkg" timestamp="2024-09-26T16:24:17+09:00">
+		<properties>
+			<property name="go.version" value="go1.22.0 linux/amd64"></property>
+		</properties>
+		<testcase classname="pkg" name="TestSquare/Positive_number" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestSquare/Positive_number&#xA;    math_test.go:22: Square(2) = 5; want 4&#xA;--- FAIL: TestSquare/Positive_number (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="pkg" name="TestSquare/Another_positive_number" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestSquare/Another_positive_number&#xA;    math_test.go:22: Square(3) = 10; want 9&#xA;--- FAIL: TestSquare/Another_positive_number (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="pkg" name="TestSquare/Negative_number" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestSquare/Negative_number&#xA;    math_test.go:22: Square(-4) = 17; want 16&#xA;--- FAIL: TestSquare/Negative_number (0.00s)&#xA;</failure>
+		</testcase>
+		<testcase classname="pkg" name="TestSquare" time="0.000000">
+			<failure message="Failed" type="">=== RUN   TestSquare&#xA;--- FAIL: TestSquare (0.00s)&#xA;</failure>
+		</testcase>
+	</testsuite>
+</testsuites>
