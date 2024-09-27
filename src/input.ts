@@ -25,3 +25,7 @@ export function getPullRequestNumber(): number {
   }
   return Number(raw)
 }
+
+export function getSha(): string {
+  return core.getInput('sha', { required: true })
+}

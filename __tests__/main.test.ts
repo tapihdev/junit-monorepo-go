@@ -39,7 +39,6 @@ describe('action', () => {
     // Mock the GitHub context
     Object.defineProperties(github.context, {
       repo: { value: { owner: 'owner', repo: 'repo' }, writable: true },
-      sha: { value: 'sha', writable: true },
       runId: { value: 123, writable: true },
       actor: { value: 'actor', writable: true }
     })
@@ -78,6 +77,8 @@ describe('action', () => {
           return 'junit.xml'
         case 'pull-request-number':
           return '123'
+        case 'sha':
+          return 'sha'
         default:
           return ''
       }
