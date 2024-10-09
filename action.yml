@@ -43,6 +43,10 @@ inputs:
   sha:
     description: 'The commit SHA to comment on'
     required: true
+  limit-failures:
+    description: 'The maximum number of failures to display'
+    required: true
+    default: '30'
 
 outputs:
   body:

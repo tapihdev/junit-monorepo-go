@@ -5,7 +5,8 @@ import {
   getFilename,
   getGitHubToken,
   getPullRequestNumber,
-  getSha
+  getSha,
+  getLimitFailures
 } from './input'
 import { Client as GitHubClient } from './github'
 import { Monorepo } from './monorepo'
@@ -22,6 +23,7 @@ export async function run(): Promise<void> {
     const token = getGitHubToken()
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
+    const limitFailures = getLimitFailures()
 
     core.info(`* search and read junit reports: ${filename}`)
     const monorepo = await Monorepo.fromFilename(filename)
@@ -29,14 +31,17 @@ export async function run(): Promise<void> {
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
-    const body = monorepo.makeMarkdownReport({
-      owner,
-      repo,
-      pullNumber,
-      sha,
-      runId,
-      actor
-    })
+    const body = monorepo.makeMarkdownReport(
+      {
+        owner,
+        repo,
+        pullNumber,
+        sha,
+        runId,
+        actor
+      },
+      limitFailures
+    )
 
     core.info(`* upsert comment matching ${mark}`)
     const client = new GitHubClient(github.getOctokit(token))

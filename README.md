@@ -78,6 +78,8 @@ jobs:
 | `github-token`        | yes          | The GitHub token to use for authentication |
 | `filename`            | yes          | The filename of the JUnit test report      |
 | `pull-request-number` | yes          | The pull request number to comment on      |
+| `sha`                 | yes          | The commit SHA of the pull request         |
+| `limit-failures`      | no           | The maximum number of failures to display  |
 
 ### Outputs
 

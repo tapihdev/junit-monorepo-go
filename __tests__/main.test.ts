@@ -79,6 +79,8 @@ describe('action', () => {
           return '123'
         case 'sha':
           return 'sha'
+        case 'limit-failures':
+          return '10'
         default:
           return ''
       }
@@ -113,14 +115,19 @@ describe('action', () => {
       mark: '<!-- commented by junit-monorepo-go -->',
       body: 'markdown report'
     })
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(1, {
-      owner: 'owner',
-      repo: 'repo',
-      pullNumber: 123,
-      sha: 'sha',
-      runId: 123,
-      actor: 'actor'
-    })
+    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+        sha: 'sha',
+        runId: 123,
+        actor: 'actor'
+      },
+      10
+    )
+
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
@@ -137,6 +144,10 @@ describe('action', () => {
           return 'junit.xml'
         case 'pull-request-number':
           return 'xxx'
+        case 'sha':
+          return 'sha'
+        case 'limit-failures':
+          return '10'
         default:
           return ''
       }
