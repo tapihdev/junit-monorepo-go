@@ -63,11 +63,12 @@ jobs:
           pattern: junit-*
           merge-multiple: true
       - name: Comment PR
-        uses: tapihdev/junit-monorepo-go@v1
+        uses: tapihdev/junit-monorepo-go@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           filename: junit.xml
           pull-request-number: ${{ github.event.pull_request.number }}
+          sha: ${{ github.pull_request.head.sha }}
 ```
 
 ### Inputs
