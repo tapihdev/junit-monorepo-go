@@ -43236,8 +43236,9 @@ class JunitReport {
         if (filtered.length === 0) {
             return na;
         }
-        if (filtered.length > 1) {
-            throw new Error('go.version is duplicated');
+        const set = new Set(filtered.map(({ value }) => value));
+        if (set.size !== 1) {
+            throw new Error(`multiple go.version properties found: ${set.size}`);
         }
         const property = filtered[0];
         const match = property.value.match(JunitReport.goVersoinRegex);
