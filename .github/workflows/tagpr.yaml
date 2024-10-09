@@ -29,6 +29,6 @@ jobs:
 
       - name: Annotate major and minor tags
         if: steps.tagpr.outputs.tag != ''
-        uses: ./
+        uses: tapihdev/tag-major-minor-semver@v1
         with:
           tag: ${{ steps.tagpr.outputs.tag }}
