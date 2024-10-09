@@ -3,7 +3,30 @@
 This action comments CI results of Go multi-module monorepo to a PR and a Actons
 summary page.
 
-## Setup
+## Usage
+
+### Directory structure
+
+This action assumes that there are multiple Go modules in the monorepo with a
+go.mod file for each module. JUnit test reports are generated with
+[gotestsum](https://github.com/gotestyourself/gotestsum) and stored in the root
+of each module.
+
+```
+go
+├── app1
+│   ├── pkg/
+│   ├── go.mod
+│   └── junit.xml
+├── app2
+│   ├── pkg/
+│   ├── go.mod
+│   └── junit.xml
+└── app3
+    ├── pkg/
+    ├── go.mod
+    └── junit.xml
+```
 
 ### Configure the workflow
 

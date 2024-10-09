@@ -1,28 +1,7 @@
 name: 'JUnit Test Report for Go Monorepo'
-description: |
-  This action generates a JUnit test report for a Go monorepo.
-  It expects that the repository has multiple Go modules and JUnit test are
-  generated for each module.
-
-  ```
-  go
-  ├── app1
-  │   ├── pkg/
-  │   ├── go.mod
-  │   └── junit.xml
-  ├── app2
-  │   ├── pkg/
-  │   ├── go.mod
-  │   └── junit.xml
-  └── app3
-      ├── pkg/
-      ├── go.mod
-      └── junit.xml
-  ```
-
-  It requires the following permissions:
-  - `issues:write`
-  - `actions:write`
+description:
+  This action generates a JUnit test report for a Go monorepo with multiple
+  go.mod files.
 
 author: 'tapih'
 
