@@ -29,3 +29,11 @@ export function getPullRequestNumber(): number {
 export function getSha(): string {
   return core.getInput('sha', { required: true })
 }
+
+export function getLimitFailures(): number {
+  const raw = core.getInput('limit-failures', { required: true })
+  if (raw.match(/^\d+$/) === null) {
+    throw new Error('`limit-failures` must be a number')
+  }
+  return Number(raw)
+}

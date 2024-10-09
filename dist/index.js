@@ -43108,6 +43108,7 @@ exports.getGitHubToken = getGitHubToken;
 exports.getFilename = getFilename;
 exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
+exports.getLimitFailures = getLimitFailures;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
@@ -43131,6 +43132,13 @@ function getPullRequestNumber() {
 }
 function getSha() {
     return core.getInput('sha', { required: true });
+}
+function getLimitFailures() {
+    const raw = core.getInput('limit-failures', { required: true });
+    if (raw.match(/^\d+$/) === null) {
+        throw new Error('`limit-failures` must be a number');
+    }
+    return Number(raw);
 }
 
 
@@ -43343,6 +43351,7 @@ async function run() {
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();
+        const limitFailures = (0, input_1.getLimitFailures)();
         core.info(`* search and read junit reports: ${filename}`);
         const monorepo = await monorepo_1.Monorepo.fromFilename(filename);
         core.info('* make markdown report');
@@ -43355,7 +43364,7 @@ async function run() {
             sha,
             runId,
             actor
-        });
+        }, limitFailures);
         core.info(`* upsert comment matching ${mark}`);
         const client = new github_1.Client(github.getOctokit(token));
         const result = await client.upsertComment({
@@ -43412,7 +43421,7 @@ class Monorepo {
         const reporters = await Promise.all(files.map(async (file) => await report_1.JunitReport.fromXml(file)));
         return new Monorepo(reporters);
     }
-    makeMarkdownReport(context) {
+    makeMarkdownReport(context, limitFailures) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
@@ -43421,7 +43430,7 @@ class Monorepo {
             : 'Failed';
         const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️';
         const moduleTable = this.makeModuleTable({ owner, repo, sha });
-        const failedTestTable = this.makeFailedTestTable({ owner, repo, sha });
+        const failedTestTable = this.makeFailedTestTable({ owner, repo, sha }, limitFailures);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
@@ -43462,7 +43471,7 @@ ${this._reporters
             .join('\n')}
 `.slice(1, -1);
     }
-    makeFailedTestTable(context) {
+    makeFailedTestTable(context, limitFailures) {
         const failures = this._reporters.map(reporter => reporter.failures).flat();
         if (failures.length === 0) {
             return '';
@@ -43472,6 +43481,7 @@ ${this._reporters
 | File | Test | Message |
 | :--- | :--- | :------ |
 ${failures
+            .slice(0, limitFailures)
             .map(({ fullPath, line, test, message }) => {
             const fileTitle = `${fullPath}:${line}`;
             const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
@@ -43479,7 +43489,8 @@ ${failures
             const joinedMessage = message.replace(/\n/g, ' ');
             return `| ${fileColumn} | ${test} | ${joinedMessage} |`;
         })
-            .join('\n')}
+            .join('\n')
+            .concat(failures.length > limitFailures ? `\n| ... | ... | ... |` : '')}
 `.slice(1, -1);
     }
     makeAnnotationMessages() {

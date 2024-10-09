@@ -38,7 +38,7 @@ export class Monorepo {
     return new Monorepo(reporters)
   }
 
-  makeMarkdownReport(context: MarkdownContext): string {
+  makeMarkdownReport(context: MarkdownContext, limitFailures: number): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
@@ -49,7 +49,10 @@ export class Monorepo {
     const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️'
 
     const moduleTable = this.makeModuleTable({ owner, repo, sha })
-    const failedTestTable = this.makeFailedTestTable({ owner, repo, sha })
+    const failedTestTable = this.makeFailedTestTable(
+      { owner, repo, sha },
+      limitFailures
+    )
 
     return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
@@ -96,7 +99,10 @@ ${this._reporters
 `.slice(1, -1)
   }
 
-  private makeFailedTestTable(context: FailedTestTableContext): string {
+  private makeFailedTestTable(
+    context: FailedTestTableContext,
+    limitFailures: number
+  ): string {
     const failures = this._reporters.map(reporter => reporter.failures).flat()
     if (failures.length === 0) {
       return ''
@@ -107,6 +113,7 @@ ${this._reporters
 | File | Test | Message |
 | :--- | :--- | :------ |
 ${failures
+  .slice(0, limitFailures)
   .map(({ fullPath, line, test, message }) => {
     const fileTitle = `${fullPath}:${line}`
     const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
@@ -114,7 +121,8 @@ ${failures
     const joinedMessage = message.replace(/\n/g, ' ')
     return `| ${fileColumn} | ${test} | ${joinedMessage} |`
   })
-  .join('\n')}
+  .join('\n')
+  .concat(failures.length > limitFailures ? `\n| ... | ... | ... |` : '')}
 `.slice(1, -1)
   }
 
