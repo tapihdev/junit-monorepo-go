@@ -32,7 +32,7 @@ export class Monorepo {
   constructor(private readonly _reporters: Reportable[]) {}
 
   static async fromDirectories(
-    directories: Array<string>,
+    directories: string[],
     filename: string
   ): Promise<Monorepo> {
     const files = directories.map(directory => path.join(directory, filename))
@@ -56,9 +56,10 @@ export class Monorepo {
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
     const result = this._reporters.every(r => r.result === TestResult.Passed)
-      ? 'Passed'
-      : 'Failed'
-    const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️'
+      ? '`Passed`🙆‍♀️'
+      : this._reporters.some(r => r.result === TestResult.Failed)
+        ? '`Failed`🙅‍♂️'
+        : '`Unknown`🤷'
 
     const moduleTable = this.makeModuleTable({ owner, repo, sha })
     const failedTestTable = this.makeFailedTestTable(
@@ -69,7 +70,7 @@ export class Monorepo {
     return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: \`${result}\`${resultEmoji}
+#### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${

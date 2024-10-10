@@ -43190,26 +43190,45 @@ var TestResult;
     TestResult["Passed"] = "passed";
     TestResult["Failed"] = "failed";
     TestResult["Skipped"] = "skipped";
+    TestResult["Unknown"] = "unknown";
 })(TestResult || (exports.TestResult = TestResult = {}));
 class JunitReport {
     _path;
     _junit;
+    _found;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(_path, _junit) {
+    constructor(_path, _junit, _found = true) {
         this._path = _path;
         this._junit = _junit;
+        this._found = _found;
+    }
+    static unknown(path) {
+        return new JunitReport(path, {
+            testsuites: {
+                $: {
+                    tests: '0',
+                    errors: '0',
+                    failures: '0',
+                    skipped: '0',
+                    time: '0'
+                }
+            }
+        }, false);
     }
     static async fromXml(path) {
         const content = await fs.promises.readFile(path, { encoding: 'utf8' });
         const junit = (await (0, xml2js_1.parseStringPromise)(content));
-        return new JunitReport(path, junit);
+        return new JunitReport(path, junit, true);
     }
     get directory() {
         const parsed = this._path.split('/').slice(0, -1).join('/');
         return parsed === '' ? '.' : parsed;
     }
     get result() {
+        if (!this._found) {
+            return TestResult.Unknown;
+        }
         if (this._junit.testsuites.$.failures !== '0') {
             return TestResult.Failed;
         }
@@ -43245,7 +43264,7 @@ class JunitReport {
             .map(({ $ }) => $)
             .flat()
             .filter(({ name }) => name === 'go.version') ?? [];
-        const na = 'N/A';
+        const na = '-';
         if (filtered.length === 0) {
             return na;
         }
@@ -43440,15 +43459,16 @@ class Monorepo {
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
         const result = this._reporters.every(r => r.result === report_1.TestResult.Passed)
-            ? 'Passed'
-            : 'Failed';
-        const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️';
+            ? '`Passed`🙆‍♀️'
+            : this._reporters.some(r => r.result === report_1.TestResult.Failed)
+                ? '`Failed`🙅‍♂️'
+                : '`Unknown`🤷';
         const moduleTable = this.makeModuleTable({ owner, repo, sha });
         const failedTestTable = this.makeFailedTestTable({ owner, repo, sha }, limitFailures);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: \`${result}\`${resultEmoji}
+#### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${moduleTable === '' || failedTestTable === ''

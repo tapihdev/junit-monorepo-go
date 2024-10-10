@@ -51,6 +51,19 @@ describe('reporter', () => {
       encoding: 'utf8'
     })
   })
+
+  it('constructs a unknown report', async () => {
+    const report = JunitReport.unknown('path/to/junit.xml')
+    expect(report.directory).toBe('path/to')
+    expect(report.result).toBe(TestResult.Unknown)
+    expect(report.tests).toBe(0)
+    expect(report.passed).toBe(0)
+    expect(report.failed).toBe(0)
+    expect(report.skipped).toBe(0)
+    expect(report.time).toBe(0)
+    expect(report.version).toBe('-')
+    expect(report.failures).toEqual([])
+  })
 })
 
 describe('testcase', () => {
