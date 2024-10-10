@@ -43460,7 +43460,7 @@ ${failedTestTable}
         const { owner, repo, sha } = context;
         return `
 | Module | Version | Result | Passed | Failed | Skipped | Time |
-| :----- | :------ | :----- | -----: | -----: | ------: | ---: |
+| :----- | ------: | :----- | -----: | -----: | ------: | ---: |
 ${this._reporters
             .map(({ directory, result, passed, failed, skipped, time, version }) => {
             const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
