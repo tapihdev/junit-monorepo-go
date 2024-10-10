@@ -43105,6 +43105,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getGitHubToken = getGitHubToken;
+exports.getDirectories = getDirectories;
 exports.getFilename = getFilename;
 exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
@@ -43113,6 +43114,10 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
+}
+function getDirectories() {
+    const raw = core.getInput('directories', { required: false });
+    return raw === '' ? [] : raw.split(/,|\n/);
 }
 function getFilename() {
     return core.getInput('filename', { required: true });
@@ -43185,26 +43190,45 @@ var TestResult;
     TestResult["Passed"] = "passed";
     TestResult["Failed"] = "failed";
     TestResult["Skipped"] = "skipped";
+    TestResult["Unknown"] = "unknown";
 })(TestResult || (exports.TestResult = TestResult = {}));
 class JunitReport {
     _path;
     _junit;
+    _found;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(_path, _junit) {
+    constructor(_path, _junit, _found = true) {
         this._path = _path;
         this._junit = _junit;
+        this._found = _found;
+    }
+    static unknown(path) {
+        return new JunitReport(path, {
+            testsuites: {
+                $: {
+                    tests: '0',
+                    errors: '0',
+                    failures: '0',
+                    skipped: '0',
+                    time: '0'
+                }
+            }
+        }, false);
     }
     static async fromXml(path) {
         const content = await fs.promises.readFile(path, { encoding: 'utf8' });
         const junit = (await (0, xml2js_1.parseStringPromise)(content));
-        return new JunitReport(path, junit);
+        return new JunitReport(path, junit, true);
     }
     get directory() {
         const parsed = this._path.split('/').slice(0, -1).join('/');
         return parsed === '' ? '.' : parsed;
     }
     get result() {
+        if (!this._found) {
+            return TestResult.Unknown;
+        }
         if (this._junit.testsuites.$.failures !== '0') {
             return TestResult.Failed;
         }
@@ -43240,7 +43264,7 @@ class JunitReport {
             .map(({ $ }) => $)
             .flat()
             .filter(({ name }) => name === 'go.version') ?? [];
-        const na = 'N/A';
+        const na = '-';
         if (filtered.length === 0) {
             return na;
         }
@@ -43347,13 +43371,16 @@ const mark = '<!-- commented by junit-monorepo-go -->';
  */
 async function run() {
     try {
+        const directories = (0, input_1.getDirectories)();
         const filename = (0, input_1.getFilename)();
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();
         const limitFailures = (0, input_1.getLimitFailures)();
         core.info(`* search and read junit reports: ${filename}`);
-        const monorepo = await monorepo_1.Monorepo.fromFilename(filename);
+        const monorepo = directories.length === 0
+            ? await monorepo_1.Monorepo.fromFilename(filename)
+            : await monorepo_1.Monorepo.fromDirectories(directories, filename);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -43411,10 +43438,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Monorepo = void 0;
 const fast_glob_1 = __importDefault(__nccwpck_require__(3664));
 const report_1 = __nccwpck_require__(8884);
+const path_1 = __importDefault(__nccwpck_require__(1017));
 class Monorepo {
     _reporters;
     constructor(_reporters) {
         this._reporters = _reporters;
+    }
+    static async fromDirectories(directories, filename) {
+        const files = directories.map(directory => path_1.default.join(directory, filename));
+        const reporters = await Promise.all(files.map(async (file) => await report_1.JunitReport.fromXml(file)));
+        return new Monorepo(reporters);
     }
     static async fromFilename(filename) {
         const files = await (0, fast_glob_1.default)(`**/${filename}`, { dot: true });
@@ -43426,15 +43459,16 @@ class Monorepo {
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
         const result = this._reporters.every(r => r.result === report_1.TestResult.Passed)
-            ? 'Passed'
-            : 'Failed';
-        const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️';
+            ? '`Passed`🙆‍♀️'
+            : this._reporters.some(r => r.result === report_1.TestResult.Failed)
+                ? '`Failed`🙅‍♂️'
+                : '`Unknown`🤷';
         const moduleTable = this.makeModuleTable({ owner, repo, sha });
         const failedTestTable = this.makeFailedTestTable({ owner, repo, sha }, limitFailures);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: \`${result}\`${resultEmoji}
+#### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${moduleTable === '' || failedTestTable === ''

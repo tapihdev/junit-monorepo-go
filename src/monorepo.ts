@@ -1,6 +1,7 @@
 import glob from 'fast-glob'
 
 import { Reportable, JunitReport, TestResult } from './junit/report'
+import path from 'path'
 
 export type MarkdownContext = RepositoryContext &
   PullRequestContext &
@@ -30,6 +31,17 @@ type RunContext = {
 export class Monorepo {
   constructor(private readonly _reporters: Reportable[]) {}
 
+  static async fromDirectories(
+    directories: string[],
+    filename: string
+  ): Promise<Monorepo> {
+    const files = directories.map(directory => path.join(directory, filename))
+    const reporters = await Promise.all(
+      files.map(async file => await JunitReport.fromXml(file))
+    )
+    return new Monorepo(reporters)
+  }
+
   static async fromFilename(filename: string): Promise<Monorepo> {
     const files = await glob(`**/${filename}`, { dot: true })
     const reporters = await Promise.all(
@@ -44,9 +56,10 @@ export class Monorepo {
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
     const result = this._reporters.every(r => r.result === TestResult.Passed)
-      ? 'Passed'
-      : 'Failed'
-    const resultEmoji = result === 'Passed' ? '🙆‍♀️' : '🙅‍♂️'
+      ? '`Passed`🙆‍♀️'
+      : this._reporters.some(r => r.result === TestResult.Failed)
+        ? '`Failed`🙅‍♂️'
+        : '`Unknown`🤷'
 
     const moduleTable = this.makeModuleTable({ owner, repo, sha })
     const failedTestTable = this.makeFailedTestTable(
@@ -57,7 +70,7 @@ export class Monorepo {
     return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: \`${result}\`${resultEmoji}
+#### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${

@@ -7,7 +7,8 @@ import { JunitReport as JunitReportXML } from './xml'
 export enum TestResult {
   Passed = 'passed',
   Failed = 'failed',
-  Skipped = 'skipped'
+  Skipped = 'skipped',
+  Unknown = 'unknown'
 }
 
 export interface Reportable {
@@ -26,15 +27,34 @@ export class JunitReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
-  constructor(
+  private constructor(
     private readonly _path: string,
-    private readonly _junit: JunitReportXML
+    private readonly _junit: JunitReportXML,
+    private readonly _found = true
   ) {}
+
+  static unknown(path: string): JunitReport {
+    return new JunitReport(
+      path,
+      {
+        testsuites: {
+          $: {
+            tests: '0',
+            errors: '0',
+            failures: '0',
+            skipped: '0',
+            time: '0'
+          }
+        }
+      },
+      false
+    )
+  }
 
   static async fromXml(path: string): Promise<JunitReport> {
     const content = await fs.promises.readFile(path, { encoding: 'utf8' })
     const junit = (await parseStringPromise(content)) as JunitReportXML
-    return new JunitReport(path, junit)
+    return new JunitReport(path, junit, true)
   }
 
   get directory(): string {
@@ -43,6 +63,10 @@ export class JunitReport implements Reportable {
   }
 
   get result(): TestResult {
+    if (!this._found) {
+      return TestResult.Unknown
+    }
+
     if (this._junit.testsuites.$.failures !== '0') {
       return TestResult.Failed
     }
@@ -88,7 +112,7 @@ export class JunitReport implements Reportable {
         .flat()
         .filter(({ name }) => name === 'go.version') ?? []
 
-    const na = 'N/A'
+    const na = '-'
     if (filtered.length === 0) {
       return na
     }
