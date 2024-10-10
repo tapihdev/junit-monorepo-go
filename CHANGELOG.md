@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.4](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.3...v0.0.4) - 2024-10-10
+- feat: add directories input by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/16
+
 ## [v0.0.3](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.2...v0.0.3) - 2024-10-10
 - feat: display limited number of failed tests to limit comment length by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/12
 - feat: align version to right by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/15
