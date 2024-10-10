@@ -43105,6 +43105,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getGitHubToken = getGitHubToken;
+exports.getDirectories = getDirectories;
 exports.getFilename = getFilename;
 exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
@@ -43113,6 +43114,10 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
+}
+function getDirectories() {
+    const raw = core.getInput('directories', { required: false });
+    return raw === '' ? [] : raw.split(/,|\n/);
 }
 function getFilename() {
     return core.getInput('filename', { required: true });
@@ -43347,13 +43352,16 @@ const mark = '<!-- commented by junit-monorepo-go -->';
  */
 async function run() {
     try {
+        const directories = (0, input_1.getDirectories)();
         const filename = (0, input_1.getFilename)();
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();
         const limitFailures = (0, input_1.getLimitFailures)();
         core.info(`* search and read junit reports: ${filename}`);
-        const monorepo = await monorepo_1.Monorepo.fromFilename(filename);
+        const monorepo = directories.length === 0
+            ? await monorepo_1.Monorepo.fromFilename(filename)
+            : await monorepo_1.Monorepo.fromDirectories(directories, filename);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -43411,10 +43419,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Monorepo = void 0;
 const fast_glob_1 = __importDefault(__nccwpck_require__(3664));
 const report_1 = __nccwpck_require__(8884);
+const path_1 = __importDefault(__nccwpck_require__(1017));
 class Monorepo {
     _reporters;
     constructor(_reporters) {
         this._reporters = _reporters;
+    }
+    static async fromDirectories(directories, filename) {
+        const files = directories.map(directory => path_1.default.join(directory, filename));
+        const reporters = await Promise.all(files.map(async (file) => await report_1.JunitReport.fromXml(file)));
+        return new Monorepo(reporters);
     }
     static async fromFilename(filename) {
         const files = await (0, fast_glob_1.default)(`**/${filename}`, { dot: true });

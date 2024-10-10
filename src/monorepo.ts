@@ -1,6 +1,7 @@
 import glob from 'fast-glob'
 
 import { Reportable, JunitReport, TestResult } from './junit/report'
+import path from 'path'
 
 export type MarkdownContext = RepositoryContext &
   PullRequestContext &
@@ -29,6 +30,17 @@ type RunContext = {
 
 export class Monorepo {
   constructor(private readonly _reporters: Reportable[]) {}
+
+  static async fromDirectories(
+    directories: Array<string>,
+    filename: string
+  ): Promise<Monorepo> {
+    const files = directories.map(directory => path.join(directory, filename))
+    const reporters = await Promise.all(
+      files.map(async file => await JunitReport.fromXml(file))
+    )
+    return new Monorepo(reporters)
+  }
 
   static async fromFilename(filename: string): Promise<Monorepo> {
     const files = await glob(`**/${filename}`, { dot: true })

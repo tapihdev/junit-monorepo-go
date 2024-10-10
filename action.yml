@@ -16,6 +16,10 @@ inputs:
   filename:
     description: 'The filename of the JUnit test report'
     required: true
+  directories:
+    description: |
+      The directories to search for JUnit test reports (Look for reports with `filename` if not specified)
+    required: false
   pull-request-number:
     description: 'The pull request number to comment on'
     required: true
