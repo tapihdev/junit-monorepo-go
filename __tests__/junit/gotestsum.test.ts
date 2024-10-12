@@ -62,7 +62,7 @@ describe('reporter', () => {
     expect(report.failed).toBe(0)
     expect(report.skipped).toBe(0)
     expect(report.time).toBe(0)
-    expect(report.version).toBe('-')
+    expect(report.version).toBe(undefined)
     expect(report.failures).toEqual([])
   })
 })

@@ -107,7 +107,7 @@ ${this._reporters
     const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`
     const resultEmoji = result === TestResult.Failed ? '❌Failed' : '✅Passed'
     const timeStr = `${time.toFixed(1)}s`
-    return `| ${moduleName} | ${version} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
+    return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
   })
   .join('\n')}
 `.slice(1, -1)

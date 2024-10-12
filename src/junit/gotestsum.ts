@@ -11,7 +11,7 @@ export class GotestsumReport implements Reportable {
 
   private constructor(
     private readonly _path: string,
-    private readonly _junit: JunitReportXML,
+    private readonly _junit: JunitReportXML
   ) {}
 
   static unknown(path: string): GotestsumReport {
@@ -37,20 +37,19 @@ export class GotestsumReport implements Reportable {
     if (this._junit.testsuites.$.failures !== '0') {
       return TestResult.Failed
     }
+
     if (
       this._junit.testsuites.$.skipped !== undefined &&
       this._junit.testsuites.$.skipped !== '0'
     ) {
       return TestResult.Skipped
     }
+
     return TestResult.Passed
   }
 
   get tests(): number {
-    if (this._junit.testsuites.$ === undefined) {
-      return 0
-    }
-    return parseInt(this._junit.testsuites.$.tests)
+    return parseInt(this._junit.testsuites.$?.tests ?? '0')
   }
 
   get passed(): number {
@@ -58,29 +57,18 @@ export class GotestsumReport implements Reportable {
   }
 
   get failed(): number {
-    if (this._junit.testsuites.$ === undefined) {
-      return 0
-    }
-    return parseInt(this._junit.testsuites.$.failures)
+    return parseInt(this._junit.testsuites.$?.failures ?? '0')
   }
 
   get skipped(): number {
-    if (this._junit.testsuites.$ === undefined) {
-      return 0
-    }
-    return this._junit.testsuites.$.skipped !== undefined
-      ? parseInt(this._junit.testsuites.$.skipped)
-      : 0
+    return parseInt(this._junit.testsuites.$?.skipped ?? '0')
   }
 
   get time(): number {
-    if (this._junit.testsuites.$ === undefined) {
-      return 0
-    }
-    return parseFloat(this._junit.testsuites.$.time)
+    return parseFloat(this._junit.testsuites.$?.time ?? '0')
   }
 
-  get version(): string {
+  get version(): string | undefined {
     const filtered =
       this._junit.testsuites.testsuite
         ?.map(testsuite => testsuite.properties ?? [])
@@ -91,61 +79,62 @@ export class GotestsumReport implements Reportable {
         .flat()
         .filter(({ name }) => name === 'go.version') ?? []
 
-    const na = '-'
     if (filtered.length === 0) {
-      return na
+      return undefined
     }
 
     const set = new Set(filtered.map(({ value }) => value))
     if (set.size !== 1) {
       throw new Error(`multiple go.version properties found: ${set.size}`)
     }
+
     const property = filtered[0]
     const match = property.value.match(GotestsumReport.goVersoinRegex)
+    if (match === null) {
+      throw new Error(`go.version does not match the regex: ${property.value}`)
+    }
     if (match !== null && match.length !== 3) {
       // This should never happen
       throw new Error(
         `go.version does match the regex but length is not 3: ${property.value}`
       )
     }
-    return match !== null ? match[1] : na
+    return match[1]
   }
 
   get failures(): TestCase[] {
-    const testsuite = this._junit.testsuites.testsuite
-    if (testsuite === undefined) {
-      return []
-    }
-
-    return testsuite
-      .map(suite =>
-        suite.testcase === undefined
-          ? []
-          : suite.testcase.filter(testcase => testcase.failure !== undefined)
-      )
-      .flat()
-      .map(testcase => {
-        const message =
-          testcase.failure
-            ?.map(failure => (failure._ === undefined ? '' : failure._))
-            .join('\n') ?? ''
-        const match = message.match(GotestsumReport.failureRegex)
-        if (match !== null && match.length !== 3) {
-          // This should never happen
-          throw new Error(
-            `message does match the regex but length is not 3: ${message}`
-          )
-        }
-        return new TestCase(
-          this.directory,
-          testcase.$.classname,
-          match === null ? '' : match[1],
-          match === null ? 0 : parseInt(match[2]),
-          testcase.$.name,
-          message
+    return (
+      this._junit.testsuites.testsuite
+        ?.map(
+          suite =>
+            suite.testcase?.filter(
+              testcase => testcase.failure !== undefined
+            ) ?? []
         )
-      })
-      .filter(testcase => testcase.file !== '' && testcase.line !== 0)
+        .flat()
+        .map(testcase => {
+          const message =
+            testcase.failure?.map(failure => failure._ ?? '').join('\n') ?? ''
+
+          const match = message.match(GotestsumReport.failureRegex)
+          if (match !== null && match.length !== 3) {
+            // This should never happen
+            throw new Error(
+              `message does match the regex but length is not 3: ${message}`
+            )
+          }
+
+          return new TestCase(
+            this.directory,
+            testcase.$.classname,
+            match === null ? '' : match[1],
+            match === null ? 0 : parseInt(match[2]),
+            testcase.$.name,
+            message
+          )
+        })
+        .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []
+    )
   }
 }
 

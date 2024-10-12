@@ -1,5 +1,4 @@
-import { TestCase } from './gotestsum';
-
+import { TestCase } from './gotestsum'
 
 export enum TestResult {
   Passed = 'passed',
@@ -16,6 +15,6 @@ export interface Reportable {
   readonly failed: number
   readonly skipped: number
   readonly time: number
-  readonly version: string
+  readonly version: string | undefined
   readonly failures: TestCase[]
 }
