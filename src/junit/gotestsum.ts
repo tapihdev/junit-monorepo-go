@@ -23,7 +23,7 @@ export interface Reportable {
   readonly failures: TestCase[]
 }
 
-export class JunitReport implements Reportable {
+export class GotestsumReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
@@ -33,8 +33,8 @@ export class JunitReport implements Reportable {
     private readonly _found = true
   ) {}
 
-  static unknown(path: string): JunitReport {
-    return new JunitReport(
+  static unknown(path: string): GotestsumReport {
+    return new GotestsumReport(
       path,
       {
         testsuites: {
@@ -51,10 +51,10 @@ export class JunitReport implements Reportable {
     )
   }
 
-  static async fromXml(path: string): Promise<JunitReport> {
+  static async fromXml(path: string): Promise<GotestsumReport> {
     const content = await fs.promises.readFile(path, { encoding: 'utf8' })
     const junit = (await parseStringPromise(content)) as JunitReportXML
-    return new JunitReport(path, junit, true)
+    return new GotestsumReport(path, junit, true)
   }
 
   get directory(): string {
@@ -122,7 +122,7 @@ export class JunitReport implements Reportable {
       throw new Error(`multiple go.version properties found: ${set.size}`)
     }
     const property = filtered[0]
-    const match = property.value.match(JunitReport.goVersoinRegex)
+    const match = property.value.match(GotestsumReport.goVersoinRegex)
     if (match !== null && match.length !== 3) {
       // This should never happen
       throw new Error(
@@ -150,7 +150,7 @@ export class JunitReport implements Reportable {
           testcase.failure
             ?.map(failure => (failure._ === undefined ? '' : failure._))
             .join('\n') ?? ''
-        const match = message.match(JunitReport.failureRegex)
+        const match = message.match(GotestsumReport.failureRegex)
         if (match !== null && match.length !== 3) {
           // This should never happen
           throw new Error(

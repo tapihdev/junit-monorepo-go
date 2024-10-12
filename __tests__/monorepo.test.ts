@@ -1,5 +1,5 @@
 import { Monorepo } from '../src/monorepo'
-import { Reportable, TestResult, TestCase } from '../src/junit/report'
+import { Reportable, TestResult, TestCase } from '../src/junit/gotestsum'
 
 const reportableMock1: Reportable = {
   directory: 'go/app1',
