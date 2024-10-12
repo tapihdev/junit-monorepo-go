@@ -1,6 +1,7 @@
 import glob from 'fast-glob'
 
-import { Reportable, GotestsumReport, TestResult } from './junit/gotestsum'
+import { GotestsumReport } from './junit/gotestsum'
+import { Reportable, TestResult } from './junit/type'
 import path from 'path'
 
 export type MarkdownContext = RepositoryContext &

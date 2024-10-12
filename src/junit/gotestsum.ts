@@ -3,25 +3,7 @@ import * as fs from 'fs'
 import { parseStringPromise } from 'xml2js'
 
 import { JunitReport as JunitReportXML } from './xml'
-
-export enum TestResult {
-  Passed = 'passed',
-  Failed = 'failed',
-  Skipped = 'skipped',
-  Unknown = 'unknown'
-}
-
-export interface Reportable {
-  readonly directory: string
-  readonly result: TestResult
-  readonly tests: number
-  readonly passed: number
-  readonly failed: number
-  readonly skipped: number
-  readonly time: number
-  readonly version: string
-  readonly failures: TestCase[]
-}
+import { Reportable, TestResult } from './type'
 
 export class GotestsumReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
