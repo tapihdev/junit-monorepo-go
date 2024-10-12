@@ -118,7 +118,11 @@ export class GotestsumReport implements Reportable {
             )
           }
 
-          return new TestCase(
+        // gotestsum reports failures in the following format:
+        // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+        // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+        // This function takes only the first one and extracts the file and line number.
+        return new TestCase(
             this.directory,
             testcase.$.classname,
             match === null ? '' : match[1],
