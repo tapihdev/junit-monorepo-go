@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 
-import { JunitReport, TestResult, TestCase } from '../../src/junit/report'
+import { GotestsumReport, TestCase } from '../../src/junit/gotestsum'
+import { TestResult } from '../../src/junit/type'
 
 describe('reporter', () => {
   it('parses the junit report', async () => {
@@ -28,7 +29,7 @@ describe('reporter', () => {
       </testsuites>
       `)
 
-    const report = await JunitReport.fromXml('path/to/junit.xml')
+    const report = await GotestsumReport.fromXml('path/to/junit.xml')
     expect(report.directory).toBe('path/to')
     expect(report.result).toBe(TestResult.Failed)
     expect(report.tests).toBe(4)
@@ -53,7 +54,7 @@ describe('reporter', () => {
   })
 
   it('constructs a unknown report', async () => {
-    const report = JunitReport.unknown('path/to/junit.xml')
+    const report = GotestsumReport.unknown('path/to/junit.xml')
     expect(report.directory).toBe('path/to')
     expect(report.result).toBe(TestResult.Unknown)
     expect(report.tests).toBe(0)
@@ -61,7 +62,7 @@ describe('reporter', () => {
     expect(report.failed).toBe(0)
     expect(report.skipped).toBe(0)
     expect(report.time).toBe(0)
-    expect(report.version).toBe('-')
+    expect(report.version).toBe(undefined)
     expect(report.failures).toEqual([])
   })
 })

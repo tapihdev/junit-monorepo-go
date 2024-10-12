@@ -43149,7 +43149,7 @@ function getLimitFailures() {
 
 /***/ }),
 
-/***/ 8884:
+/***/ 6755:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -43181,79 +43181,59 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestCase = exports.JunitReport = exports.TestResult = void 0;
+exports.TestCase = exports.GotestsumReport = void 0;
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __nccwpck_require__(6189);
-var TestResult;
-(function (TestResult) {
-    TestResult["Passed"] = "passed";
-    TestResult["Failed"] = "failed";
-    TestResult["Skipped"] = "skipped";
-    TestResult["Unknown"] = "unknown";
-})(TestResult || (exports.TestResult = TestResult = {}));
-class JunitReport {
+const type_1 = __nccwpck_require__(1409);
+class GotestsumReport {
     _path;
     _junit;
-    _found;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(_path, _junit, _found = true) {
+    constructor(_path, _junit) {
         this._path = _path;
         this._junit = _junit;
-        this._found = _found;
     }
     static unknown(path) {
-        return new JunitReport(path, {
-            testsuites: {
-                $: {
-                    tests: '0',
-                    errors: '0',
-                    failures: '0',
-                    skipped: '0',
-                    time: '0'
-                }
-            }
-        }, false);
+        return new GotestsumReport(path, { testsuites: {} });
     }
     static async fromXml(path) {
         const content = await fs.promises.readFile(path, { encoding: 'utf8' });
         const junit = (await (0, xml2js_1.parseStringPromise)(content));
-        return new JunitReport(path, junit, true);
+        return new GotestsumReport(path, junit);
     }
     get directory() {
         const parsed = this._path.split('/').slice(0, -1).join('/');
         return parsed === '' ? '.' : parsed;
     }
     get result() {
-        if (!this._found) {
-            return TestResult.Unknown;
+        if (this._junit.testsuites.$ === undefined) {
+            return type_1.TestResult.Unknown;
         }
         if (this._junit.testsuites.$.failures !== '0') {
-            return TestResult.Failed;
+            return type_1.TestResult.Failed;
         }
         if (this._junit.testsuites.$.skipped !== undefined &&
             this._junit.testsuites.$.skipped !== '0') {
-            return TestResult.Skipped;
+            return type_1.TestResult.Skipped;
         }
-        return TestResult.Passed;
+        return type_1.TestResult.Passed;
     }
     get tests() {
-        return parseInt(this._junit.testsuites.$.tests);
+        return parseInt(this._junit.testsuites.$?.tests ?? '0');
     }
     get passed() {
         return this.tests - this.failed;
     }
     get failed() {
-        return parseInt(this._junit.testsuites.$.failures);
+        return parseInt(this._junit.testsuites.$?.failures ?? '0');
     }
     get skipped() {
-        return this._junit.testsuites.$.skipped !== undefined
-            ? parseInt(this._junit.testsuites.$.skipped)
-            : 0;
+        return parseInt(this._junit.testsuites.$?.skipped ?? '0');
     }
     get time() {
-        return parseFloat(this._junit.testsuites.$.time);
+        return parseFloat(this._junit.testsuites.$?.time ?? '0');
     }
     get version() {
         const filtered = this._junit.testsuites.testsuite
@@ -43264,47 +43244,41 @@ class JunitReport {
             .map(({ $ }) => $)
             .flat()
             .filter(({ name }) => name === 'go.version') ?? [];
-        const na = '-';
         if (filtered.length === 0) {
-            return na;
+            return undefined;
         }
         const set = new Set(filtered.map(({ value }) => value));
         if (set.size !== 1) {
             throw new Error(`multiple go.version properties found: ${set.size}`);
         }
         const property = filtered[0];
-        const match = property.value.match(JunitReport.goVersoinRegex);
+        const match = property.value.match(GotestsumReport.goVersoinRegex);
+        if (match === null) {
+            throw new Error(`go.version does not match the regex: ${property.value}`);
+        }
         if (match !== null && match.length !== 3) {
             // This should never happen
             throw new Error(`go.version does match the regex but length is not 3: ${property.value}`);
         }
-        return match !== null ? match[1] : na;
+        return match[1];
     }
     get failures() {
-        const testsuite = this._junit.testsuites.testsuite;
-        if (testsuite === undefined) {
-            return [];
-        }
-        return testsuite
-            .map(suite => suite.testcase === undefined
-            ? []
-            : suite.testcase.filter(testcase => testcase.failure !== undefined))
+        return (this._junit.testsuites.testsuite
+            ?.map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
             .flat()
             .map(testcase => {
-            const message = testcase.failure
-                ?.map(failure => (failure._ === undefined ? '' : failure._))
-                .join('\n') ?? '';
-            const match = message.match(JunitReport.failureRegex);
+            const message = testcase.failure?.map(failure => failure._ ?? '').join('\n') ?? '';
+            const match = message.match(GotestsumReport.failureRegex);
             if (match !== null && match.length !== 3) {
                 // This should never happen
                 throw new Error(`message does match the regex but length is not 3: ${message}`);
             }
             return new TestCase(this.directory, testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
         })
-            .filter(testcase => testcase.file !== '' && testcase.line !== 0);
+            .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []);
     }
 }
-exports.JunitReport = JunitReport;
+exports.GotestsumReport = GotestsumReport;
 class TestCase {
     moduleDir;
     subDir;
@@ -43325,6 +43299,24 @@ class TestCase {
     }
 }
 exports.TestCase = TestCase;
+
+
+/***/ }),
+
+/***/ 1409:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TestResult = void 0;
+var TestResult;
+(function (TestResult) {
+    TestResult["Passed"] = "passed";
+    TestResult["Failed"] = "failed";
+    TestResult["Skipped"] = "skipped";
+    TestResult["Unknown"] = "unknown";
+})(TestResult || (exports.TestResult = TestResult = {}));
 
 
 /***/ }),
@@ -43437,7 +43429,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Monorepo = void 0;
 const fast_glob_1 = __importDefault(__nccwpck_require__(3664));
-const report_1 = __nccwpck_require__(8884);
+const gotestsum_1 = __nccwpck_require__(6755);
+const type_1 = __nccwpck_require__(1409);
 const path_1 = __importDefault(__nccwpck_require__(1017));
 class Monorepo {
     _reporters;
@@ -43446,21 +43439,21 @@ class Monorepo {
     }
     static async fromDirectories(directories, filename) {
         const files = directories.map(directory => path_1.default.join(directory, filename));
-        const reporters = await Promise.all(files.map(async (file) => await report_1.JunitReport.fromXml(file)));
+        const reporters = await Promise.all(files.map(async (file) => await gotestsum_1.GotestsumReport.fromXml(file)));
         return new Monorepo(reporters);
     }
     static async fromFilename(filename) {
         const files = await (0, fast_glob_1.default)(`**/${filename}`, { dot: true });
-        const reporters = await Promise.all(files.map(async (file) => await report_1.JunitReport.fromXml(file)));
+        const reporters = await Promise.all(files.map(async (file) => await gotestsum_1.GotestsumReport.fromXml(file)));
         return new Monorepo(reporters);
     }
     makeMarkdownReport(context, limitFailures) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-        const result = this._reporters.every(r => r.result === report_1.TestResult.Passed)
+        const result = this._reporters.every(r => r.result === type_1.TestResult.Passed)
             ? '`Passed`🙆‍♀️'
-            : this._reporters.some(r => r.result === report_1.TestResult.Failed)
+            : this._reporters.some(r => r.result === type_1.TestResult.Failed)
                 ? '`Failed`🙅‍♂️'
                 : '`Unknown`🤷';
         const moduleTable = this.makeModuleTable({ owner, repo, sha });
@@ -43498,9 +43491,9 @@ ${failedTestTable}
 ${this._reporters
             .map(({ directory, result, passed, failed, skipped, time, version }) => {
             const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
-            const resultEmoji = result === report_1.TestResult.Failed ? '❌Failed' : '✅Passed';
+            const resultEmoji = result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
             const timeStr = `${time.toFixed(1)}s`;
-            return `| ${moduleName} | ${version} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
+            return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
         })
             .join('\n')}
 `.slice(1, -1);

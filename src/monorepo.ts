@@ -1,6 +1,7 @@
 import glob from 'fast-glob'
 
-import { Reportable, JunitReport, TestResult } from './junit/report'
+import { GotestsumReport } from './junit/gotestsum'
+import { Reportable, TestResult } from './junit/type'
 import path from 'path'
 
 export type MarkdownContext = RepositoryContext &
@@ -37,7 +38,7 @@ export class Monorepo {
   ): Promise<Monorepo> {
     const files = directories.map(directory => path.join(directory, filename))
     const reporters = await Promise.all(
-      files.map(async file => await JunitReport.fromXml(file))
+      files.map(async file => await GotestsumReport.fromXml(file))
     )
     return new Monorepo(reporters)
   }
@@ -45,7 +46,7 @@ export class Monorepo {
   static async fromFilename(filename: string): Promise<Monorepo> {
     const files = await glob(`**/${filename}`, { dot: true })
     const reporters = await Promise.all(
-      files.map(async file => await JunitReport.fromXml(file))
+      files.map(async file => await GotestsumReport.fromXml(file))
     )
     return new Monorepo(reporters)
   }
@@ -106,7 +107,7 @@ ${this._reporters
     const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`
     const resultEmoji = result === TestResult.Failed ? '❌Failed' : '✅Passed'
     const timeStr = `${time.toFixed(1)}s`
-    return `| ${moduleName} | ${version} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
+    return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
   })
   .join('\n')}
 `.slice(1, -1)
