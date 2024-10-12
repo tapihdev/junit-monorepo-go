@@ -74,7 +74,7 @@ export class GotestsumReport implements Reportable {
         .filter(({ name }) => name === 'go.version') ?? []
 
     if (filtered.length === 0) {
-      return undefined
+      throw new Error('go.version property not found')
     }
 
     const set = new Set(filtered.map(({ value }) => value))
@@ -88,7 +88,6 @@ export class GotestsumReport implements Reportable {
       throw new Error(`go.version does not match the regex: ${property.value}`)
     }
     if (match !== null && match.length !== 3) {
-      // This should never happen
       throw new Error(
         `go.version does match the regex but length is not 3: ${property.value}`
       )
