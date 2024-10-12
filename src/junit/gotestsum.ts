@@ -30,31 +30,16 @@ export class GotestsumReport implements Reportable {
   private constructor(
     private readonly _path: string,
     private readonly _junit: JunitReportXML,
-    private readonly _found = true
   ) {}
 
   static unknown(path: string): GotestsumReport {
-    return new GotestsumReport(
-      path,
-      {
-        testsuites: {
-          $: {
-            tests: '0',
-            errors: '0',
-            failures: '0',
-            skipped: '0',
-            time: '0'
-          }
-        }
-      },
-      false
-    )
+    return new GotestsumReport(path, { testsuites: {} })
   }
 
   static async fromXml(path: string): Promise<GotestsumReport> {
     const content = await fs.promises.readFile(path, { encoding: 'utf8' })
     const junit = (await parseStringPromise(content)) as JunitReportXML
-    return new GotestsumReport(path, junit, true)
+    return new GotestsumReport(path, junit)
   }
 
   get directory(): string {
@@ -63,7 +48,7 @@ export class GotestsumReport implements Reportable {
   }
 
   get result(): TestResult {
-    if (!this._found) {
+    if (this._junit.testsuites.$ === undefined) {
       return TestResult.Unknown
     }
 
@@ -80,6 +65,9 @@ export class GotestsumReport implements Reportable {
   }
 
   get tests(): number {
+    if (this._junit.testsuites.$ === undefined) {
+      return 0
+    }
     return parseInt(this._junit.testsuites.$.tests)
   }
 
@@ -88,16 +76,25 @@ export class GotestsumReport implements Reportable {
   }
 
   get failed(): number {
+    if (this._junit.testsuites.$ === undefined) {
+      return 0
+    }
     return parseInt(this._junit.testsuites.$.failures)
   }
 
   get skipped(): number {
+    if (this._junit.testsuites.$ === undefined) {
+      return 0
+    }
     return this._junit.testsuites.$.skipped !== undefined
       ? parseInt(this._junit.testsuites.$.skipped)
       : 0
   }
 
   get time(): number {
+    if (this._junit.testsuites.$ === undefined) {
+      return 0
+    }
     return parseFloat(this._junit.testsuites.$.time)
   }
 

@@ -6,7 +6,7 @@ export type JunitReport = {
 }
 
 type TestSuites = {
-  $: {
+  $?: {
     tests: string
     errors: string
     failures: string
@@ -23,7 +23,7 @@ type TestSuite = {
     errors: string
     failures: string
     skipped?: string
-    time: string
+    time?: string
     timestamp?: Date
   }
   testcase?: TestCase[]
