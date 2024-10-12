@@ -1,6 +1,14 @@
 /**
  * Types to parse JUnit XML reports
  */
+import * as fs from 'fs'
+import { parseStringPromise } from 'xml2js'
+
+export async function parseJunitReport(path: string): Promise<JunitReport> {
+  const content = await fs.promises.readFile(path, { encoding: 'utf8' })
+  return (await parseStringPromise(content)) as JunitReport
+}
+
 export type JunitReport = {
   testsuites: TestSuites
 }
