@@ -10,7 +10,7 @@ import {
   getLimitFailures
 } from './input'
 import { Client as GitHubClient } from './github'
-import { Monorepo } from './monorepo'
+import { Repository } from './repository'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -28,15 +28,15 @@ export async function run(): Promise<void> {
     const limitFailures = getLimitFailures()
 
     core.info(`* search and read junit reports: ${filename}`)
-    const monorepo =
+    const repository =
       directories.length === 0
-        ? await Monorepo.fromFilename(filename)
-        : await Monorepo.fromDirectories(directories, filename)
+        ? await Repository.fromFilename(filename)
+        : await Repository.fromDirectories(directories, filename)
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
-    const body = monorepo.makeMarkdownReport(
+    const body = repository.makeMarkdownReport(
       {
         owner,
         repo,
@@ -67,7 +67,7 @@ export async function run(): Promise<void> {
     await core.summary.addRaw(body).write()
 
     core.info('* annotate failed tests')
-    monorepo
+    repository
       .makeAnnotationMessages()
       .forEach(annotation => core.info(annotation))
 

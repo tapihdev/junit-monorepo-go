@@ -11,7 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { Monorepo } from '../src/monorepo'
+import { Repository } from '../src/repository'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -26,13 +26,13 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let monorepoFromFilenameMock: jest.SpiedFunction<typeof Monorepo.fromFilename>
+let monorepoFromFilenameMock: jest.SpiedFunction<typeof Repository.fromFilename>
 let monorepoFromDirectoriesMock: jest.SpiedFunction<
-  typeof Monorepo.fromDirectories
+  typeof Repository.fromDirectories
 >
-let makeMarkdownReportMock: jest.SpiedFunction<Monorepo['makeMarkdownReport']>
+let makeMarkdownReportMock: jest.SpiedFunction<Repository['makeMarkdownReport']>
 let makeAnnotationMessagesMock: jest.SpiedFunction<
-  Monorepo['makeAnnotationMessages']
+  Repository['makeAnnotationMessages']
 >
 
 describe('action', () => {
@@ -61,16 +61,16 @@ describe('action', () => {
       .mockResolvedValue({ updated: false, id: 123 })
 
     monorepoFromFilenameMock = jest
-      .spyOn(Monorepo, 'fromFilename')
-      .mockResolvedValue(new Monorepo([]))
+      .spyOn(Repository, 'fromFilename')
+      .mockResolvedValue(new Repository([]))
     monorepoFromDirectoriesMock = jest
-      .spyOn(Monorepo, 'fromDirectories')
-      .mockResolvedValue(new Monorepo([]))
+      .spyOn(Repository, 'fromDirectories')
+      .mockResolvedValue(new Repository([]))
     makeMarkdownReportMock = jest
-      .spyOn(Monorepo.prototype, 'makeMarkdownReport')
+      .spyOn(Repository.prototype, 'makeMarkdownReport')
       .mockReturnValue('markdown report')
     makeAnnotationMessagesMock = jest
-      .spyOn(Monorepo.prototype, 'makeAnnotationMessages')
+      .spyOn(Repository.prototype, 'makeAnnotationMessages')
       .mockReturnValue(['annotation'])
   })
 
