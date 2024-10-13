@@ -10,10 +10,6 @@ export class GotestsumReport implements Reportable {
     private readonly _junit: JunitReportXML
   ) {}
 
-  static unknown(path: string): GotestsumReport {
-    return new GotestsumReport(path, { testsuites: {} })
-  }
-
   static async fromXml(path: string): Promise<GotestsumReport> {
     return new GotestsumReport(path, await parseJunitReport(path))
   }
@@ -58,8 +54,9 @@ export class GotestsumReport implements Reportable {
     return parseInt(this._junit.testsuites.$?.skipped ?? '0')
   }
 
-  get time(): number {
-    return parseFloat(this._junit.testsuites.$?.time ?? '0')
+  get time(): number | undefined {
+    const time = this._junit.testsuites.$?.time
+    return time === undefined ? undefined : parseFloat(time)
   }
 
   get version(): string | undefined {

@@ -14,7 +14,7 @@ export interface Reportable {
   readonly passed: number
   readonly failed: number
   readonly skipped: number
-  readonly time: number
+  readonly time: number | undefined
   readonly version: string | undefined
   readonly failures: TestCase[]
 }

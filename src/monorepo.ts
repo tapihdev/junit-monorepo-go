@@ -106,7 +106,7 @@ ${this._reporters
   .map(({ directory, result, passed, failed, skipped, time, version }) => {
     const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`
     const resultEmoji = result === TestResult.Failed ? '❌Failed' : '✅Passed'
-    const timeStr = `${time.toFixed(1)}s`
+    const timeStr = time === undefined ? '-' : `${time.toFixed(1)}s`
     return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
   })
   .join('\n')}
