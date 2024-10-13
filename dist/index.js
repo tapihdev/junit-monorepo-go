@@ -43149,7 +43149,7 @@ function getLimitFailures() {
 
 /***/ }),
 
-/***/ 6755:
+/***/ 681:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -43393,7 +43393,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const input_1 = __nccwpck_require__(6747);
 const github_1 = __nccwpck_require__(978);
-const monorepo_1 = __nccwpck_require__(2397);
+const repository_1 = __nccwpck_require__(259);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -43408,13 +43408,13 @@ async function run() {
         const sha = (0, input_1.getSha)();
         const limitFailures = (0, input_1.getLimitFailures)();
         core.info(`* search and read junit reports: ${filename}`);
-        const monorepo = directories.length === 0
-            ? await monorepo_1.Monorepo.fromFilename(filename)
-            : await monorepo_1.Monorepo.fromDirectories(directories, filename);
+        const repository = directories.length === 0
+            ? await repository_1.Repository.fromFilename(filename)
+            : await repository_1.Repository.fromDirectories(directories, filename);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
-        const body = monorepo.makeMarkdownReport({
+        const body = repository.makeMarkdownReport({
             owner,
             repo,
             pullNumber,
@@ -43440,7 +43440,7 @@ async function run() {
         core.info('* post summary to summary page');
         await core.summary.addRaw(body).write();
         core.info('* annotate failed tests');
-        monorepo
+        repository
             .makeAnnotationMessages()
             .forEach(annotation => core.info(annotation));
         core.info('* set output');
@@ -43456,7 +43456,7 @@ async function run() {
 
 /***/ }),
 
-/***/ 2397:
+/***/ 259:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -43465,12 +43465,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Monorepo = void 0;
+exports.Repository = void 0;
 const fast_glob_1 = __importDefault(__nccwpck_require__(3664));
-const gotestsum_1 = __nccwpck_require__(6755);
+const gotestsum_1 = __nccwpck_require__(681);
 const type_1 = __nccwpck_require__(1409);
 const path_1 = __importDefault(__nccwpck_require__(1017));
-class Monorepo {
+class Repository {
     _reporters;
     constructor(_reporters) {
         this._reporters = _reporters;
@@ -43478,12 +43478,12 @@ class Monorepo {
     static async fromDirectories(directories, filename) {
         const files = directories.map(directory => path_1.default.join(directory, filename));
         const reporters = await Promise.all(files.map(async (file) => await gotestsum_1.GotestsumReport.fromXml(file)));
-        return new Monorepo(reporters);
+        return new Repository(reporters);
     }
     static async fromFilename(filename) {
         const files = await (0, fast_glob_1.default)(`**/${filename}`, { dot: true });
         const reporters = await Promise.all(files.map(async (file) => await gotestsum_1.GotestsumReport.fromXml(file)));
-        return new Monorepo(reporters);
+        return new Repository(reporters);
     }
     makeMarkdownReport(context, limitFailures) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
@@ -43567,7 +43567,7 @@ ${failures
         });
     }
 }
-exports.Monorepo = Monorepo;
+exports.Repository = Repository;
 
 
 /***/ }),

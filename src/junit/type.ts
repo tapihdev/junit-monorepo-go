@@ -1,13 +1,6 @@
 import * as path from 'path'
 
-export enum TestResult {
-  Passed = 'passed',
-  Failed = 'failed',
-  Skipped = 'skipped',
-  Unknown = 'unknown'
-}
-
-export interface Reportable {
+export interface JUnitReport {
   readonly directory: string
   readonly result: TestResult
   readonly tests: number
@@ -17,6 +10,13 @@ export interface Reportable {
   readonly time: number | undefined
   readonly version: string | undefined
   readonly failures: TestCase[]
+}
+
+export enum TestResult {
+  Passed = 'passed',
+  Failed = 'failed',
+  Skipped = 'skipped',
+  Unknown = 'unknown'
 }
 
 export class TestCase {

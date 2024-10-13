@@ -1,7 +1,7 @@
-import { Monorepo } from '../src/monorepo'
-import { Reportable, TestResult, TestCase } from '../src/junit/type'
+import { Repository } from '../src/repository'
+import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 
-const reportableMock1: Reportable = {
+const reportableMock1: JUnitReport = {
   directory: 'go/app1',
   result: TestResult.Failed,
   tests: 2,
@@ -15,7 +15,7 @@ const reportableMock1: Reportable = {
   ]
 }
 
-const reportableMock2: Reportable = {
+const reportableMock2: JUnitReport = {
   directory: 'go/app2',
   result: TestResult.Passed,
   tests: 1,
@@ -38,7 +38,7 @@ const context = {
 
 describe('monorepo', () => {
   it('makes a markdown report for empty CI', async () => {
-    const monorepo = new Monorepo([])
+    const monorepo = new Repository([])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -55,7 +55,7 @@ No test results found.
   })
 
   it('makes a markdown report for failure CI', async () => {
-    const monorepo = new Monorepo([reportableMock1, reportableMock2])
+    const monorepo = new Repository([reportableMock1, reportableMock2])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -86,7 +86,7 @@ No test results found.
   })
 
   it('makes a markdown report for successful CI', async () => {
-    const monorepo = new Monorepo([reportableMock2])
+    const monorepo = new Repository([reportableMock2])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -105,7 +105,7 @@ No test results found.
   })
 
   it('makes a markdown report with limited number of failed tests', async () => {
-    const monorepo = new Monorepo([
+    const monorepo = new Repository([
       reportableMock1,
       reportableMock2,
       reportableMock1
@@ -142,14 +142,14 @@ No test results found.
   })
 
   it('makes annotation messages for empty CI', async () => {
-    const monorepo = new Monorepo([])
+    const monorepo = new Repository([])
     const annotations = monorepo.makeAnnotationMessages()
 
     expect(annotations).toEqual([])
   })
 
   it('makes annotation messages', async () => {
-    const monorepo = new Monorepo([reportableMock1, reportableMock2])
+    const monorepo = new Repository([reportableMock1, reportableMock2])
     const annotations = monorepo.makeAnnotationMessages()
 
     expect(annotations).toEqual([
