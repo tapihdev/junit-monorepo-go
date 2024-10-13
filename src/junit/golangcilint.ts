@@ -9,10 +9,6 @@ export class GolangCILintReport implements Reportable {
     private readonly _junit: JunitReportXML
   ) {}
 
-  static unknown(path: string): GolangCILintReport {
-    return new GolangCILintReport(path, { testsuites: {} })
-  }
-
   static async fromXml(path: string): Promise<GolangCILintReport> {
     return new GolangCILintReport(path, await parseJunitReport(path))
   }
@@ -38,6 +34,7 @@ export class GolangCILintReport implements Reportable {
     )
   }
 
+  // This should always be 0 because golangci-lint reports only failures
   get passed(): number {
     return this.tests - this.failed
   }
@@ -60,13 +57,8 @@ export class GolangCILintReport implements Reportable {
     )
   }
 
-  get time(): number {
-    return (
-      this._junit.testsuites.testsuite?.reduce(
-        (acc, suite) => acc + parseInt(suite.$.time ?? '0'),
-        0
-      ) ?? 0
-    )
+  get time(): undefined {
+    return undefined
   }
 
   get version(): string | undefined {
@@ -87,7 +79,10 @@ export class GolangCILintReport implements Reportable {
             // This should never happen because golangci-lint testcases must have only one failure
             throw new Error('golangci-lint test case has multiple failures')
           }
-          const message = testcase.failure[0].$.message
+
+          // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
+          // Output: Error: Foo: Bar
+          const message = testcase.failure[0].$.message.split(': ').slice(1).join(': ').trim()
 
           // Input:
           //   classname: path/to/file.go:line:column
