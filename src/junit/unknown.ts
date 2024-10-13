@@ -4,9 +4,7 @@ import { parseJunitReport, JunitReport as JunitReportXML } from './xml'
 import { Reportable, TestResult, TestCase } from './type'
 
 export class Unknown implements Reportable {
-  constructor(
-    private readonly _path: string
-  ) {}
+  constructor(private readonly _path: string) {}
 
   get directory(): string {
     const parsed = this._path.split('/').slice(0, -1).join('/')

@@ -43150,41 +43150,13 @@ function getLimitFailures() {
 /***/ }),
 
 /***/ 6755:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestCase = exports.GotestsumReport = void 0;
-const path_1 = __importDefault(__nccwpck_require__(1017));
-const fs = __importStar(__nccwpck_require__(7147));
-const xml2js_1 = __nccwpck_require__(6189);
+exports.GotestsumReport = void 0;
+const xml_1 = __nccwpck_require__(7822);
 const type_1 = __nccwpck_require__(1409);
 class GotestsumReport {
     _path;
@@ -43195,13 +43167,8 @@ class GotestsumReport {
         this._path = _path;
         this._junit = _junit;
     }
-    static unknown(path) {
-        return new GotestsumReport(path, { testsuites: {} });
-    }
     static async fromXml(path) {
-        const content = await fs.promises.readFile(path, { encoding: 'utf8' });
-        const junit = (await (0, xml2js_1.parseStringPromise)(content));
-        return new GotestsumReport(path, junit);
+        return new GotestsumReport(path, await (0, xml_1.parseJunitReport)(path));
     }
     get directory() {
         const parsed = this._path.split('/').slice(0, -1).join('/');
@@ -43233,7 +43200,8 @@ class GotestsumReport {
         return parseInt(this._junit.testsuites.$?.skipped ?? '0');
     }
     get time() {
-        return parseFloat(this._junit.testsuites.$?.time ?? '0');
+        const time = this._junit.testsuites.$?.time;
+        return time === undefined ? undefined : parseFloat(time);
     }
     get version() {
         const filtered = this._junit.testsuites.testsuite
@@ -43245,7 +43213,7 @@ class GotestsumReport {
             .flat()
             .filter(({ name }) => name === 'go.version') ?? [];
         if (filtered.length === 0) {
-            return undefined;
+            throw new Error('go.version property not found');
         }
         const set = new Set(filtered.map(({ value }) => value));
         if (set.size !== 1) {
@@ -43257,7 +43225,6 @@ class GotestsumReport {
             throw new Error(`go.version does not match the regex: ${property.value}`);
         }
         if (match !== null && match.length !== 3) {
-            // This should never happen
             throw new Error(`go.version does match the regex but length is not 3: ${property.value}`);
         }
         return match[1];
@@ -43273,12 +43240,58 @@ class GotestsumReport {
                 // This should never happen
                 throw new Error(`message does match the regex but length is not 3: ${message}`);
             }
-            return new TestCase(this.directory, testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
+            // gotestsum reports failures in the following format:
+            // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+            // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+            // This function takes only the first one and extracts the file and line number.
+            return new type_1.TestCase(this.directory, testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
         })
             .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []);
     }
 }
 exports.GotestsumReport = GotestsumReport;
+
+
+/***/ }),
+
+/***/ 1409:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TestCase = exports.TestResult = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+var TestResult;
+(function (TestResult) {
+    TestResult["Passed"] = "passed";
+    TestResult["Failed"] = "failed";
+    TestResult["Skipped"] = "skipped";
+    TestResult["Unknown"] = "unknown";
+})(TestResult || (exports.TestResult = TestResult = {}));
 class TestCase {
     moduleDir;
     subDir;
@@ -43295,7 +43308,7 @@ class TestCase {
         this.message = message;
     }
     get fullPath() {
-        return path_1.default.join(this.moduleDir, this.subDir, this.file);
+        return path.join(this.moduleDir, this.subDir, this.file);
     }
 }
 exports.TestCase = TestCase;
@@ -43303,20 +43316,45 @@ exports.TestCase = TestCase;
 
 /***/ }),
 
-/***/ 1409:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ 7822:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestResult = void 0;
-var TestResult;
-(function (TestResult) {
-    TestResult["Passed"] = "passed";
-    TestResult["Failed"] = "failed";
-    TestResult["Skipped"] = "skipped";
-    TestResult["Unknown"] = "unknown";
-})(TestResult || (exports.TestResult = TestResult = {}));
+exports.parseJunitReport = parseJunitReport;
+/**
+ * Types to parse JUnit XML reports
+ */
+const fs = __importStar(__nccwpck_require__(7147));
+const xml2js_1 = __nccwpck_require__(6189);
+async function parseJunitReport(path) {
+    const content = await fs.promises.readFile(path, { encoding: 'utf8' });
+    return (await (0, xml2js_1.parseStringPromise)(content));
+}
 
 
 /***/ }),
@@ -43492,7 +43530,7 @@ ${this._reporters
             .map(({ directory, result, passed, failed, skipped, time, version }) => {
             const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
             const resultEmoji = result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
-            const timeStr = `${time.toFixed(1)}s`;
+            const timeStr = time === undefined ? '-' : `${time.toFixed(1)}s`;
             return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
         })
             .join('\n')}

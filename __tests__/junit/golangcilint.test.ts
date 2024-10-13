@@ -38,22 +38,8 @@ Details: Bar]]></failure>
     expect(report.time).toBeUndefined()
     expect(report.version).toBeUndefined()
     expect(report.failures).toEqual([
-      new TestCase(
-        'path/to',
-        'go/app',
-        'foo_test.go',
-        12,
-        'errcheck',
-        'Error',
-      ),
-      new TestCase(
-        'path/to',
-        'go/app',
-        'bar_test.go',
-        56,
-        'errcheck',
-        'Error',
-      )
+      new TestCase('path/to', 'go/app', 'foo_test.go', 12, 'errcheck', 'Error'),
+      new TestCase('path/to', 'go/app', 'bar_test.go', 56, 'errcheck', 'Error')
     ] as TestCase[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'

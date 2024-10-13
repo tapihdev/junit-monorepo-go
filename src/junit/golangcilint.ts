@@ -68,7 +68,12 @@ export class GolangCILintReport implements Reportable {
   get failures(): TestCase[] {
     return (
       this._junit.testsuites.testsuite
-        ?.map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
+        ?.map(
+          suite =>
+            suite.testcase?.filter(
+              testcase => testcase.failure !== undefined
+            ) ?? []
+        )
         .flat()
         .map(testcase => {
           if (testcase.failure === undefined || testcase.failure.length === 0) {
@@ -82,7 +87,11 @@ export class GolangCILintReport implements Reportable {
 
           // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
           // Output: Error: Foo: Bar
-          const message = testcase.failure[0].$.message.split(': ').slice(1).join(': ').trim()
+          const message = testcase.failure[0].$.message
+            .split(': ')
+            .slice(1)
+            .join(': ')
+            .trim()
 
           // Input:
           //   classname: path/to/file.go:line:column
@@ -90,7 +99,7 @@ export class GolangCILintReport implements Reportable {
           //   file: file.go
           //   subDir: path/to
           //   line: line
-          const [ fullPath, line ] = testcase.$.classname.split(':')
+          const [fullPath, line] = testcase.$.classname.split(':')
           const file = path.basename(fullPath)
           const subDir = path.dirname(fullPath)
           return new TestCase(
@@ -99,10 +108,9 @@ export class GolangCILintReport implements Reportable {
             file,
             parseInt(line),
             testcase.$.name,
-            message,
+            message
           )
-        })
-        ?? []
+        }) ?? []
     )
   }
 }
