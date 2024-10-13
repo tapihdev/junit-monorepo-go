@@ -1,9 +1,5 @@
-import path from 'path'
-import * as fs from 'fs'
-import { parseStringPromise } from 'xml2js'
-
-import { JunitReport as JunitReportXML } from './xml'
-import { Reportable, TestResult } from './type'
+import { parseJunitReport, JunitReport as JunitReportXML } from './xml'
+import { Reportable, TestResult, TestCase } from './type'
 
 export class GotestsumReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
@@ -14,14 +10,8 @@ export class GotestsumReport implements Reportable {
     private readonly _junit: JunitReportXML
   ) {}
 
-  static unknown(path: string): GotestsumReport {
-    return new GotestsumReport(path, { testsuites: {} })
-  }
-
   static async fromXml(path: string): Promise<GotestsumReport> {
-    const content = await fs.promises.readFile(path, { encoding: 'utf8' })
-    const junit = (await parseStringPromise(content)) as JunitReportXML
-    return new GotestsumReport(path, junit)
+    return new GotestsumReport(path, await parseJunitReport(path))
   }
 
   get directory(): string {
@@ -64,8 +54,9 @@ export class GotestsumReport implements Reportable {
     return parseInt(this._junit.testsuites.$?.skipped ?? '0')
   }
 
-  get time(): number {
-    return parseFloat(this._junit.testsuites.$?.time ?? '0')
+  get time(): number | undefined {
+    const time = this._junit.testsuites.$?.time
+    return time === undefined ? undefined : parseFloat(time)
   }
 
   get version(): string | undefined {
@@ -80,7 +71,7 @@ export class GotestsumReport implements Reportable {
         .filter(({ name }) => name === 'go.version') ?? []
 
     if (filtered.length === 0) {
-      return undefined
+      throw new Error('go.version property not found')
     }
 
     const set = new Set(filtered.map(({ value }) => value))
@@ -94,7 +85,6 @@ export class GotestsumReport implements Reportable {
       throw new Error(`go.version does not match the regex: ${property.value}`)
     }
     if (match !== null && match.length !== 3) {
-      // This should never happen
       throw new Error(
         `go.version does match the regex but length is not 3: ${property.value}`
       )
@@ -124,6 +114,10 @@ export class GotestsumReport implements Reportable {
             )
           }
 
+          // gotestsum reports failures in the following format:
+          // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+          // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+          // This function takes only the first one and extracts the file and line number.
           return new TestCase(
             this.directory,
             testcase.$.classname,
@@ -135,20 +129,5 @@ export class GotestsumReport implements Reportable {
         })
         .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []
     )
-  }
-}
-
-export class TestCase {
-  constructor(
-    readonly moduleDir: string,
-    readonly subDir: string,
-    readonly file: string,
-    readonly line: number,
-    readonly test: string,
-    readonly message: string
-  ) {}
-
-  get fullPath(): string {
-    return path.join(this.moduleDir, this.subDir, this.file)
   }
 }

@@ -1,9 +1,9 @@
 import * as fs from 'fs'
 
-import { GotestsumReport, TestCase } from '../../src/junit/gotestsum'
-import { TestResult } from '../../src/junit/type'
+import { GotestsumReport } from '../../src/junit/gotestsum'
+import { TestResult, TestCase } from '../../src/junit/type'
 
-describe('reporter', () => {
+describe('gotestsum', () => {
   it('parses the junit report', async () => {
     const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
       <?xml version="1.0" encoding="UTF-8"?>
@@ -51,56 +51,5 @@ describe('reporter', () => {
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
     })
-  })
-
-  it('constructs a unknown report', async () => {
-    const report = GotestsumReport.unknown('path/to/junit.xml')
-    expect(report.directory).toBe('path/to')
-    expect(report.result).toBe(TestResult.Unknown)
-    expect(report.tests).toBe(0)
-    expect(report.passed).toBe(0)
-    expect(report.failed).toBe(0)
-    expect(report.skipped).toBe(0)
-    expect(report.time).toBe(0)
-    expect(report.version).toBe(undefined)
-    expect(report.failures).toEqual([])
-  })
-})
-
-describe('testcase', () => {
-  it('joins path', () => {
-    const testcase = new TestCase(
-      'path/to',
-      'foo/bar',
-      'baz_test.go',
-      1,
-      'Test1',
-      'message'
-    )
-    expect(testcase.fullPath).toBe('path/to/foo/bar/baz_test.go')
-  })
-
-  it('joins path of which sub directory is .', () => {
-    const testcase = new TestCase(
-      'path/to',
-      '.',
-      'baz_test.go',
-      1,
-      'Test1',
-      'message'
-    )
-    expect(testcase.fullPath).toBe('path/to/baz_test.go')
-  })
-
-  it('joins path of which module dir is .', () => {
-    const testcase = new TestCase(
-      '.',
-      'foo/bar',
-      'baz_test.go',
-      1,
-      'Test1',
-      'message'
-    )
-    expect(testcase.fullPath).toBe('foo/bar/baz_test.go')
   })
 })
