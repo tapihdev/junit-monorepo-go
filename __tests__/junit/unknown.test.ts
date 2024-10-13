@@ -1,8 +1,5 @@
-import * as fs from 'fs'
-
 import { Unknown } from '../../src/junit/unknown'
-import { TestResult, TestCase } from '../../src/junit/type'
-import exp from 'constants'
+import { TestResult } from '../../src/junit/type'
 
 describe('unknown', () => {
   it('returns unknown', () => {

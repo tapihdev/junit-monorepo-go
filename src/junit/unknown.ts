@@ -1,6 +1,3 @@
-import * as path from 'path'
-
-import { parseJunitReport, JunitReport as JunitReportXML } from './xml'
 import { Reportable, TestResult, TestCase } from './type'
 
 export class Unknown implements Reportable {
