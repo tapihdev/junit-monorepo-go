@@ -1,5 +1,5 @@
-import { Unknown } from '../../src/junit/unknown'
-import { TestResult } from '../../src/junit/type'
+import { Unknown } from '../../../src/junit/reporter/unknown'
+import { TestResult } from '../../../src/junit/type'
 
 describe('unknown', () => {
   it('returns unknown', () => {

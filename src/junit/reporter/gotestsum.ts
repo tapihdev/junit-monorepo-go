@@ -1,5 +1,5 @@
-import { parseJunitReport, JunitReport as JunitReportXML } from './xml'
-import { JUnitReport, TestResult, TestCase } from './type'
+import { parseJunitReport, JunitReport as JunitReportXML } from '../xml'
+import { JUnitReport, TestResult, TestCase } from '../type'
 
 export class GotestsumReport implements JUnitReport {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/

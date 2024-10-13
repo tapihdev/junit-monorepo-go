@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
-import { GotestsumReport } from '../../src/junit/gotestsum'
-import { TestResult, TestCase } from '../../src/junit/type'
+import { GotestsumReport } from '../../../src/junit/reporter/gotestsum'
+import { TestResult, TestCase } from '../../../src/junit/type'
 
 describe('gotestsum', () => {
   it('parses the junit report', async () => {

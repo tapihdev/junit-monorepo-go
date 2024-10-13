@@ -1,6 +1,6 @@
 import glob from 'fast-glob'
 
-import { GotestsumReport } from './junit/gotestsum'
+import { GotestsumReport } from './junit/reporter/gotestsum'
 import { JUnitReport, TestResult } from './junit/type'
 import path from 'path'
 
