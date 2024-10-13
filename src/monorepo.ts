@@ -1,7 +1,7 @@
 import glob from 'fast-glob'
 
 import { GotestsumReport } from './junit/gotestsum'
-import { Reportable, TestResult } from './junit/type'
+import { JUnitReport, TestResult } from './junit/type'
 import path from 'path'
 
 export type MarkdownContext = RepositoryContext &
@@ -30,7 +30,7 @@ type RunContext = {
 }
 
 export class Monorepo {
-  constructor(private readonly _reporters: Reportable[]) {}
+  constructor(private readonly _reporters: JUnitReport[]) {}
 
   static async fromDirectories(
     directories: string[],

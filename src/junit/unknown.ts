@@ -1,6 +1,6 @@
-import { Reportable, TestResult, TestCase } from './type'
+import { JUnitReport, TestResult, TestCase } from './type'
 
-export class Unknown implements Reportable {
+export class Unknown implements JUnitReport {
   constructor(private readonly _path: string) {}
 
   get directory(): string {

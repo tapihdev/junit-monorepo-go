@@ -1,7 +1,7 @@
 import { Monorepo } from '../src/monorepo'
-import { Reportable, TestResult, TestCase } from '../src/junit/type'
+import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 
-const reportableMock1: Reportable = {
+const reportableMock1: JUnitReport = {
   directory: 'go/app1',
   result: TestResult.Failed,
   tests: 2,
@@ -15,7 +15,7 @@ const reportableMock1: Reportable = {
   ]
 }
 
-const reportableMock2: Reportable = {
+const reportableMock2: JUnitReport = {
   directory: 'go/app2',
   result: TestResult.Passed,
   tests: 1,
