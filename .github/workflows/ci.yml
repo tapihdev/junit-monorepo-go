@@ -65,6 +65,10 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          directories: |
+            .github/testdata/go/app1
+            .github/testdata/go/app2
+            .github/testdata/go/app3
           filename: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
@@ -74,6 +78,10 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          directories: |
+            .github/testdata/go/app1
+            .github/testdata/go/app2
+            .github/testdata/go/app3
           filename: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
