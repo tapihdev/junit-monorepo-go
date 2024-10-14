@@ -89,6 +89,7 @@ jobs:
         uses: tapihdev/junit-monorepo-go@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          directories: 'go/app1,go/app2'
           filename: junit.xml
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.pull_request.head.sha }}
@@ -96,13 +97,14 @@ jobs:
 
 ### Inputs
 
-| **Input**             | **Required** | **Description**                            |
-| --------------------- | ------------ | ------------------------------------------ |
-| `github-token`        | yes          | The GitHub token to use for authentication |
-| `filename`            | yes          | The filename of the JUnit test report      |
-| `pull-request-number` | yes          | The pull request number to comment on      |
-| `sha`                 | yes          | The commit SHA of the pull request         |
-| `limit-failures`      | no           | The maximum number of failures to display  |
+| **Input**             | **Required** | **Description**                             |
+| --------------------- | ------------ | ------------------------------------------- |
+| `github-token`        | yes          | The GitHub token to use for authentication  |
+| `directories`         | yes          | The directories to search for JUnit reports |
+| `filename`            | yes          | The filename of the JUnit test report       |
+| `pull-request-number` | yes          | The pull request number to comment on       |
+| `sha`                 | yes          | The commit SHA of the pull request          |
+| `limit-failures`      | no           | The maximum number of failures to display   |
 
 ### Outputs
 
