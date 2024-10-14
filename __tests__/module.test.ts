@@ -1,16 +1,12 @@
 import { Module } from '../src/module'
-import { JUnitReport as JUnitReportXML } from '../src/junit/xml'
 import { GotestsumReport } from '../src/junit/reporter/gotestsum'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 
 describe('module', () => {
   it('constructs a module', async () => {
-    const fromXMLMock = jest.spyOn(GotestsumReport, 'fromXml').mockResolvedValue(
-      new GotestsumReport(
-        'path/to',
-        { testsuites: {} },
-      )
-    )
+    const fromXMLMock = jest
+      .spyOn(GotestsumReport, 'fromXml')
+      .mockResolvedValue(new GotestsumReport('path/to', { testsuites: {} }))
     const module = await Module.fromXml('path/to', 'junit.xml')
     expect(module.directory).toBe('path/to')
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
@@ -24,9 +20,9 @@ describe('module', () => {
       passed: 3,
       failed: 1,
       skipped: 0,
-      time: 1.10,
+      time: 1.1,
       version: '1.22.1',
-      failures: [],
+      failures: []
     } as JUnitReport)
 
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual(
@@ -42,18 +38,34 @@ describe('module', () => {
       passed: 3,
       failed: 1,
       skipped: 0,
-      time: 1.10,
+      time: 1.1,
       version: '1.22.1',
       failures: [
-        new TestCase('path/to', 'foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
-        new TestCase('path/to', 'foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred'),
-      ],
+        new TestCase(
+          'path/to',
+          'foo/bar',
+          'baz_test.go',
+          1,
+          'Test1',
+          'error1\noccurred'
+        ),
+        new TestCase(
+          'path/to',
+          'foo/bar',
+          'baz_test.go',
+          2,
+          'Test2',
+          'error2\noccurred'
+        )
+      ]
     } as JUnitReport)
 
-    expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual(`
+    expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual(
+      `
 | [path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1) | Test1 | error1 occurred |
 | [path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2) | Test2 | error2 occurred |
-`.slice(1, -1))
+`.slice(1, -1)
+    )
   })
 
   it('makes a failed lint table record', async () => {
@@ -64,9 +76,9 @@ describe('module', () => {
       passed: 3,
       failed: 1,
       skipped: 0,
-      time: 1.10,
+      time: 1.1,
       version: '1.22.1',
-      failures: [],
+      failures: []
     } as JUnitReport)
 
     expect(module.makeFailedLintTableRecords()).toEqual('')
@@ -80,17 +92,31 @@ describe('module', () => {
       passed: 3,
       failed: 1,
       skipped: 0,
-      time: 1.10,
+      time: 1.1,
       version: '1.22.1',
       failures: [
-        new TestCase('path/to', 'foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
-        new TestCase('path/to', 'foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred'),
-      ],
+        new TestCase(
+          'path/to',
+          'foo/bar',
+          'baz_test.go',
+          1,
+          'Test1',
+          'error1\noccurred'
+        ),
+        new TestCase(
+          'path/to',
+          'foo/bar',
+          'baz_test.go',
+          2,
+          'Test2',
+          'error2\noccurred'
+        )
+      ]
     } as JUnitReport)
 
     expect(module.makeAnnotationMessages()).toEqual([
       '::error file=path/to/foo/bar/baz_test.go,line=1::error1\noccurred',
-      '::error file=path/to/foo/bar/baz_test.go,line=2::error2\noccurred',
+      '::error file=path/to/foo/bar/baz_test.go,line=2::error2\noccurred'
     ])
   })
 })

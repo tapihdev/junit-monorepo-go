@@ -35950,7 +35950,7 @@ class GotestsumReport {
         this._junit = _junit;
     }
     static async fromXml(path) {
-        return new GotestsumReport(path, await (0, xml_1.parseJunitReport)(path));
+        return new GotestsumReport(path, await (0, xml_1.parseJUnitReport)(path));
     }
     get directory() {
         const parsed = this._path.split('/').slice(0, -1).join('/');
@@ -36127,13 +36127,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseJunitReport = parseJunitReport;
+exports.parseJUnitReport = parseJUnitReport;
 /**
  * Types to parse JUnit XML reports
  */
 const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __nccwpck_require__(6189);
-async function parseJunitReport(path) {
+async function parseJUnitReport(path) {
     const content = await fs.promises.readFile(path, { encoding: 'utf8' });
     return (await (0, xml2js_1.parseStringPromise)(content));
 }
@@ -36304,7 +36304,7 @@ ${this._reporters
             .map(({ directory, result, passed, failed, skipped, time, version }) => {
             const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
             const resultEmoji = result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
-            const timeStr = time === undefined ? '-' : `${time.toFixed(1)}s`;
+            const timeStr = time?.toFixed(1).concat('s') ?? '-';
             return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
         })
             .join('\n')}
