@@ -1,5 +1,3 @@
-import glob from 'fast-glob'
-
 import { GotestsumReport } from './junit/reporter/gotestsum'
 import { JUnitReport, TestResult } from './junit/type'
 import path from 'path'
@@ -37,14 +35,6 @@ export class Repository {
     filename: string
   ): Promise<Repository> {
     const files = directories.map(directory => path.join(directory, filename))
-    const reporters = await Promise.all(
-      files.map(async file => await GotestsumReport.fromXml(file))
-    )
-    return new Repository(reporters)
-  }
-
-  static async fromFilename(filename: string): Promise<Repository> {
-    const files = await glob(`**/${filename}`, { dot: true })
     const reporters = await Promise.all(
       files.map(async file => await GotestsumReport.fromXml(file))
     )

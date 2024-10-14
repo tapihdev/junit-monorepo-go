@@ -6,7 +6,7 @@ export function getGitHubToken(): string {
 }
 
 export function getDirectories(): string[] {
-  const raw = core.getInput('directories', { required: false })
+  const raw = core.getInput('directories', { required: true })
   return raw === '' ? [] : raw.split(/,|\n/)
 }
 

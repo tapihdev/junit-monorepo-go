@@ -26,7 +26,6 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let monorepoFromFilenameMock: jest.SpiedFunction<typeof Repository.fromFilename>
 let monorepoFromDirectoriesMock: jest.SpiedFunction<
   typeof Repository.fromDirectories
 >
@@ -60,9 +59,6 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
 
-    monorepoFromFilenameMock = jest
-      .spyOn(Repository, 'fromFilename')
-      .mockResolvedValue(new Repository([]))
     monorepoFromDirectoriesMock = jest
       .spyOn(Repository, 'fromDirectories')
       .mockResolvedValue(new Repository([]))
@@ -74,81 +70,13 @@ describe('action', () => {
       .mockReturnValue(['annotation'])
   })
 
-  it('sets the body output with no directories for directories', async () => {
+  it('sets the body output', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
           return 'xxx'
         case 'directories':
-          return ''
-        case 'filename':
-          return 'junit.xml'
-        case 'pull-request-number':
-          return '123'
-        case 'sha':
-          return 'sha'
-        case 'limit-failures':
-          return '10'
-        default:
-          return ''
-      }
-    })
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(infoMock).toHaveBeenNthCalledWith(
-      1,
-      '* search and read junit reports: junit.xml'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      3,
-      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(4, 'created comment: 123')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      5,
-      '* post summary to summary page'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
-    expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
-    expect(monorepoFromFilenameMock).toHaveBeenNthCalledWith(1, 'junit.xml')
-    expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
-      owner: 'owner',
-      repo: 'repo',
-      pullNumber: 123,
-      mark: '<!-- commented by junit-monorepo-go -->',
-      body: 'markdown report'
-    })
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
-      1,
-      {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: 123,
-        sha: 'sha',
-        runId: 123,
-        actor: 'actor'
-      },
-      10
-    )
-    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
-    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
-    expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
-    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
-    expect(errorMock).not.toHaveBeenCalled()
-  })
-
-  it('sets the body output with some directories for directories', async () => {
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'github-token':
-          return 'xxx'
-        case 'directories':
-          return 'dir1,dir2'
+          return 'go/app1,go/app2'
         case 'filename':
           return 'junit.xml'
         case 'pull-request-number':
@@ -185,7 +113,79 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
-      ['dir1', 'dir2'],
+      ['go/app1', 'go/app2'],
+      'junit.xml'
+    )
+    expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
+      owner: 'owner',
+      repo: 'repo',
+      pullNumber: 123,
+      mark: '<!-- commented by junit-monorepo-go -->',
+      body: 'markdown report'
+    })
+    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+        sha: 'sha',
+        runId: 123,
+        actor: 'actor'
+      },
+      10
+    )
+    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
+    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
+    expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
+    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
+    expect(errorMock).not.toHaveBeenCalled()
+  })
+
+  it('sets the body output with directories input empty', async () => {
+    getInputMock.mockImplementation(name => {
+      switch (name) {
+        case 'github-token':
+          return 'xxx'
+        case 'directories':
+          return ''
+        case 'filename':
+          return 'junit.xml'
+        case 'pull-request-number':
+          return '123'
+        case 'sha':
+          return 'sha'
+        case 'limit-failures':
+          return '10'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+    expect(runMock).toHaveReturned()
+
+    // Verify that all of the core library functions were called correctly
+    expect(infoMock).toHaveBeenNthCalledWith(
+      1,
+      '* search and read junit reports: junit.xml'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
+    expect(infoMock).toHaveBeenNthCalledWith(
+      3,
+      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(4, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(
+      5,
+      '* post summary to summary page'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
+    expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
+    expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
+    expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
+      1,
+      [],
       'junit.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
