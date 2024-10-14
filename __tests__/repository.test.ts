@@ -36,7 +36,7 @@ const context = {
   actor: 'actor'
 }
 
-describe('monorepo', () => {
+describe('repository', () => {
   it('makes a markdown report for empty CI', async () => {
     const monorepo = new Repository([])
     const markdown = monorepo.makeMarkdownReport(context, 10)
