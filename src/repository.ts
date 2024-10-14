@@ -1,6 +1,5 @@
-import { GotestsumReport } from './junit/reporter/gotestsum'
-import { JUnitReport, TestResult } from './junit/type'
-import path from 'path'
+import { Module } from './module'
+import { TestResult } from './junit/type'
 
 export type MarkdownContext = RepositoryContext &
   PullRequestContext &
@@ -28,17 +27,18 @@ type RunContext = {
 }
 
 export class Repository {
-  constructor(private readonly _reporters: JUnitReport[]) {}
+  constructor(private readonly _modules: Module[]) {}
 
   static async fromDirectories(
     directories: string[],
     filename: string
   ): Promise<Repository> {
-    const files = directories.map(directory => path.join(directory, filename))
-    const reporters = await Promise.all(
-      files.map(async file => await GotestsumReport.fromXml(file))
+    const modules = await Promise.all(
+      directories.map(
+        async directory => await Module.fromXml(directory, filename)
+      )
     )
-    return new Repository(reporters)
+    return new Repository(modules)
   }
 
   makeMarkdownReport(context: MarkdownContext, limitFailures: number): string {
@@ -46,11 +46,9 @@ export class Repository {
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
-    const result = this._reporters.every(r => r.result === TestResult.Passed)
+    const result = this._modules.every(m => m.result === TestResult.Passed)
       ? '`Passed`🙆‍♀️'
-      : this._reporters.some(r => r.result === TestResult.Failed)
-        ? '`Failed`🙅‍♂️'
-        : '`Unknown`🤷'
+      : '`Failed`🙅‍♂️'
 
     const moduleTable = this.makeModuleTable({ owner, repo, sha })
     const failedTestTable = this.makeFailedTestTable(
@@ -84,7 +82,7 @@ ${failedTestTable}
   }
 
   private makeModuleTable(context: ModuleTableContext): string {
-    if (this._reporters.length === 0) {
+    if (this._modules.length === 0) {
       return ''
     }
 
@@ -92,14 +90,7 @@ ${failedTestTable}
     return `
 | Module | Version | Result | Passed | Failed | Skipped | Time |
 | :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-${this._reporters
-  .map(({ directory, result, passed, failed, skipped, time, version }) => {
-    const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`
-    const resultEmoji = result === TestResult.Failed ? '❌Failed' : '✅Passed'
-    const timeStr = time?.toFixed(1).concat('s') ?? '-'
-    return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`
-  })
-  .join('\n')}
+${this._modules.map(module => module.makeModuleTableRecord(owner, repo, sha)).join('\n')}
 `.slice(1, -1)
   }
 
@@ -107,35 +98,25 @@ ${this._reporters
     context: FailedTestTableContext,
     limitFailures: number
   ): string {
-    const failures = this._reporters.map(reporter => reporter.failures).flat()
+    const { owner, repo, sha } = context
+    const failures = this._modules
+      .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
+      .flat()
     if (failures.length === 0) {
       return ''
     }
 
-    const { owner, repo, sha } = context
     return `
 | File | Test | Message |
 | :--- | :--- | :------ |
 ${failures
   .slice(0, limitFailures)
-  .map(({ fullPath, line, test, message }) => {
-    const fileTitle = `${fullPath}:${line}`
-    const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
-    const fileColumn = `[${fileTitle}](${fileLink})`
-    const joinedMessage = message.replace(/\n/g, ' ')
-    return `| ${fileColumn} | ${test} | ${joinedMessage} |`
-  })
   .join('\n')
   .concat(failures.length > limitFailures ? `\n| ... | ... | ... |` : '')}
 `.slice(1, -1)
   }
 
   makeAnnotationMessages(): string[] {
-    return this._reporters
-      .map(reporter => reporter.failures)
-      .flat()
-      .map(({ fullPath, line, message }) => {
-        return `::error file=${fullPath},line=${line}::${message}`
-      })
+    return this._modules.map(m => m.makeAnnotationMessages()).flat()
   }
 }

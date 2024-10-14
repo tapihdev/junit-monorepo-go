@@ -1,8 +1,8 @@
 import { Repository } from '../src/repository'
+import { Module } from '../src/module'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 
-const reportableMock1: JUnitReport = {
-  directory: 'go/app1',
+const reportableMock1 = new Module('go/app1', {
   result: TestResult.Failed,
   tests: 2,
   passed: 1,
@@ -13,10 +13,9 @@ const reportableMock1: JUnitReport = {
   failures: [
     new TestCase('go/app1', '.', 'foo_test.go', 1, 'Test1/Case', 'failed')
   ]
-}
+} as JUnitReport)
 
-const reportableMock2: JUnitReport = {
-  directory: 'go/app2',
+const reportableMock2 = new Module('go/app2', {
   result: TestResult.Passed,
   tests: 1,
   passed: 1,
@@ -24,8 +23,8 @@ const reportableMock2: JUnitReport = {
   skipped: 0,
   time: 0.1,
   version: '1.22.2',
-  failures: []
-}
+  failures: [] as TestCase[]
+} as JUnitReport)
 
 const context = {
   owner: 'owner',

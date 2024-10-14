@@ -60,12 +60,10 @@ describe('module', () => {
       ]
     } as JUnitReport)
 
-    expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual(
-      `
-| [path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1) | Test1 | error1 occurred |
-| [path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2) | Test2 | error2 occurred |
-`.slice(1, -1)
-    )
+    expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual([
+      `| [path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1) | Test1 | error1 occurred |`,
+      `| [path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2) | Test2 | error2 occurred |`
+    ])
   })
 
   it('makes a failed lint table record', async () => {
@@ -81,7 +79,7 @@ describe('module', () => {
       failures: []
     } as JUnitReport)
 
-    expect(module.makeFailedLintTableRecords()).toEqual('')
+    expect(module.makeFailedLintTableRecords()).toEqual([])
   })
 
   it('makes annotation messages', async () => {

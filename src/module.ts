@@ -19,6 +19,10 @@ export class Module {
     return this._directory
   }
 
+  get result(): TestResult {
+    return this._testReport.result
+  }
+
   makeModuleTableRecord(owner: string, repo: string, sha: string): string {
     const link = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`
     const version = this._testReport.version ?? '-'
@@ -31,21 +35,23 @@ export class Module {
     return `| ${link} | ${version} | ${result} | ${passed} | ${failed} | ${skipped} | ${time} |`
   }
 
-  makeFailedTestTableRecords(owner: string, repo: string, sha: string): string {
-    return this._testReport.failures
-      .map(failure => {
-        const { fullPath, line, test, message } = failure
-        const fileTitle = `${fullPath}:${line}`
-        const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
-        const fileColumn = `[${fileTitle}](${fileLink})`
-        const joinedMessage = message.replace(/\n/g, ' ')
-        return `| ${fileColumn} | ${test} | ${joinedMessage} |`
-      })
-      .join('\n')
+  makeFailedTestTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): string[] {
+    return this._testReport.failures.map(failure => {
+      const { fullPath, line, test, message } = failure
+      const fileTitle = `${fullPath}:${line}`
+      const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
+      const fileColumn = `[${fileTitle}](${fileLink})`
+      const joinedMessage = message.replace(/\n/g, ' ')
+      return `| ${fileColumn} | ${test} | ${joinedMessage} |`
+    })
   }
 
-  makeFailedLintTableRecords(): string {
-    return ''
+  makeFailedLintTableRecords(): string[] {
+    return []
   }
 
   makeAnnotationMessages(): string[] {
