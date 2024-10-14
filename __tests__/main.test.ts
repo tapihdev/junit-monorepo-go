@@ -111,7 +111,11 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
     expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
-    expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(1, ['go/app1', 'go/app2'], 'junit.xml')
+    expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
+      1,
+      ['go/app1', 'go/app2'],
+      'junit.xml'
+    )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
