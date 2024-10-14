@@ -4,7 +4,7 @@ import { parseJUnitReport, JUnitReport as JunitReportXML } from '../xml'
 import { JUnitReport, TestResult, TestCase } from '../type'
 
 export class GolangCILintReport implements JUnitReport {
-  private constructor(
+  constructor(
     private readonly _path: string,
     private readonly _junit: JunitReportXML
   ) {}
