@@ -28,10 +28,7 @@ export async function run(): Promise<void> {
     const limitFailures = getLimitFailures()
 
     core.info(`* search and read junit reports: ${filename}`)
-    const repository =
-      directories.length === 0
-        ? await Repository.fromFilename(filename)
-        : await Repository.fromDirectories(directories, filename)
+    const repository = await Repository.fromDirectories(directories, filename)
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo

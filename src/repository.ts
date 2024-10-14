@@ -43,14 +43,6 @@ export class Repository {
     return new Repository(reporters)
   }
 
-  static async fromFilename(filename: string): Promise<Repository> {
-    const files = await glob(`**/${filename}`, { dot: true })
-    const reporters = await Promise.all(
-      files.map(async file => await GotestsumReport.fromXml(file))
-    )
-    return new Repository(reporters)
-  }
-
   makeMarkdownReport(context: MarkdownContext, limitFailures: number): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`

@@ -26,7 +26,6 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let monorepoFromFilenameMock: jest.SpiedFunction<typeof Repository.fromFilename>
 let monorepoFromDirectoriesMock: jest.SpiedFunction<
   typeof Repository.fromDirectories
 >
@@ -60,9 +59,6 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
 
-    monorepoFromFilenameMock = jest
-      .spyOn(Repository, 'fromFilename')
-      .mockResolvedValue(new Repository([]))
     monorepoFromDirectoriesMock = jest
       .spyOn(Repository, 'fromDirectories')
       .mockResolvedValue(new Repository([]))
@@ -74,13 +70,13 @@ describe('action', () => {
       .mockReturnValue(['annotation'])
   })
 
-  it('sets the body output with no directories for directories', async () => {
+  it('sets the body output', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
           return 'xxx'
         case 'directories':
-          return ''
+          return 'go/app1,go/app2'
         case 'filename':
           return 'junit.xml'
         case 'pull-request-number':
@@ -115,7 +111,7 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
     expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
-    expect(monorepoFromFilenameMock).toHaveBeenNthCalledWith(1, 'junit.xml')
+    expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(1, ['go/app1', 'go/app2'], 'junit.xml')
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
@@ -142,13 +138,13 @@ describe('action', () => {
     expect(errorMock).not.toHaveBeenCalled()
   })
 
-  it('sets the body output with some directories for directories', async () => {
+  it('sets the body output with directories input empty', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
           return 'xxx'
         case 'directories':
-          return 'dir1,dir2'
+          return ''
         case 'filename':
           return 'junit.xml'
         case 'pull-request-number':
@@ -185,7 +181,7 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
-      ['dir1', 'dir2'],
+      [],
       'junit.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
