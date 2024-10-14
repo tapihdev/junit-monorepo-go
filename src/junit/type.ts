@@ -7,8 +7,8 @@ export interface JUnitReport {
   readonly passed: number
   readonly failed: number
   readonly skipped: number
-  readonly time: number | undefined
-  readonly version: string | undefined
+  readonly time?: number
+  readonly version?: string
   readonly failures: TestCase[]
 }
 
