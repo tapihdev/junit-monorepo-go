@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { parseJunitReport, JunitReport as JunitReportXML } from '../xml'
+import { parseJUnitReport, JUnitReport as JunitReportXML } from '../xml'
 import { JUnitReport, TestResult, TestCase } from '../type'
 
 export class GolangCILintReport implements JUnitReport {
@@ -10,7 +10,7 @@ export class GolangCILintReport implements JUnitReport {
   ) {}
 
   static async fromXml(path: string): Promise<GolangCILintReport> {
-    return new GolangCILintReport(path, await parseJunitReport(path))
+    return new GolangCILintReport(path, await parseJUnitReport(path))
   }
 
   get directory(): string {

@@ -4,12 +4,12 @@
 import * as fs from 'fs'
 import { parseStringPromise } from 'xml2js'
 
-export async function parseJunitReport(path: string): Promise<JunitReport> {
+export async function parseJUnitReport(path: string): Promise<JUnitReport> {
   const content = await fs.promises.readFile(path, { encoding: 'utf8' })
-  return (await parseStringPromise(content)) as JunitReport
+  return (await parseStringPromise(content)) as JUnitReport
 }
 
-export type JunitReport = {
+export type JUnitReport = {
   testsuites: TestSuites
 }
 
