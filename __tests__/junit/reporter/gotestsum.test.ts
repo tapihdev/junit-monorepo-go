@@ -30,7 +30,6 @@ describe('gotestsum', () => {
       `)
 
     const report = await GotestsumReport.fromXml('path/to/junit.xml')
-    expect(report.directory).toBe('path/to')
     expect(report.result).toBe(TestResult.Failed)
     expect(report.tests).toBe(4)
     expect(report.passed).toBe(2)
@@ -40,7 +39,6 @@ describe('gotestsum', () => {
     expect(report.version).toBe('1.22.1')
     expect(report.failures).toEqual([
       {
-        moduleDir: 'path/to',
         subDir: 'foo/bar',
         file: 'baz_test.go',
         line: 1,

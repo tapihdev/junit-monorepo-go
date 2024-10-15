@@ -41,7 +41,8 @@ export class Module {
     sha: string
   ): string[] {
     return this._testReport.failures.map(failure => {
-      const { fullPath, line, test, message } = failure
+      const { subDir, file, line, test, message } = failure
+      const fullPath = path.join(this._directory, subDir, file)
       const fileTitle = `${fullPath}:${line}`
       const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
       const fileColumn = `[${fileTitle}](${fileLink})`

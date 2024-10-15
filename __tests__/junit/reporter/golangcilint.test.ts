@@ -29,7 +29,6 @@ Details: Bar]]></failure>
     `)
 
     const report = await GolangCILintReport.fromXml('path/to/junit.xml')
-    expect(report.directory).toBe('path/to')
     expect(report.result).toBe(TestResult.Failed)
     expect(report.tests).toBe(5)
     expect(report.passed).toBe(0)
@@ -38,8 +37,8 @@ Details: Bar]]></failure>
     expect(report.time).toBeUndefined()
     expect(report.version).toBeUndefined()
     expect(report.failures).toEqual([
-      new TestCase('path/to', 'go/app', 'foo_test.go', 12, 'errcheck', 'Error'),
-      new TestCase('path/to', 'go/app', 'bar_test.go', 56, 'errcheck', 'Error')
+      new TestCase('go/app', 'foo_test.go', 12, 'errcheck', 'Error'),
+      new TestCase('go/app', 'bar_test.go', 56, 'errcheck', 'Error')
     ] as TestCase[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
