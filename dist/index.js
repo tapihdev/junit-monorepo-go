@@ -36236,38 +36236,116 @@ async function run() {
 
 /***/ }),
 
-/***/ 259:
+/***/ 6611:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Repository = void 0;
+exports.Module = void 0;
+const path = __importStar(__nccwpck_require__(1017));
 const gotestsum_1 = __nccwpck_require__(681);
 const type_1 = __nccwpck_require__(1409);
-const path_1 = __importDefault(__nccwpck_require__(1017));
+class Module {
+    _directory;
+    _testReport;
+    constructor(_directory, _testReport) {
+        this._directory = _directory;
+        this._testReport = _testReport;
+    }
+    static async fromXml(directory, testPath) {
+        return new Module(directory, await gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath)));
+    }
+    get directory() {
+        return this._directory;
+    }
+    get result() {
+        return this._testReport.result;
+    }
+    makeModuleTableRecord(owner, repo, sha) {
+        const link = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`;
+        const version = this._testReport.version ?? '-';
+        const result = this._testReport.result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
+        const passed = this._testReport.passed;
+        const failed = this._testReport.failed;
+        const skipped = this._testReport.skipped;
+        const time = this._testReport.time?.toFixed(1).concat('s') ?? '-';
+        return `| ${link} | ${version} | ${result} | ${passed} | ${failed} | ${skipped} | ${time} |`;
+    }
+    makeFailedTestTableRecords(owner, repo, sha) {
+        return this._testReport.failures.map(failure => {
+            const { fullPath, line, test, message } = failure;
+            const fileTitle = `${fullPath}:${line}`;
+            const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
+            const fileColumn = `[${fileTitle}](${fileLink})`;
+            const joinedMessage = message.replace(/\n/g, ' ');
+            return `| ${fileColumn} | ${test} | ${joinedMessage} |`;
+        });
+    }
+    makeFailedLintTableRecords() {
+        return [];
+    }
+    makeAnnotationMessages() {
+        return this._testReport.failures.map(failure => {
+            const { subDir, file, line, message } = failure;
+            const fullPath = path.join(this._directory, subDir, file);
+            return `::error file=${fullPath},line=${line}::${message}`;
+        });
+    }
+}
+exports.Module = Module;
+
+
+/***/ }),
+
+/***/ 259:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Repository = void 0;
+const module_1 = __nccwpck_require__(6611);
+const type_1 = __nccwpck_require__(1409);
 class Repository {
-    _reporters;
-    constructor(_reporters) {
-        this._reporters = _reporters;
+    _modules;
+    constructor(_modules) {
+        this._modules = _modules;
     }
     static async fromDirectories(directories, filename) {
-        const files = directories.map(directory => path_1.default.join(directory, filename));
-        const reporters = await Promise.all(files.map(async (file) => await gotestsum_1.GotestsumReport.fromXml(file)));
-        return new Repository(reporters);
+        const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, filename)));
+        return new Repository(modules);
     }
     makeMarkdownReport(context, limitFailures) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-        const result = this._reporters.every(r => r.result === type_1.TestResult.Passed)
+        const result = this._modules.every(m => m.result === type_1.TestResult.Passed)
             ? '`Passed`🙆‍♀️'
-            : this._reporters.some(r => r.result === type_1.TestResult.Failed)
-                ? '`Failed`🙅‍♂️'
-                : '`Unknown`🤷';
+            : '`Failed`🙅‍♂️';
         const moduleTable = this.makeModuleTable({ owner, repo, sha });
         const failedTestTable = this.makeFailedTestTable({ owner, repo, sha }, limitFailures);
         return `
@@ -36293,52 +36371,35 @@ ${failedTestTable}
 `.slice(1, -1);
     }
     makeModuleTable(context) {
-        if (this._reporters.length === 0) {
+        if (this._modules.length === 0) {
             return '';
         }
         const { owner, repo, sha } = context;
         return `
 | Module | Version | Result | Passed | Failed | Skipped | Time |
 | :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-${this._reporters
-            .map(({ directory, result, passed, failed, skipped, time, version }) => {
-            const moduleName = `[${directory}](https://github.com/${owner}/${repo}/blob/${sha}/${directory})`;
-            const resultEmoji = result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
-            const timeStr = time?.toFixed(1).concat('s') ?? '-';
-            return `| ${moduleName} | ${version ?? '-'} | ${resultEmoji} | ${passed} | ${failed} | ${skipped} | ${timeStr} |`;
-        })
-            .join('\n')}
+${this._modules.map(module => module.makeModuleTableRecord(owner, repo, sha)).join('\n')}
 `.slice(1, -1);
     }
     makeFailedTestTable(context, limitFailures) {
-        const failures = this._reporters.map(reporter => reporter.failures).flat();
+        const { owner, repo, sha } = context;
+        const failures = this._modules
+            .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
+            .flat();
         if (failures.length === 0) {
             return '';
         }
-        const { owner, repo, sha } = context;
         return `
 | File | Test | Message |
 | :--- | :--- | :------ |
 ${failures
             .slice(0, limitFailures)
-            .map(({ fullPath, line, test, message }) => {
-            const fileTitle = `${fullPath}:${line}`;
-            const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
-            const fileColumn = `[${fileTitle}](${fileLink})`;
-            const joinedMessage = message.replace(/\n/g, ' ');
-            return `| ${fileColumn} | ${test} | ${joinedMessage} |`;
-        })
             .join('\n')
             .concat(failures.length > limitFailures ? `\n| ... | ... | ... |` : '')}
 `.slice(1, -1);
     }
     makeAnnotationMessages() {
-        return this._reporters
-            .map(reporter => reporter.failures)
-            .flat()
-            .map(({ fullPath, line, message }) => {
-            return `::error file=${fullPath},line=${line}::${message}`;
-        });
+        return this._modules.map(m => m.makeAnnotationMessages()).flat();
     }
 }
 exports.Repository = Repository;
