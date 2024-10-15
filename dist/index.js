@@ -36253,14 +36253,22 @@ class Module {
         return this._testReport.result;
     }
     makeModuleTableRecord(owner, repo, sha) {
-        const link = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`;
+        const name = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`;
         const version = this._testReport.version ?? '-';
         const result = this._testReport.result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
-        const passed = this._testReport.passed;
-        const failed = this._testReport.failed;
-        const skipped = this._testReport.skipped;
+        const passed = this._testReport.passed.toString();
+        const failed = this._testReport.failed.toString();
+        const skipped = this._testReport.skipped.toString();
         const time = this._testReport.time?.toFixed(1).concat('s') ?? '-';
-        return `| ${link} | ${version} | ${result} | ${passed} | ${failed} | ${skipped} | ${time} |`;
+        return {
+            name,
+            version,
+            result,
+            passed,
+            failed,
+            skipped,
+            time
+        };
     }
     makeFailedTestTableRecords(owner, repo, sha) {
         return this._testReport.failures.map(failure => {
@@ -36270,7 +36278,7 @@ class Module {
             const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
             const fileColumn = `[${fileTitle}](${fileLink})`;
             const joinedMessage = message.replace(/\n/g, ' ');
-            return `| ${fileColumn} | ${test} | ${joinedMessage} |`;
+            return { file: fileColumn, test, message: joinedMessage };
         });
     }
     makeFailedLintTableRecords() {
@@ -36307,6 +36315,16 @@ class Repository {
         const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, filename)));
         return new Repository(modules);
     }
+    renderTable(header, separator, records) {
+        if (records.length === 0) {
+            return '';
+        }
+        return [
+            `| ${Object.values(header).join(' | ')} |`,
+            `| ${Object.values(separator).join(' | ')} |`,
+            ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
+        ].join('\n');
+    }
     makeMarkdownReport(context, limitFailures) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
@@ -36314,8 +36332,35 @@ class Repository {
         const result = this._modules.every(m => m.result === type_1.TestResult.Passed)
             ? '`Passed`🙆‍♀️'
             : '`Failed`🙅‍♂️';
-        const moduleTable = this.makeModuleTable({ owner, repo, sha });
-        const failedTestTable = this.makeFailedTestTable({ owner, repo, sha }, limitFailures);
+        const moduleTable = this.renderTable({
+            name: 'Module',
+            version: 'Version',
+            result: 'Result',
+            passed: 'Passed',
+            failed: 'Failed',
+            skipped: 'Skipped',
+            time: 'Time'
+        }, {
+            name: ':-----',
+            version: '------:',
+            result: ':-----',
+            passed: '-----:',
+            failed: '-----:',
+            skipped: '------:',
+            time: '---:'
+        }, this._modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
+        const failuresRaw = this._modules
+            .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
+            .flat();
+        const failures = failuresRaw.slice(0, limitFailures);
+        if (failuresRaw.length > limitFailures) {
+            failures.push({
+                file: `:warning: and ${failuresRaw.length - limitFailures} more...`,
+                test: '-',
+                message: '-'
+            });
+        }
+        const failedTestTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failures);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
@@ -36336,34 +36381,6 @@ ${failedTestTable}
 `}
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
-`.slice(1, -1);
-    }
-    makeModuleTable(context) {
-        if (this._modules.length === 0) {
-            return '';
-        }
-        const { owner, repo, sha } = context;
-        return `
-| Module | Version | Result | Passed | Failed | Skipped | Time |
-| :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-${this._modules.map(module => module.makeModuleTableRecord(owner, repo, sha)).join('\n')}
-`.slice(1, -1);
-    }
-    makeFailedTestTable(context, limitFailures) {
-        const { owner, repo, sha } = context;
-        const failures = this._modules
-            .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
-            .flat();
-        if (failures.length === 0) {
-            return '';
-        }
-        return `
-| File | Test | Message |
-| :--- | :--- | :------ |
-${failures
-            .slice(0, limitFailures)
-            .join('\n')
-            .concat(failures.length > limitFailures ? `\n| ... | ... | ... |` : '')}
 `.slice(1, -1);
     }
     makeAnnotationMessages() {

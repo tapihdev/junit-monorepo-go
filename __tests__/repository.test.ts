@@ -128,7 +128,7 @@ No test results found.
 | File | Test | Message |
 | :--- | :--- | :------ |
 | [go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1) | Test1/Case | failed |
-| ... | ... | ... |
+| :warning: and 1 more... | - | - |
 
 </details>
 
