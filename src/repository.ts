@@ -1,6 +1,11 @@
 import { Module } from './module'
 import { TestResult } from './junit/type'
-import { AnyRecord, FailedTestTableRecord, FailedLintTableRecord, ModuleTableRecord } from './type'
+import {
+  AnyRecord,
+  FailedTestTableRecord,
+  FailedLintTableRecord,
+  ModuleTableRecord
+} from './type'
 
 export type MarkdownContext = {
   owner: string
@@ -17,11 +22,12 @@ export class Repository {
   static async fromDirectories(
     directories: string[],
     testReportXml: string,
-    lintReportXml?: string,
+    lintReportXml?: string
   ): Promise<Repository> {
     const modules = await Promise.all(
       directories.map(
-        async directory => await Module.fromXml(directory, testReportXml, lintReportXml)
+        async directory =>
+          await Module.fromXml(directory, testReportXml, lintReportXml)
       )
     )
     return new Repository(modules)
@@ -121,9 +127,9 @@ ${failedTestTable}
 </details>
 `
 }${
-  failedLintTable === ''
-    ? ''
-    : `
+      failedLintTable === ''
+        ? ''
+        : `
 <br/>
 
 <details open>
@@ -133,7 +139,7 @@ ${failedTestTable}
 
 </details>
 `
-}
+    }
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)

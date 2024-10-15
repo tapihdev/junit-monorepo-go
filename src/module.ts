@@ -13,19 +13,21 @@ export class Module {
   constructor(
     private readonly _directory: string,
     private readonly _testReport: JUnitReport,
-    private readonly _lintReport?: JUnitReport,
+    private readonly _lintReport?: JUnitReport
   ) {}
 
-  static async fromXml(directory: string, testPath: string, lintPath?: string): Promise<Module> {
-    const [ test, lint ] = await Promise.all([
+  static async fromXml(
+    directory: string,
+    testPath: string,
+    lintPath?: string
+  ): Promise<Module> {
+    const [test, lint] = await Promise.all([
       GotestsumReport.fromXml(path.join(directory, testPath)),
-      lintPath ? GolangCILintReport.fromXml(path.join(directory, lintPath)) : undefined
+      lintPath
+        ? GolangCILintReport.fromXml(path.join(directory, lintPath))
+        : undefined
     ])
-    return new Module(
-      directory,
-      test,
-      lint,
-    )
+    return new Module(directory, test, lint)
   }
 
   get directory(): string {
@@ -81,15 +83,17 @@ export class Module {
     repo: string,
     sha: string
   ): FailedLintTableRecord[] {
-    return this._lintReport?.failures.map(failure => {
-      const { subDir, file, line, test, message } = failure
-      const fullPath = path.join(this._directory, subDir, file)
-      const fileTitle = `${fullPath}:${line}`
-      const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
-      const fileColumn = `[${fileTitle}](${fileLink})`
-      const joinedMessage = message.replace(/\n/g, ' ')
-      return { file: fileColumn, test, message: joinedMessage }
-    }) ?? []
+    return (
+      this._lintReport?.failures.map(failure => {
+        const { subDir, file, line, test, message } = failure
+        const fullPath = path.join(this._directory, subDir, file)
+        const fileTitle = `${fullPath}:${line}`
+        const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
+        const fileColumn = `[${fileTitle}](${fileLink})`
+        const joinedMessage = message.replace(/\n/g, ' ')
+        return { file: fileColumn, test, message: joinedMessage }
+      }) ?? []
+    )
   }
 
   makeAnnotationMessages(): string[] {

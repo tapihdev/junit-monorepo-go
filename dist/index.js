@@ -35906,7 +35906,11 @@ function getTestReportXml() {
     return core.getInput('test-report-xml', { required: true });
 }
 function getLintReportXml() {
-    return core.getInput('lint-report-xml', { required: false });
+    const raw = core.getInput('lint-report-xml', { required: false });
+    if (raw === '') {
+        return undefined;
+    }
+    return raw;
 }
 function getPullRequestNumber() {
     const raw = core.getInput('pull-request-number', { required: false });
@@ -35931,6 +35935,112 @@ function getLimitFailures() {
     }
     return Number(raw);
 }
+
+
+/***/ }),
+
+/***/ 2355:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GolangCILintReport = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const xml_1 = __nccwpck_require__(7822);
+const type_1 = __nccwpck_require__(1409);
+class GolangCILintReport {
+    _path;
+    _junit;
+    constructor(_path, _junit) {
+        this._path = _path;
+        this._junit = _junit;
+    }
+    static async fromXml(path) {
+        return new GolangCILintReport(path, await (0, xml_1.parseJUnitReport)(path));
+    }
+    get result() {
+        // Passed if there are no test suites, because golangci-lint reports only failures
+        return this._junit.testsuites.testsuite === undefined
+            ? type_1.TestResult.Passed
+            : type_1.TestResult.Failed;
+    }
+    get tests() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
+    }
+    // This should always be 0 because golangci-lint reports only failures
+    get passed() {
+        return this.tests - this.failed;
+    }
+    get failed() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.failures), 0) ?? 0);
+    }
+    get skipped() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.skipped ?? '0'), 0) ?? 0);
+    }
+    get time() {
+        return undefined;
+    }
+    get version() {
+        return undefined;
+    }
+    get failures() {
+        return (this._junit.testsuites.testsuite
+            ?.map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
+            .flat()
+            .map(testcase => {
+            if (testcase.failure === undefined || testcase.failure.length === 0) {
+                // This should never happen because golangci-lint testcases must have a failure
+                throw new Error('golangci-lint test case has no failure');
+            }
+            if (testcase.failure.length > 1) {
+                // This should never happen because golangci-lint testcases must have only one failure
+                throw new Error('golangci-lint test case has multiple failures');
+            }
+            // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
+            // Output: Error: Foo: Bar
+            const message = testcase.failure[0].$.message
+                .split(': ')
+                .slice(1)
+                .join(': ')
+                .trim();
+            // Input:
+            //   classname: path/to/file.go:line:column
+            // Output:
+            //   file: file.go
+            //   subDir: path/to
+            //   line: line
+            const [fullPath, line] = testcase.$.classname.split(':');
+            const file = path.basename(fullPath);
+            const subDir = path.dirname(fullPath);
+            return new type_1.TestCase(subDir, file, parseInt(line), testcase.$.name, message);
+        }) ?? []);
+    }
+}
+exports.GolangCILintReport = GolangCILintReport;
 
 
 /***/ }),
@@ -36155,13 +36265,14 @@ const mark = '<!-- commented by junit-monorepo-go -->';
 async function run() {
     try {
         const directories = (0, input_1.getDirectories)();
-        const filename = (0, input_1.getTestReportXml)();
+        const testReportXml = (0, input_1.getTestReportXml)();
+        const lintReportXml = (0, input_1.getLintReportXml)();
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();
         const limitFailures = (0, input_1.getLimitFailures)();
-        core.info(`* search and read junit reports: ${filename}`);
-        const repository = await repository_1.Repository.fromDirectories(directories, filename);
+        core.info(`* search and read junit reports: ${testReportXml}`);
+        const repository = await repository_1.Repository.fromDirectories(directories, testReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -36240,15 +36351,24 @@ exports.Module = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const gotestsum_1 = __nccwpck_require__(681);
 const type_1 = __nccwpck_require__(1409);
+const golangcilint_1 = __nccwpck_require__(2355);
 class Module {
     _directory;
     _testReport;
-    constructor(_directory, _testReport) {
+    _lintReport;
+    constructor(_directory, _testReport, _lintReport) {
         this._directory = _directory;
         this._testReport = _testReport;
+        this._lintReport = _lintReport;
     }
-    static async fromXml(directory, testPath) {
-        return new Module(directory, await gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath)));
+    static async fromXml(directory, testPath, lintPath) {
+        const [test, lint] = await Promise.all([
+            gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath)),
+            lintPath
+                ? golangcilint_1.GolangCILintReport.fromXml(path.join(directory, lintPath))
+                : undefined
+        ]);
+        return new Module(directory, test, lint);
     }
     get directory() {
         return this._directory;
@@ -36285,8 +36405,16 @@ class Module {
             return { file: fileColumn, test, message: joinedMessage };
         });
     }
-    makeFailedLintTableRecords() {
-        return [];
+    makeFailedLintTableRecords(owner, repo, sha) {
+        return (this._lintReport?.failures.map(failure => {
+            const { subDir, file, line, test, message } = failure;
+            const fullPath = path.join(this._directory, subDir, file);
+            const fileTitle = `${fullPath}:${line}`;
+            const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
+            const fileColumn = `[${fileTitle}](${fileLink})`;
+            const joinedMessage = message.replace(/\n/g, ' ');
+            return { file: fileColumn, test, message: joinedMessage };
+        }) ?? []);
     }
     makeAnnotationMessages() {
         return this._testReport.failures.map(failure => {
@@ -36315,8 +36443,8 @@ class Repository {
     constructor(_modules) {
         this._modules = _modules;
     }
-    static async fromDirectories(directories, filename) {
-        const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, filename)));
+    static async fromDirectories(directories, testReportXml, lintReportXml) {
+        const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, testReportXml, lintReportXml)));
         return new Repository(modules);
     }
     renderTable(header, separator, records) {
@@ -36365,13 +36493,27 @@ class Repository {
             });
         }
         const failedTestTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failures);
+        const failedLintTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, this._modules
+            .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+            .flat());
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
 #### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
-${moduleTable === '' || failedTestTable === ''
+${failedTestTable === ''
+            ? ''
+            : `
+<br/>
+
+<details open>
+<summary> Failed Tests </summary>
+
+${failedTestTable}
+
+</details>
+`}${failedLintTable === ''
             ? ''
             : `
 <br/>

@@ -30,7 +30,10 @@ export async function run(): Promise<void> {
     const limitFailures = getLimitFailures()
 
     core.info(`* search and read junit reports: ${testReportXml}`)
-    const repository = await Repository.fromDirectories(directories, testReportXml)
+    const repository = await Repository.fromDirectories(
+      directories,
+      testReportXml
+    )
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo

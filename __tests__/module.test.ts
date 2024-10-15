@@ -65,7 +65,8 @@ describe('module', () => {
   })
 
   it('makes a failed lint table record', async () => {
-    const module = new Module('path/to',
+    const module = new Module(
+      'path/to',
       {
         result: TestResult.Failed,
         tests: 4,
@@ -83,17 +84,19 @@ describe('module', () => {
         failed: 1,
         skipped: 0,
         failures: [
-          new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
+          new TestCase(
+            'foo/bar',
+            'baz_test.go',
+            1,
+            'Test1',
+            'error1\noccurred'
+          ),
           new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
         ]
-      } as JUnitReport,
-  )
+      } as JUnitReport
+    )
 
-    expect(module.makeFailedLintTableRecords(
-      'owner',
-      'repo',
-      'sha'
-    )).toEqual([
+    expect(module.makeFailedLintTableRecords('owner', 'repo', 'sha')).toEqual([
       {
         file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
         test: 'Test1',

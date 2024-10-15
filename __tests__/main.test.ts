@@ -116,7 +116,7 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
-      'test.xml',
+      'test.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -190,7 +190,7 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       [],
-      'test.xml',
+      'test.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
