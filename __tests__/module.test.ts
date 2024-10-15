@@ -14,7 +14,6 @@ describe('module', () => {
 
   it('makes a module table record', async () => {
     const module = new Module('path/to', {
-      directory: 'path/to',
       result: TestResult.Passed,
       tests: 4,
       passed: 3,
@@ -38,7 +37,6 @@ describe('module', () => {
 
   it('makes a failed test table record', async () => {
     const module = new Module('path/to', {
-      directory: 'path/to',
       result: TestResult.Failed,
       tests: 4,
       passed: 3,
@@ -67,24 +65,50 @@ describe('module', () => {
   })
 
   it('makes a failed lint table record', async () => {
-    const module = new Module('path/to', {
-      directory: 'path/to',
-      result: TestResult.Failed,
-      tests: 4,
-      passed: 3,
-      failed: 1,
-      skipped: 0,
-      time: 1.1,
-      version: '1.22.1',
-      failures: []
-    } as JUnitReport)
+    const module = new Module('path/to',
+      {
+        result: TestResult.Failed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        time: 1.1,
+        version: '1.22.1',
+        failures: []
+      } as JUnitReport,
+      {
+        result: TestResult.Failed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        failures: [
+          new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
+          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
+        ]
+      } as JUnitReport,
+  )
 
-    expect(module.makeFailedLintTableRecords()).toEqual([])
+    expect(module.makeFailedLintTableRecords(
+      'owner',
+      'repo',
+      'sha'
+    )).toEqual([
+      {
+        file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
+        test: 'Test1',
+        message: 'error1 occurred'
+      },
+      {
+        file: '[path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2)',
+        test: 'Test2',
+        message: 'error2 occurred'
+      }
+    ])
   })
 
   it('makes annotation messages', async () => {
     const module = new Module('path/to', {
-      directory: 'path/to',
       result: TestResult.Failed,
       tests: 4,
       passed: 3,

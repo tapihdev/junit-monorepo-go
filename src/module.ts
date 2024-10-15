@@ -76,8 +76,20 @@ export class Module {
     })
   }
 
-  makeFailedLintTableRecords(): FailedLintTableRecord[] {
-    return []
+  makeFailedLintTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): FailedLintTableRecord[] {
+    return this._lintReport?.failures.map(failure => {
+      const { subDir, file, line, test, message } = failure
+      const fullPath = path.join(this._directory, subDir, file)
+      const fileTitle = `${fullPath}:${line}`
+      const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
+      const fileColumn = `[${fileTitle}](${fileLink})`
+      const joinedMessage = message.replace(/\n/g, ' ')
+      return { file: fileColumn, test, message: joinedMessage }
+    }) ?? []
   }
 
   makeAnnotationMessages(): string[] {

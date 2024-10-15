@@ -21,6 +21,6 @@ export type FailedTestTableRecord = {
 
 export type FailedLintTableRecord = {
   file: string
-  lint: string
+  test: string
   message: string
 }

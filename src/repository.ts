@@ -1,6 +1,6 @@
 import { Module } from './module'
 import { TestResult } from './junit/type'
-import { AnyRecord, FailedTestTableRecord, ModuleTableRecord } from './type'
+import { AnyRecord, FailedTestTableRecord, FailedLintTableRecord, ModuleTableRecord } from './type'
 
 export type MarkdownContext = {
   owner: string
@@ -93,6 +93,14 @@ export class Repository {
       failures
     )
 
+    const failedLintTable = this.renderTable<FailedLintTableRecord>(
+      { file: 'File', test: 'Test', message: 'Message' },
+      { file: ':---', test: ':---', message: ':------' },
+      this._modules
+        .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+        .flat()
+    )
+
     return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
@@ -100,7 +108,20 @@ export class Repository {
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${
-  moduleTable === '' || failedTestTable === ''
+  failedTestTable === ''
+    ? ''
+    : `
+<br/>
+
+<details open>
+<summary> Failed Tests </summary>
+
+${failedTestTable}
+
+</details>
+`
+}${
+  failedLintTable === ''
     ? ''
     : `
 <br/>
