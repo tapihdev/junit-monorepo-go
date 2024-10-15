@@ -7,17 +7,24 @@ import {
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
+import { GolangCILintReport } from './junit/reporter/golangcilint'
 
 export class Module {
   constructor(
     private readonly _directory: string,
-    private readonly _testReport: JUnitReport
+    private readonly _testReport: JUnitReport,
+    private readonly _lintReport?: JUnitReport,
   ) {}
 
-  static async fromXml(directory: string, testPath: string): Promise<Module> {
+  static async fromXml(directory: string, testPath: string, lintPath?: string): Promise<Module> {
+    const [ test, lint ] = await Promise.all([
+      GotestsumReport.fromXml(path.join(directory, testPath)),
+      lintPath ? GolangCILintReport.fromXml(path.join(directory, lintPath)) : undefined
+    ])
     return new Module(
       directory,
-      await GotestsumReport.fromXml(path.join(directory, testPath))
+      test,
+      lint,
     )
   }
 

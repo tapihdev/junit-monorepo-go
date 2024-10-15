@@ -3,7 +3,8 @@ import * as github from '@actions/github'
 
 import {
   getDirectories,
-  getFilename,
+  getTestReportXml,
+  getLintReportXml,
   getGitHubToken,
   getPullRequestNumber,
   getSha,
@@ -21,14 +22,15 @@ const mark = '<!-- commented by junit-monorepo-go -->'
 export async function run(): Promise<void> {
   try {
     const directories = getDirectories()
-    const filename = getFilename()
+    const testReportXml = getTestReportXml()
+    const lintReportXml = getLintReportXml()
     const token = getGitHubToken()
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
     const limitFailures = getLimitFailures()
 
-    core.info(`* search and read junit reports: ${filename}`)
-    const repository = await Repository.fromDirectories(directories, filename)
+    core.info(`* search and read junit reports: ${testReportXml}`)
+    const repository = await Repository.fromDirectories(directories, testReportXml)
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo

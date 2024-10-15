@@ -35888,7 +35888,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getGitHubToken = getGitHubToken;
 exports.getDirectories = getDirectories;
-exports.getFilename = getFilename;
+exports.getTestReportXml = getTestReportXml;
+exports.getLintReportXml = getLintReportXml;
 exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
 exports.getLimitFailures = getLimitFailures;
@@ -35901,8 +35902,11 @@ function getDirectories() {
     const raw = core.getInput('directories', { required: true });
     return raw === '' ? [] : raw.split(/,|\n/);
 }
-function getFilename() {
-    return core.getInput('filename', { required: true });
+function getTestReportXml() {
+    return core.getInput('test-report-xml', { required: true });
+}
+function getLintReportXml() {
+    return core.getInput('lint-report-xml', { required: false });
 }
 function getPullRequestNumber() {
     const raw = core.getInput('pull-request-number', { required: false });
@@ -36151,7 +36155,7 @@ const mark = '<!-- commented by junit-monorepo-go -->';
 async function run() {
     try {
         const directories = (0, input_1.getDirectories)();
-        const filename = (0, input_1.getFilename)();
+        const filename = (0, input_1.getTestReportXml)();
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();

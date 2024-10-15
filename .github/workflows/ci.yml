@@ -69,7 +69,7 @@ jobs:
             .github/testdata/go/app1
             .github/testdata/go/app2
             .github/testdata/go/app3
-          filename: 'junit.xml'
+          test-report-xml: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
 
@@ -82,7 +82,7 @@ jobs:
             .github/testdata/go/app1
             .github/testdata/go/app2
             .github/testdata/go/app3
-          filename: 'junit.xml'
+          test-report-xml: 'junit.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
 

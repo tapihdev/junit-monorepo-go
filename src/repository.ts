@@ -16,11 +16,12 @@ export class Repository {
 
   static async fromDirectories(
     directories: string[],
-    filename: string
+    testReportXml: string,
+    lintReportXml?: string,
   ): Promise<Repository> {
     const modules = await Promise.all(
       directories.map(
-        async directory => await Module.fromXml(directory, filename)
+        async directory => await Module.fromXml(directory, testReportXml, lintReportXml)
       )
     )
     return new Repository(modules)

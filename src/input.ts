@@ -10,8 +10,16 @@ export function getDirectories(): string[] {
   return raw === '' ? [] : raw.split(/,|\n/)
 }
 
-export function getFilename(): string {
-  return core.getInput('filename', { required: true })
+export function getTestReportXml(): string {
+  return core.getInput('test-report-xml', { required: true })
+}
+
+export function getLintReportXml(): string | undefined {
+  const raw = core.getInput('lint-report-xml', { required: false })
+  if (raw === '') {
+    return undefined
+  }
+  return raw
 }
 
 export function getPullRequestNumber(): number {
