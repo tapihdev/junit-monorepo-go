@@ -1,15 +1,10 @@
-export interface Table<R> {
-  header: R
-  sperator: R
-  records: R[]
-}
+export type AnyRecord =
+  | ModuleTableRecord
+  | FailedTestTableRecord
+  | FailedLintTableRecord
 
-export type ModuleTable = Table<ModuleTableRecord>
-export type FailedTestTable = Table<FailedTestTableRecord>
-export type FailedLintTable = Table<FailedLintTableRecord>
-
-export interface ModuleTableRecord {
-  link: string
+export type ModuleTableRecord = {
+  name: string
   version: string
   result: string
   passed: string
@@ -18,19 +13,14 @@ export interface ModuleTableRecord {
   time: string
 }
 
-export interface FailedTestTableRecord {
-  fileColumn: string
+export type FailedTestTableRecord = {
+  file: string
   test: string
   message: string
 }
 
-export interface FailedLintTableRecord {
-  fileColumn: string
-  message: string
-}
-
-export interface AnnotationMessage {
-  fullPath: string
-  line: number
+export type FailedLintTableRecord = {
+  file: string
+  lint: string
   message: string
 }

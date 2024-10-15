@@ -25,9 +25,15 @@ describe('module', () => {
       failures: []
     } as JUnitReport)
 
-    expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual(
-      '| [path/to](https://github.com/owner/repo/blob/sha/path/to) | 1.22.1 | ✅Passed | 3 | 1 | 0 | 1.1s |'
-    )
+    expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
+      name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+      version: '1.22.1',
+      result: '✅Passed',
+      passed: '3',
+      failed: '1',
+      skipped: '0',
+      time: '1.1s'
+    })
   })
 
   it('makes a failed test table record', async () => {
@@ -47,8 +53,16 @@ describe('module', () => {
     } as JUnitReport)
 
     expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual([
-      `| [path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1) | Test1 | error1 occurred |`,
-      `| [path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2) | Test2 | error2 occurred |`
+      {
+        file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
+        test: 'Test1',
+        message: 'error1 occurred'
+      },
+      {
+        file: '[path/to/foo/bar/baz_test.go:2](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L2)',
+        test: 'Test2',
+        message: 'error2 occurred'
+      }
     ])
   })
 

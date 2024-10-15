@@ -1,6 +1,12 @@
 import * as path from 'path'
+
 import { GotestsumReport } from './junit/reporter/gotestsum'
 import { JUnitReport, TestResult } from './junit/type'
+import {
+  ModuleTableRecord,
+  FailedTestTableRecord,
+  FailedLintTableRecord
+} from './type'
 
 export class Module {
   constructor(
@@ -23,23 +29,35 @@ export class Module {
     return this._testReport.result
   }
 
-  makeModuleTableRecord(owner: string, repo: string, sha: string): string {
-    const link = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`
+  makeModuleTableRecord(
+    owner: string,
+    repo: string,
+    sha: string
+  ): ModuleTableRecord {
+    const name = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`
     const version = this._testReport.version ?? '-'
     const result =
       this._testReport.result === TestResult.Failed ? '❌Failed' : '✅Passed'
-    const passed = this._testReport.passed
-    const failed = this._testReport.failed
-    const skipped = this._testReport.skipped
+    const passed = this._testReport.passed.toString()
+    const failed = this._testReport.failed.toString()
+    const skipped = this._testReport.skipped.toString()
     const time = this._testReport.time?.toFixed(1).concat('s') ?? '-'
-    return `| ${link} | ${version} | ${result} | ${passed} | ${failed} | ${skipped} | ${time} |`
+    return {
+      name,
+      version,
+      result,
+      passed,
+      failed,
+      skipped,
+      time
+    }
   }
 
   makeFailedTestTableRecords(
     owner: string,
     repo: string,
     sha: string
-  ): string[] {
+  ): FailedTestTableRecord[] {
     return this._testReport.failures.map(failure => {
       const { subDir, file, line, test, message } = failure
       const fullPath = path.join(this._directory, subDir, file)
@@ -47,11 +65,11 @@ export class Module {
       const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`
       const fileColumn = `[${fileTitle}](${fileLink})`
       const joinedMessage = message.replace(/\n/g, ' ')
-      return `| ${fileColumn} | ${test} | ${joinedMessage} |`
+      return { file: fileColumn, test, message: joinedMessage }
     })
   }
 
-  makeFailedLintTableRecords(): string[] {
+  makeFailedLintTableRecords(): FailedLintTableRecord[] {
     return []
   }
 
