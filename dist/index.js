@@ -35952,10 +35952,6 @@ class GotestsumReport {
     static async fromXml(path) {
         return new GotestsumReport(path, await (0, xml_1.parseJUnitReport)(path));
     }
-    get directory() {
-        const parsed = this._path.split('/').slice(0, -1).join('/');
-        return parsed === '' ? '.' : parsed;
-    }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
             return type_1.TestResult.Unknown;
@@ -36026,7 +36022,7 @@ class GotestsumReport {
             // 1. === RUN   Test&#xA;    baz_test.go:1: error;
             // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
             // This function takes only the first one and extracts the file and line number.
-            return new type_1.TestCase(this.directory, testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
+            return new type_1.TestCase(testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
         })
             .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []);
     }
@@ -36037,36 +36033,12 @@ exports.GotestsumReport = GotestsumReport;
 /***/ }),
 
 /***/ 1409:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TestCase = exports.TestResult = void 0;
-const path = __importStar(__nccwpck_require__(1017));
 var TestResult;
 (function (TestResult) {
     TestResult["Passed"] = "passed";
@@ -36075,22 +36047,17 @@ var TestResult;
     TestResult["Unknown"] = "unknown";
 })(TestResult || (exports.TestResult = TestResult = {}));
 class TestCase {
-    moduleDir;
     subDir;
     file;
     line;
     test;
     message;
-    constructor(moduleDir, subDir, file, line, test, message) {
-        this.moduleDir = moduleDir;
+    constructor(subDir, file, line, test, message) {
         this.subDir = subDir;
         this.file = file;
         this.line = line;
         this.test = test;
         this.message = message;
-    }
-    get fullPath() {
-        return path.join(this.moduleDir, this.subDir, this.file);
     }
 }
 exports.TestCase = TestCase;
@@ -36297,7 +36264,8 @@ class Module {
     }
     makeFailedTestTableRecords(owner, repo, sha) {
         return this._testReport.failures.map(failure => {
-            const { fullPath, line, test, message } = failure;
+            const { subDir, file, line, test, message } = failure;
+            const fullPath = path.join(this._directory, subDir, file);
             const fileTitle = `${fullPath}:${line}`;
             const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${line}`;
             const fileColumn = `[${fileTitle}](${fileLink})`;

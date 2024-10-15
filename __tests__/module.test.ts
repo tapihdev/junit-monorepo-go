@@ -41,22 +41,8 @@ describe('module', () => {
       time: 1.1,
       version: '1.22.1',
       failures: [
-        new TestCase(
-          'path/to',
-          'foo/bar',
-          'baz_test.go',
-          1,
-          'Test1',
-          'error1\noccurred'
-        ),
-        new TestCase(
-          'path/to',
-          'foo/bar',
-          'baz_test.go',
-          2,
-          'Test2',
-          'error2\noccurred'
-        )
+        new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
+        new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
       ]
     } as JUnitReport)
 
@@ -93,22 +79,8 @@ describe('module', () => {
       time: 1.1,
       version: '1.22.1',
       failures: [
-        new TestCase(
-          'path/to',
-          'foo/bar',
-          'baz_test.go',
-          1,
-          'Test1',
-          'error1\noccurred'
-        ),
-        new TestCase(
-          'path/to',
-          'foo/bar',
-          'baz_test.go',
-          2,
-          'Test2',
-          'error2\noccurred'
-        )
+        new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
+        new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
       ]
     } as JUnitReport)
 

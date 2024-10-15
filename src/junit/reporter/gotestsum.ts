@@ -14,11 +14,6 @@ export class GotestsumReport implements JUnitReport {
     return new GotestsumReport(path, await parseJUnitReport(path))
   }
 
-  get directory(): string {
-    const parsed = this._path.split('/').slice(0, -1).join('/')
-    return parsed === '' ? '.' : parsed
-  }
-
   get result(): TestResult {
     if (this._junit.testsuites.$ === undefined) {
       return TestResult.Unknown
@@ -119,7 +114,6 @@ export class GotestsumReport implements JUnitReport {
           // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
           // This function takes only the first one and extracts the file and line number.
           return new TestCase(
-            this.directory,
             testcase.$.classname,
             match === null ? '' : match[1],
             match === null ? 0 : parseInt(match[2]),

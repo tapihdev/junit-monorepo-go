@@ -13,11 +13,6 @@ export class GolangCILintReport implements JUnitReport {
     return new GolangCILintReport(path, await parseJUnitReport(path))
   }
 
-  get directory(): string {
-    const parsed = this._path.split('/').slice(0, -1).join('/')
-    return parsed === '' ? '.' : parsed
-  }
-
   get result(): TestResult {
     // Passed if there are no test suites, because golangci-lint reports only failures
     return this._junit.testsuites.testsuite === undefined
@@ -103,7 +98,6 @@ export class GolangCILintReport implements JUnitReport {
           const file = path.basename(fullPath)
           const subDir = path.dirname(fullPath)
           return new TestCase(
-            this.directory,
             subDir,
             file,
             parseInt(line),

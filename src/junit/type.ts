@@ -1,7 +1,4 @@
-import * as path from 'path'
-
 export interface JUnitReport {
-  readonly directory: string
   readonly result: TestResult
   readonly tests: number
   readonly passed: number
@@ -21,15 +18,10 @@ export enum TestResult {
 
 export class TestCase {
   constructor(
-    readonly moduleDir: string,
     readonly subDir: string,
     readonly file: string,
     readonly line: number,
     readonly test: string,
     readonly message: string
   ) {}
-
-  get fullPath(): string {
-    return path.join(this.moduleDir, this.subDir, this.file)
-  }
 }

@@ -10,9 +10,7 @@ const reportableMock1 = new Module('go/app1', {
   skipped: 0,
   time: 0.2,
   version: '1.22.1',
-  failures: [
-    new TestCase('go/app1', '.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-  ]
+  failures: [new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')]
 } as JUnitReport)
 
 const reportableMock2 = new Module('go/app2', {
