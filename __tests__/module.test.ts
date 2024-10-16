@@ -1,7 +1,11 @@
 import { Module } from '../src/module'
 import { GotestsumReport } from '../src/junit/reporter/gotestsum'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
-import { ModuleTableRecord, FailedTestTableRecord, FailedLintTableRecord } from '../src/type'
+import {
+  ModuleTableRecord,
+  FailedTestTableRecord,
+  FailedLintTableRecord
+} from '../src/type'
 
 describe('module', () => {
   it('constructs a module', async () => {
@@ -13,7 +17,7 @@ describe('module', () => {
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
   })
 
-  it('makes a module table record', async () => {
+  it('makes a module table record with test', async () => {
     const module = new Module('path/to', {
       result: TestResult.Passed,
       tests: 4,
@@ -25,13 +29,59 @@ describe('module', () => {
       failures: []
     } as JUnitReport)
 
+    expect(module.result).toBe(TestResult.Passed)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
       name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
       version: '1.22.1',
-      result: '✅Passed',
-      passed: '3',
-      failed: '1',
-      time: '1.1s'
+      testResult: '✅Passed',
+      testPassed: '3',
+      testFailed: '1',
+      testElapsed: '1.1s',
+      lintResult: '-'
+    } as ModuleTableRecord)
+  })
+
+  it('makes a module table record with test and lint', async () => {
+    const module = new Module(
+      'path/to',
+      {
+        result: TestResult.Passed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        time: 1.1,
+        version: '1.22.1',
+        failures: []
+      } as JUnitReport,
+      {
+        result: TestResult.Failed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        failures: [
+          new TestCase(
+            'foo/bar',
+            'baz_test.go',
+            1,
+            'Test1',
+            'error1\noccurred'
+          ),
+          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
+        ]
+      } as JUnitReport
+    )
+
+    expect(module.result).toBe(TestResult.Failed)
+    expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
+      name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+      version: '1.22.1',
+      testResult: '✅Passed',
+      testPassed: '3',
+      testFailed: '1',
+      testElapsed: '1.1s',
+      lintResult: '❌Failed'
     } as ModuleTableRecord)
   })
 
@@ -50,6 +100,7 @@ describe('module', () => {
       ]
     } as JUnitReport)
 
+    expect(module.result).toBe(TestResult.Failed)
     expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual([
       {
         file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
@@ -96,6 +147,7 @@ describe('module', () => {
       } as JUnitReport
     )
 
+    expect(module.result).toBe(TestResult.Failed)
     expect(module.makeFailedLintTableRecords('owner', 'repo', 'sha')).toEqual([
       {
         file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',

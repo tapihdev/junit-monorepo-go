@@ -35,7 +35,10 @@ export class Module {
   }
 
   get result(): TestResult {
-    return this._testReport.result
+    return this._testReport.result === TestResult.Failed ||
+      this._lintReport?.result === TestResult.Failed
+      ? TestResult.Failed
+      : TestResult.Passed
   }
 
   makeModuleTableRecord(
@@ -43,20 +46,20 @@ export class Module {
     repo: string,
     sha: string
   ): ModuleTableRecord {
-    const name = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`
-    const version = this._testReport.version ?? '-'
-    const result =
-      this._testReport.result === TestResult.Failed ? '❌Failed' : '✅Passed'
-    const passed = this._testReport.passed.toString()
-    const failed = this._testReport.failed.toString()
-    const time = this._testReport.time?.toFixed(1).concat('s') ?? '-'
     return {
-      name,
-      version,
-      result,
-      passed,
-      failed,
-      time
+      name: `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`,
+      version: this._testReport.version ?? '-',
+      testResult:
+        this._testReport.result === TestResult.Failed ? '❌Failed' : '✅Passed',
+      testPassed: this._testReport.passed.toString(),
+      testFailed: this._testReport.failed.toString(),
+      testElapsed: this._testReport.time?.toFixed(1).concat('s') ?? '-',
+      lintResult:
+        this._lintReport === undefined
+          ? '-'
+          : this._lintReport.result === TestResult.Failed
+            ? '❌Failed'
+            : '✅Passed'
     }
   }
 

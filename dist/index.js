@@ -36383,24 +36383,24 @@ class Module {
         return this._directory;
     }
     get result() {
-        return this._testReport.result;
+        return this._testReport.result === type_1.TestResult.Failed ||
+            this._lintReport?.result === type_1.TestResult.Failed
+            ? type_1.TestResult.Failed
+            : type_1.TestResult.Passed;
     }
     makeModuleTableRecord(owner, repo, sha) {
-        const name = `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`;
-        const version = this._testReport.version ?? '-';
-        const result = this._testReport.result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed';
-        const passed = this._testReport.passed.toString();
-        const failed = this._testReport.failed.toString();
-        const skipped = this._testReport.skipped.toString();
-        const time = this._testReport.time?.toFixed(1).concat('s') ?? '-';
         return {
-            name,
-            version,
-            result,
-            passed,
-            failed,
-            skipped,
-            time
+            name: `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`,
+            version: this._testReport.version ?? '-',
+            testResult: this._testReport.result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed',
+            testPassed: this._testReport.passed.toString(),
+            testFailed: this._testReport.failed.toString(),
+            testElapsed: this._testReport.time?.toFixed(1).concat('s') ?? '-',
+            lintResult: this._lintReport === undefined
+                ? '-'
+                : this._lintReport.result === type_1.TestResult.Failed
+                    ? '❌Failed'
+                    : '✅Passed'
         };
     }
     makeFailedTestTableRecords(owner, repo, sha) {
@@ -36476,19 +36476,19 @@ class Repository {
         const moduleTable = this.renderTable({
             name: 'Module',
             version: 'Version',
-            result: 'Result',
-            passed: 'Passed',
-            failed: 'Failed',
-            skipped: 'Skipped',
-            time: 'Time'
+            testResult: 'Test',
+            testPassed: 'Passed',
+            testFailed: 'Failed',
+            testElapsed: 'Time',
+            lintResult: 'Lint'
         }, {
             name: ':-----',
             version: '------:',
-            result: ':-----',
-            passed: '-----:',
-            failed: '-----:',
-            skipped: '------:',
-            time: '---:'
+            testResult: ':---',
+            testPassed: '-----:',
+            testFailed: '-----:',
+            testElapsed: '---:',
+            lintResult: ':---'
         }, this._modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
         const failedTests = this._modules
             .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
@@ -36515,7 +36515,7 @@ class Repository {
                 message: '-'
             });
         }
-        const failedLintTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLintsLimited);
+        const failedLintTable = this.renderTable({ file: 'File', test: 'Lint', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLintsLimited);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 

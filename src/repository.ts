@@ -66,18 +66,20 @@ export class Repository {
       {
         name: 'Module',
         version: 'Version',
-        result: 'Result',
-        passed: 'Passed',
-        failed: 'Failed',
-        time: 'Time'
+        testResult: 'Test',
+        testPassed: 'Passed',
+        testFailed: 'Failed',
+        testElapsed: 'Time',
+        lintResult: 'Lint'
       },
       {
         name: ':-----',
         version: '------:',
-        result: ':-----',
-        passed: '-----:',
-        failed: '-----:',
-        time: '---:'
+        testResult: ':---',
+        testPassed: '-----:',
+        testFailed: '-----:',
+        testElapsed: '---:',
+        lintResult: ':---'
       },
       this._modules.map(module =>
         module.makeModuleTableRecord(context.owner, context.repo, context.sha)
@@ -116,7 +118,7 @@ export class Repository {
       })
     }
     const failedLintTable = this.renderTable<FailedLintTableRecord>(
-      { file: 'File', test: 'Test', message: 'Message' },
+      { file: 'File', test: 'Lint', message: 'Message' },
       { file: ':---', test: ':---', message: ':------' },
       failedLintsLimited
     )
