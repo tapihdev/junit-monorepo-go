@@ -29,10 +29,11 @@ export async function run(): Promise<void> {
     const sha = getSha()
     const limitFailures = getLimitFailures()
 
-    core.info(`* search and read junit reports: ${testReportXml}`)
+    core.info(`* search and read junit reports`)
     const repository = await Repository.fromDirectories(
       directories,
-      testReportXml
+      testReportXml,
+      lintReportXml
     )
 
     core.info('* make markdown report')

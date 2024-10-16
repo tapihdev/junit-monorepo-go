@@ -80,7 +80,7 @@ describe('action', () => {
         case 'test-report-xml':
           return 'test.xml'
         case 'lint-report-xml':
-          return ''
+          return 'lint.xml'
         case 'pull-request-number':
           return '123'
         case 'sha':
@@ -98,7 +98,7 @@ describe('action', () => {
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(
       1,
-      '* search and read junit reports: test.xml'
+      '* search and read junit reports'
     )
     expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
@@ -116,7 +116,8 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
-      'test.xml'
+      'test.xml',
+      'lint.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -154,7 +155,7 @@ describe('action', () => {
         case 'test-report-xml':
           return 'test.xml'
         case 'lint-report-xml':
-          return ''
+          return 'lint.xml'
         case 'pull-request-number':
           return '123'
         case 'sha':
@@ -172,7 +173,7 @@ describe('action', () => {
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(
       1,
-      '* search and read junit reports: test.xml'
+      '* search and read junit reports'
     )
     expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
@@ -190,7 +191,8 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       [],
-      'test.xml'
+      'test.xml',
+      'lint.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -229,7 +231,7 @@ describe('action', () => {
         case 'test-report-xml':
           return 'test.xml'
         case 'lint-report-xml':
-          return ''
+          return 'lint.xml'
         case 'pull-request-number':
           return 'xxx'
         case 'sha':
