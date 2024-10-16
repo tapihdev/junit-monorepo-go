@@ -69,7 +69,6 @@ export class Repository {
         result: 'Result',
         passed: 'Passed',
         failed: 'Failed',
-        skipped: 'Skipped',
         time: 'Time'
       },
       {
@@ -78,7 +77,6 @@ export class Repository {
         result: ':-----',
         passed: '-----:',
         failed: '-----:',
-        skipped: '------:',
         time: '---:'
       },
       this._modules.map(module =>

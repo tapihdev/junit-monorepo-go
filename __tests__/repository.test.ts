@@ -60,10 +60,10 @@ No test results found.
 
 #### Result: \`Failed\`🙅‍♂️
 
-| Module | Version | Result | Passed | Failed | Skipped | Time |
-| :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0 | 0.2s |
-| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0 | 0.1s |
+| Module | Version | Result | Passed | Failed | Time |
+| :----- | ------: | :----- | -----: | -----: | ---: |
+| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0.2s |
+| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0.1s |
 
 <br/>
 
@@ -91,9 +91,9 @@ No test results found.
 
 #### Result: \`Passed\`🙆‍♀️
 
-| Module | Version | Result | Passed | Failed | Skipped | Time |
-| :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0 | 0.1s |
+| Module | Version | Result | Passed | Failed | Time |
+| :----- | ------: | :----- | -----: | -----: | ---: |
+| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0.1s |
 
 ---
 *This comment is created for the commit [abcdef1](https://github.com/owner/repo/pull/123/commits/abcdef123456) pushed by @actor.*
@@ -114,11 +114,11 @@ No test results found.
 
 #### Result: \`Failed\`🙅‍♂️
 
-| Module | Version | Result | Passed | Failed | Skipped | Time |
-| :----- | ------: | :----- | -----: | -----: | ------: | ---: |
-| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0 | 0.2s |
-| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0 | 0.1s |
-| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0 | 0.2s |
+| Module | Version | Result | Passed | Failed | Time |
+| :----- | ------: | :----- | -----: | -----: | ---: |
+| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0.2s |
+| [go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2) | 1.22.2 | ✅Passed | 1 | 0 | 0.1s |
+| [go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1) | 1.22.1 | ❌Failed | 1 | 1 | 0.2s |
 
 <br/>
 

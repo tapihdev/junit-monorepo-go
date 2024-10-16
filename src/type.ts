@@ -9,7 +9,6 @@ export type ModuleTableRecord = {
   result: string
   passed: string
   failed: string
-  skipped: string
   time: string
 }
 

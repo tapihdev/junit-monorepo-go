@@ -49,7 +49,6 @@ export class Module {
       this._testReport.result === TestResult.Failed ? '❌Failed' : '✅Passed'
     const passed = this._testReport.passed.toString()
     const failed = this._testReport.failed.toString()
-    const skipped = this._testReport.skipped.toString()
     const time = this._testReport.time?.toFixed(1).concat('s') ?? '-'
     return {
       name,
@@ -57,7 +56,6 @@ export class Module {
       result,
       passed,
       failed,
-      skipped,
       time
     }
   }

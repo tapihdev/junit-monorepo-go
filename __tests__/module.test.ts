@@ -1,6 +1,7 @@
 import { Module } from '../src/module'
 import { GotestsumReport } from '../src/junit/reporter/gotestsum'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
+import { ModuleTableRecord, FailedTestTableRecord, FailedLintTableRecord } from '../src/type'
 
 describe('module', () => {
   it('constructs a module', async () => {
@@ -30,9 +31,8 @@ describe('module', () => {
       result: '✅Passed',
       passed: '3',
       failed: '1',
-      skipped: '0',
       time: '1.1s'
-    })
+    } as ModuleTableRecord)
   })
 
   it('makes a failed test table record', async () => {
@@ -61,7 +61,7 @@ describe('module', () => {
         test: 'Test2',
         message: 'error2 occurred'
       }
-    ])
+    ] as FailedTestTableRecord[])
   })
 
   it('makes a failed lint table record', async () => {
@@ -107,7 +107,7 @@ describe('module', () => {
         test: 'Test2',
         message: 'error2 occurred'
       }
-    ])
+    ] as FailedLintTableRecord[])
   })
 
   it('makes annotation messages', async () => {
