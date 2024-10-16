@@ -17,15 +17,18 @@ go
 ├── app1
 │   ├── pkg/
 │   ├── go.mod
-│   └── junit.xml
+│   ├── lint.xml
+│   └── test.xml
 ├── app2
 │   ├── pkg/
 │   ├── go.mod
-│   └── junit.xml
+│   ├── lint.xml
+│   └── test.xml
 └── app3
     ├── pkg/
     ├── go.mod
-    └── junit.xml
+    ├── lint.xml
+    └── test.xml
 ```
 
 ### Configure the workflow
@@ -62,15 +65,24 @@ jobs:
         run: |-
           echo "name=$(echo "${directory}" | tr '/' '-')" >> "${GITHUB_OUTPUT}"
           gotestsum \
-            --junitfile junit.xml \
+            --format github-actions \
+            --junitfile test.xml \
             --junitfile-testcase-classname relative \
             --junitfile-testsuite-name relative \
             ./...
+      - name: Lint
+        id: lint
+        working-directory: ${{ matrix.directory }}
+        run: |-
+          golangci-lint --out-format github-actions,junit-xml:lint.xml
       - name: Update artifacts
         uses: actions/upload-artifact@v4
         with:
           name: junit-${{ steps.test.outputs.name }}
-          path: '**/junit.xml'
+          # ** preserves the directory structure
+          path: |
+            **/test.xml
+            **/lint.xml
 
   report:
     name: Report
@@ -91,22 +103,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           directories: 'go/app1,go/app2'
           test-report-xml: test.xml
+          lint-report-xml: lint.xml
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.pull_request.head.sha }}
 ```
 
 ### Inputs
 
-| **Input**             | **Required** | **Description**                             |
-| --------------------- | ------------ | ------------------------------------------- |
-| `github-token`        | yes          | The GitHub token to use for authentication  |
-| `directories`         | yes          | The directories to search for JUnit reports |
-| `test-report-xml`     | yes          | The name of the JUnit report XML file       |
-| `lint-report-xml`     | no           | The name of the lint report XML file        |
-| `pull-request-number` | yes          | The pull request number to comment on       |
-| `sha`                 | yes          | The commit SHA of the pull request          |
-| `failed-test-limit`   | no           | The number of failed tests to display       |
-| `failed-lint-limit`   | no           | The number of failed lints to display       |
+| **Input**             | **Required** | **Description**                                     |
+| --------------------- | ------------ | --------------------------------------------------- |
+| `github-token`        | yes          | The GitHub token to use for authentication          |
+| `directories`         | yes          | The directories to search for JUnit reports         |
+| `test-report-xml`     | yes          | The name of the JUnit report XML file               |
+| `lint-report-xml`     | no           | The name of the lint report XML file                |
+| `pull-request-number` | yes          | The pull request number to comment on               |
+| `sha`                 | yes          | The commit SHA of the pull request                  |
+| `failed-test-limit`   | no           | The number of failed tests to display (default: 30) |
+| `failed-lint-limit`   | no           | The number of failed lints to display (default: 30) |
 
 ### Outputs
 
