@@ -1,6 +1,11 @@
 import { Module } from './module'
 import { TestResult } from './junit/type'
-import { AnyRecord, FailedTestTableRecord, ModuleTableRecord } from './type'
+import {
+  AnyRecord,
+  FailedTestTableRecord,
+  FailedLintTableRecord,
+  ModuleTableRecord
+} from './type'
 
 export type MarkdownContext = {
   owner: string
@@ -16,11 +21,13 @@ export class Repository {
 
   static async fromDirectories(
     directories: string[],
-    filename: string
+    testReportXml: string,
+    lintReportXml?: string
   ): Promise<Repository> {
     const modules = await Promise.all(
       directories.map(
-        async directory => await Module.fromXml(directory, filename)
+        async directory =>
+          await Module.fromXml(directory, testReportXml, lintReportXml)
       )
     )
     return new Repository(modules)
@@ -42,7 +49,11 @@ export class Repository {
     ].join('\n')
   }
 
-  makeMarkdownReport(context: MarkdownContext, limitFailures: number): string {
+  makeMarkdownReport(
+    context: MarkdownContext,
+    failedTestLimit: number,
+    failedLintLimit?: number
+  ): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
@@ -55,33 +66,33 @@ export class Repository {
       {
         name: 'Module',
         version: 'Version',
-        result: 'Result',
-        passed: 'Passed',
-        failed: 'Failed',
-        skipped: 'Skipped',
-        time: 'Time'
+        testResult: 'Test',
+        testPassed: 'Passed',
+        testFailed: 'Failed',
+        testElapsed: 'Time',
+        lintResult: 'Lint'
       },
       {
         name: ':-----',
         version: '------:',
-        result: ':-----',
-        passed: '-----:',
-        failed: '-----:',
-        skipped: '------:',
-        time: '---:'
+        testResult: ':---',
+        testPassed: '-----:',
+        testFailed: '-----:',
+        testElapsed: '---:',
+        lintResult: ':---'
       },
       this._modules.map(module =>
         module.makeModuleTableRecord(context.owner, context.repo, context.sha)
       )
     )
 
-    const failuresRaw = this._modules
+    const failedTests = this._modules
       .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
       .flat()
-    const failures = failuresRaw.slice(0, limitFailures)
-    if (failuresRaw.length > limitFailures) {
-      failures.push({
-        file: `:warning: and ${failuresRaw.length - limitFailures} more...`,
+    const faileTestsLimited = failedTests.slice(0, failedTestLimit)
+    if (failedTests.length > failedTestLimit) {
+      faileTestsLimited.push({
+        file: `:warning: and ${failedTests.length - failedTestLimit} more...`,
         test: '-',
         message: '-'
       })
@@ -89,7 +100,27 @@ export class Repository {
     const failedTestTable = this.renderTable<FailedTestTableRecord>(
       { file: 'File', test: 'Test', message: 'Message' },
       { file: ':---', test: ':---', message: ':------' },
-      failures
+      faileTestsLimited
+    )
+
+    const failedLints = this._modules
+      .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+      .flat()
+    const failedLintsLimited =
+      failedLintLimit === undefined
+        ? failedLints
+        : failedLints.slice(0, failedTestLimit)
+    if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
+      faileTestsLimited.push({
+        file: `:warning: and ${failedLints.length - failedTestLimit} more...`,
+        test: '-',
+        message: '-'
+      })
+    }
+    const failedLintTable = this.renderTable<FailedLintTableRecord>(
+      { file: 'File', test: 'Lint', message: 'Message' },
+      { file: ':---', test: ':---', message: ':------' },
+      failedLintsLimited
     )
 
     return `
@@ -99,7 +130,7 @@ export class Repository {
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${
-  moduleTable === '' || failedTestTable === ''
+  failedTestTable === ''
     ? ''
     : `
 <br/>
@@ -111,7 +142,20 @@ ${failedTestTable}
 
 </details>
 `
-}
+}${
+      failedLintTable === ''
+        ? ''
+        : `
+<br/>
+
+<details open>
+<summary> Failed Lints </summary>
+
+${failedLintTable}
+
+</details>
+`
+    }
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)

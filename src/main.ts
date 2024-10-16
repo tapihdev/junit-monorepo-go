@@ -3,11 +3,13 @@ import * as github from '@actions/github'
 
 import {
   getDirectories,
-  getFilename,
+  getTestReportXml,
+  getLintReportXml,
   getGitHubToken,
   getPullRequestNumber,
   getSha,
-  getLimitFailures
+  getFailedTestLimit,
+  getFailedLintLimit
 } from './input'
 import { Client as GitHubClient } from './github'
 import { Repository } from './repository'
@@ -21,14 +23,20 @@ const mark = '<!-- commented by junit-monorepo-go -->'
 export async function run(): Promise<void> {
   try {
     const directories = getDirectories()
-    const filename = getFilename()
+    const testReportXml = getTestReportXml()
+    const lintReportXml = getLintReportXml()
     const token = getGitHubToken()
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
-    const limitFailures = getLimitFailures()
+    const failedTestLimit = getFailedTestLimit()
+    const failedLintLimit = getFailedLintLimit()
 
-    core.info(`* search and read junit reports: ${filename}`)
-    const repository = await Repository.fromDirectories(directories, filename)
+    core.info(`* search and read junit reports`)
+    const repository = await Repository.fromDirectories(
+      directories,
+      testReportXml,
+      lintReportXml
+    )
 
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo
@@ -42,7 +50,8 @@ export async function run(): Promise<void> {
         runId,
         actor
       },
-      limitFailures
+      failedTestLimit,
+      failedLintLimit
     )
 
     core.info(`* upsert comment matching ${mark}`)

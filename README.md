@@ -90,7 +90,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           directories: 'go/app1,go/app2'
-          filename: junit.xml
+          test-report-xml: test.xml
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.pull_request.head.sha }}
 ```
@@ -101,10 +101,12 @@ jobs:
 | --------------------- | ------------ | ------------------------------------------- |
 | `github-token`        | yes          | The GitHub token to use for authentication  |
 | `directories`         | yes          | The directories to search for JUnit reports |
-| `filename`            | yes          | The filename of the JUnit test report       |
+| `test-report-xml`     | yes          | The name of the JUnit report XML file       |
+| `lint-report-xml`     | no           | The name of the lint report XML file        |
 | `pull-request-number` | yes          | The pull request number to comment on       |
 | `sha`                 | yes          | The commit SHA of the pull request          |
-| `limit-failures`      | no           | The maximum number of failures to display   |
+| `failed-test-limit`   | no           | The number of failed tests to display       |
+| `failed-lint-limit`   | no           | The number of failed lints to display       |
 
 ### Outputs
 

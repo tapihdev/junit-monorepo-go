@@ -77,14 +77,18 @@ describe('action', () => {
           return 'xxx'
         case 'directories':
           return 'go/app1,go/app2'
-        case 'filename':
-          return 'junit.xml'
+        case 'test-report-xml':
+          return 'test.xml'
+        case 'lint-report-xml':
+          return 'lint.xml'
         case 'pull-request-number':
           return '123'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }
@@ -96,7 +100,7 @@ describe('action', () => {
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(
       1,
-      '* search and read junit reports: junit.xml'
+      '* search and read junit reports'
     )
     expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
@@ -114,7 +118,8 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
-      'junit.xml'
+      'test.xml',
+      'lint.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -133,7 +138,8 @@ describe('action', () => {
         runId: 123,
         actor: 'actor'
       },
-      10
+      10,
+      5
     )
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
@@ -149,14 +155,18 @@ describe('action', () => {
           return 'xxx'
         case 'directories':
           return ''
-        case 'filename':
-          return 'junit.xml'
+        case 'test-report-xml':
+          return 'test.xml'
+        case 'lint-report-xml':
+          return 'lint.xml'
         case 'pull-request-number':
           return '123'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }
@@ -168,7 +178,7 @@ describe('action', () => {
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(
       1,
-      '* search and read junit reports: junit.xml'
+      '* search and read junit reports'
     )
     expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
@@ -186,7 +196,8 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       [],
-      'junit.xml'
+      'test.xml',
+      'lint.xml'
     )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -205,7 +216,8 @@ describe('action', () => {
         runId: 123,
         actor: 'actor'
       },
-      10
+      10,
+      5
     )
 
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
@@ -222,14 +234,18 @@ describe('action', () => {
           return 'xxx'
         case 'directories':
           return ''
-        case 'filename':
-          return 'junit.xml'
+        case 'test-report-xml':
+          return 'test.xml'
+        case 'lint-report-xml':
+          return 'lint.xml'
         case 'pull-request-number':
           return 'xxx'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }

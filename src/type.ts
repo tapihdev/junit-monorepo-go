@@ -6,11 +6,11 @@ export type AnyRecord =
 export type ModuleTableRecord = {
   name: string
   version: string
-  result: string
-  passed: string
-  failed: string
-  skipped: string
-  time: string
+  testResult: string
+  testPassed: string
+  testFailed: string
+  testElapsed: string
+  lintResult: string
 }
 
 export type FailedTestTableRecord = {
@@ -21,6 +21,6 @@ export type FailedTestTableRecord = {
 
 export type FailedLintTableRecord = {
   file: string
-  lint: string
+  test: string
   message: string
 }
