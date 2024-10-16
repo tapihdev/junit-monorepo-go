@@ -13,11 +13,11 @@ inputs:
   github-token:
     description: 'The GitHub token to use for authentication'
     required: true
-  test-report-filename:
+  test-report-xml:
     description: 'The filename of the gotestsum report'
     required: true
     default: 'test.xml'
-  lint-report-filename:
+  lint-report-xml:
     description: 'The filename of the golangci-lint report (optional)'
     required: false
   directories:
