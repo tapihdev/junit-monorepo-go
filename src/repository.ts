@@ -86,13 +86,13 @@ export class Repository {
       )
     )
 
-    const failuresRaw = this._modules
+    const failedTests = this._modules
       .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
       .flat()
-    const failures = failuresRaw.slice(0, failedTestLimit)
-    if (failuresRaw.length > failedTestLimit) {
-      failures.push({
-        file: `:warning: and ${failuresRaw.length - failedTestLimit} more...`,
+    const faileTestsLimited = failedTests.slice(0, failedTestLimit)
+    if (failedTests.length > failedTestLimit) {
+      faileTestsLimited.push({
+        file: `:warning: and ${failedTests.length - failedTestLimit} more...`,
         test: '-',
         message: '-'
       })
@@ -100,15 +100,24 @@ export class Repository {
     const failedTestTable = this.renderTable<FailedTestTableRecord>(
       { file: 'File', test: 'Test', message: 'Message' },
       { file: ':---', test: ':---', message: ':------' },
-      failures
+      faileTestsLimited
     )
 
+    const failedLints = this._modules
+      .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+      .flat()
+    const failedLintsLimited = failedLintLimit === undefined ? failedLints : failedLints.slice(0, failedTestLimit)
+    if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
+      faileTestsLimited.push({
+        file: `:warning: and ${failedLints.length - failedTestLimit} more...`,
+        test: '-',
+        message: '-'
+      })
+    }
     const failedLintTable = this.renderTable<FailedLintTableRecord>(
       { file: 'File', test: 'Test', message: 'Message' },
       { file: ':---', test: ':---', message: ':------' },
-      this._modules
-        .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
-        .flat()
+      failedLintsLimited
     )
 
     return `
@@ -137,9 +146,9 @@ ${failedTestTable}
 <br/>
 
 <details open>
-<summary> Failed Tests </summary>
+<summary> Failed Lints </summary>
 
-${failedTestTable}
+${failedLintTable}
 
 </details>
 `
