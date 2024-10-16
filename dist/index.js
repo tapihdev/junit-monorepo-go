@@ -35892,7 +35892,8 @@ exports.getTestReportXml = getTestReportXml;
 exports.getLintReportXml = getLintReportXml;
 exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
-exports.getLimitFailures = getLimitFailures;
+exports.getFailedTestLimit = getFailedTestLimit;
+exports.getFailedLintLimit = getFailedLintLimit;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
@@ -35928,10 +35929,17 @@ function getPullRequestNumber() {
 function getSha() {
     return core.getInput('sha', { required: true });
 }
-function getLimitFailures() {
-    const raw = core.getInput('limit-failures', { required: true });
+function getFailedTestLimit() {
+    const raw = core.getInput('failed-test-limit', { required: true });
     if (raw.match(/^\d+$/) === null) {
-        throw new Error('`limit-failures` must be a number');
+        throw new Error('`failed-test-limit` must be a number');
+    }
+    return Number(raw);
+}
+function getFailedLintLimit() {
+    const raw = core.getInput('failed-lint-limit', { required: true });
+    if (raw.match(/^\d+$/) === null) {
+        throw new Error('`failed-lint-limit` must be a number');
     }
     return Number(raw);
 }
@@ -36270,9 +36278,10 @@ async function run() {
         const token = (0, input_1.getGitHubToken)();
         const pullNumber = (0, input_1.getPullRequestNumber)();
         const sha = (0, input_1.getSha)();
-        const limitFailures = (0, input_1.getLimitFailures)();
-        core.info(`* search and read junit reports: ${testReportXml}`);
-        const repository = await repository_1.Repository.fromDirectories(directories, testReportXml);
+        const failedTestLimit = (0, input_1.getFailedTestLimit)();
+        const failedLintLimit = (0, input_1.getFailedLintLimit)();
+        core.info(`* search and read junit reports`);
+        const repository = await repository_1.Repository.fromDirectories(directories, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -36283,7 +36292,7 @@ async function run() {
             sha,
             runId,
             actor
-        }, limitFailures);
+        }, failedTestLimit, failedLintLimit);
         core.info(`* upsert comment matching ${mark}`);
         const client = new github_1.Client(github.getOctokit(token));
         const result = await client.upsertComment({
@@ -36457,7 +36466,7 @@ class Repository {
             ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
         ].join('\n');
     }
-    makeMarkdownReport(context, limitFailures) {
+    makeMarkdownReport(context, failedTestLimit, failedLintLimit) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
@@ -36481,21 +36490,32 @@ class Repository {
             skipped: '------:',
             time: '---:'
         }, this._modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
-        const failuresRaw = this._modules
+        const failedTests = this._modules
             .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
             .flat();
-        const failures = failuresRaw.slice(0, limitFailures);
-        if (failuresRaw.length > limitFailures) {
-            failures.push({
-                file: `:warning: and ${failuresRaw.length - limitFailures} more...`,
+        const faileTestsLimited = failedTests.slice(0, failedTestLimit);
+        if (failedTests.length > failedTestLimit) {
+            faileTestsLimited.push({
+                file: `:warning: and ${failedTests.length - failedTestLimit} more...`,
                 test: '-',
                 message: '-'
             });
         }
-        const failedTestTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failures);
-        const failedLintTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, this._modules
+        const failedTestTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, faileTestsLimited);
+        const failedLints = this._modules
             .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
-            .flat());
+            .flat();
+        const failedLintsLimited = failedLintLimit === undefined
+            ? failedLints
+            : failedLints.slice(0, failedTestLimit);
+        if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
+            faileTestsLimited.push({
+                file: `:warning: and ${failedLints.length - failedTestLimit} more...`,
+                test: '-',
+                message: '-'
+            });
+        }
+        const failedLintTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLintsLimited);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
@@ -36519,9 +36539,9 @@ ${failedTestTable}
 <br/>
 
 <details open>
-<summary> Failed Tests </summary>
+<summary> Failed Lints </summary>
 
-${failedTestTable}
+${failedLintTable}
 
 </details>
 `}

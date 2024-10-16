@@ -106,7 +106,10 @@ export class Repository {
     const failedLints = this._modules
       .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
       .flat()
-    const failedLintsLimited = failedLintLimit === undefined ? failedLints : failedLints.slice(0, failedTestLimit)
+    const failedLintsLimited =
+      failedLintLimit === undefined
+        ? failedLints
+        : failedLints.slice(0, failedTestLimit)
     if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
       faileTestsLimited.push({
         file: `:warning: and ${failedLints.length - failedTestLimit} more...`,

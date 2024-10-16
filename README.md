@@ -108,7 +108,6 @@ jobs:
 | `failed-test-limit`   | no           | The number of failed tests to display       |
 | `failed-lint-limit`   | no           | The number of failed lints to display       |
 
-
 ### Outputs
 
 A full set list of possible output values for this action.
