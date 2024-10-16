@@ -1,0 +1,12 @@
+<testsuites>
+  <testsuite name="pkg/array.go" tests="1" errors="0" failures="1">
+    <testcase name="typecheck" classname="pkg/array.go:1">
+      <failure message="pkg/array.go:1: : # github.com/tapihdev/junit-monorepo-go/app2/pkg [github.com/tapihdev/junit-monorepo-go/app2/pkg.test]&#xA;pkg/array.go:5:2: unused declared and not used" type=""><![CDATA[: : # github.com/tapihdev/junit-monorepo-go/app2/pkg [github.com/tapihdev/junit-monorepo-go/app2/pkg.test]
+pkg/array.go:5:2: unused declared and not used
+Category: typecheck
+File: pkg/array.go
+Line: 1
+Details: package arrayutils]]></failure>
+    </testcase>
+  </testsuite>
+</testsuites>

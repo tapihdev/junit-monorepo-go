@@ -1,9 +1,10 @@
 package arrayutils
 
-// Max: 配列の中の最大値を返す
 func Max(nums []int) int {
+	// golangci-lint will complain about this unused variable
+	unused := 42
 	if len(nums) == 0 {
-		return 0 // 配列が空の場合は0を返す
+		return 0
 	}
 	max := nums[0]
 	for _, num := range nums {

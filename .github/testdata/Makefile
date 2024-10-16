@@ -8,3 +8,9 @@ test:
 		--junitfile-testcase-classname relative \
 		--junitfile-testsuite-name relative  \
 		./...
+
+.PHONY: lint
+lint:
+	cd "go/$(TARGET)" \
+		&& golangci-lint run \
+		--out-format github-actions,junit-xml:lint.xml
