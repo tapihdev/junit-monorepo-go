@@ -8,7 +8,8 @@ import {
   getGitHubToken,
   getPullRequestNumber,
   getSha,
-  getLimitFailures
+  getFailedTestLimit,
+  getFailedLintLimit
 } from './input'
 import { Client as GitHubClient } from './github'
 import { Repository } from './repository'
@@ -27,7 +28,8 @@ export async function run(): Promise<void> {
     const token = getGitHubToken()
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
-    const limitFailures = getLimitFailures()
+    const failedTestLimit = getFailedTestLimit()
+    const failedLintLimit = getFailedLintLimit()
 
     core.info(`* search and read junit reports`)
     const repository = await Repository.fromDirectories(
@@ -48,7 +50,8 @@ export async function run(): Promise<void> {
         runId,
         actor
       },
-      limitFailures
+      failedTestLimit,
+      failedLintLimit
     )
 
     core.info(`* upsert comment matching ${mark}`)

@@ -29,8 +29,12 @@ inputs:
   sha:
     description: 'The commit SHA to comment on'
     required: true
-  limit-failures:
-    description: 'The maximum number of failures to display'
+  failed-test-limit:
+    description: 'The maximum number of failed tests to display'
+    required: true
+    default: '30'
+  failed-lint-limit:
+    description: 'The maximum number of failed lints to display'
     required: true
     default: '30'
 

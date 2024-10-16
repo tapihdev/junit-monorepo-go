@@ -105,7 +105,9 @@ jobs:
 | `lint-report-xml`     | no           | The name of the lint report XML file        |
 | `pull-request-number` | yes          | The pull request number to comment on       |
 | `sha`                 | yes          | The commit SHA of the pull request          |
-| `limit-failures`      | no           | The maximum number of failures to display   |
+| `failed-test-limit`   | no           | The number of failed tests to display       |
+| `failed-lint-limit`   | no           | The number of failed lints to display       |
+
 
 ### Outputs
 

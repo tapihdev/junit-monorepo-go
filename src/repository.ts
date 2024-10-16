@@ -49,7 +49,11 @@ export class Repository {
     ].join('\n')
   }
 
-  makeMarkdownReport(context: MarkdownContext, limitFailures: number): string {
+  makeMarkdownReport(
+    context: MarkdownContext,
+    failedTestLimit: number,
+    failedLintLimit?: number
+  ): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
@@ -85,10 +89,10 @@ export class Repository {
     const failuresRaw = this._modules
       .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
       .flat()
-    const failures = failuresRaw.slice(0, limitFailures)
-    if (failuresRaw.length > limitFailures) {
+    const failures = failuresRaw.slice(0, failedTestLimit)
+    if (failuresRaw.length > failedTestLimit) {
       failures.push({
-        file: `:warning: and ${failuresRaw.length - limitFailures} more...`,
+        file: `:warning: and ${failuresRaw.length - failedTestLimit} more...`,
         test: '-',
         message: '-'
       })

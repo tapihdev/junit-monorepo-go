@@ -85,8 +85,10 @@ describe('action', () => {
           return '123'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }
@@ -136,7 +138,8 @@ describe('action', () => {
         runId: 123,
         actor: 'actor'
       },
-      10
+      10,
+      5
     )
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
@@ -160,8 +163,10 @@ describe('action', () => {
           return '123'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }
@@ -211,7 +216,8 @@ describe('action', () => {
         runId: 123,
         actor: 'actor'
       },
-      10
+      10,
+      5
     )
 
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
@@ -236,8 +242,10 @@ describe('action', () => {
           return 'xxx'
         case 'sha':
           return 'sha'
-        case 'limit-failures':
+        case 'failed-test-limit':
           return '10'
+        case 'failed-lint-limit':
+          return '5'
         default:
           return ''
       }

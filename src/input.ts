@@ -43,10 +43,18 @@ export function getSha(): string {
   return core.getInput('sha', { required: true })
 }
 
-export function getLimitFailures(): number {
-  const raw = core.getInput('limit-failures', { required: true })
+export function getFailedTestLimit(): number {
+  const raw = core.getInput('failed-test-limit', { required: true })
   if (raw.match(/^\d+$/) === null) {
-    throw new Error('`limit-failures` must be a number')
+    throw new Error('`failed-test-limit` must be a number')
+  }
+  return Number(raw)
+}
+
+export function getFailedLintLimit(): number {
+  const raw = core.getInput('failed-lint-limit', { required: true })
+  if (raw.match(/^\d+$/) === null) {
+    throw new Error('`failed-lint-limit` must be a number')
   }
   return Number(raw)
 }
