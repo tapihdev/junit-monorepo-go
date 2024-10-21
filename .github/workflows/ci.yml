@@ -60,6 +60,32 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      - name: Fail to create comment
+        id: error
+        continue-on-error: true
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          directories: |
+            .github/testdata/go/does-not-exist
+            .github/testdata/go/app1
+            .github/testdata/go/app2
+            .github/testdata/go/app3
+          test-report-xml: 'test.xml'
+          lint-report-xml: 'lint.xml'
+          pull-request-number: ${{ github.event.pull_request.number }}
+          sha: ${{ github.event.pull_request.head.sha }}
+
+      - name: The previous step should fail
+        id: check-error
+        env:
+          outcome: ${{ steps.error.outcome }}
+        run: |
+          if [ "${outcome}" == "success" ]; then
+            echo "Test should have failed"
+            exit 1
+          fi
+
       - name: Create Comment
         id: create
         uses: ./
