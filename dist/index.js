@@ -36282,6 +36282,10 @@ const mark = '<!-- commented by junit-monorepo-go -->';
 async function run() {
     try {
         const directories = (0, input_1.getDirectories)();
+        if (directories.length === 0) {
+            core.info('no directories provided, skipping action');
+            return;
+        }
         const testReportXml = (0, input_1.getTestReportXml)();
         const lintReportXml = (0, input_1.getLintReportXml)();
         const token = (0, input_1.getGitHubToken)();
