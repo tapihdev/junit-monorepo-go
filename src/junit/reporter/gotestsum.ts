@@ -6,12 +6,11 @@ export class GotestsumReport implements JUnitReport {
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
   constructor(
-    private readonly _path: string,
     private readonly _junit: JunitReportXML
   ) {}
 
   static async fromXml(path: string): Promise<GotestsumReport> {
-    return new GotestsumReport(path, await parseJUnitReport(path))
+    return new GotestsumReport(await parseJUnitReport(path))
   }
 
   get result(): TestResult {

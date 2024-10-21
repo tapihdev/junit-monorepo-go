@@ -11,7 +11,7 @@ describe('module', () => {
   it('constructs a module', async () => {
     const fromXMLMock = jest
       .spyOn(GotestsumReport, 'fromXml')
-      .mockResolvedValue(new GotestsumReport('path/to', { testsuites: {} }))
+      .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
     const module = await Module.fromXml('path/to', 'junit.xml')
     expect(module.directory).toBe('path/to')
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
