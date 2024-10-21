@@ -8,7 +8,7 @@ import {
 } from '../src/type'
 
 describe('module', () => {
-  it('constructs a module', async () => {
+  it('should construct a module', async () => {
     const fromXMLMock = jest
       .spyOn(GotestsumReport, 'fromXml')
       .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
@@ -17,7 +17,7 @@ describe('module', () => {
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
   })
 
-  it('makes a module table record with test', async () => {
+  it('should make a module table record with test', async () => {
     const module = new Module('path/to', {
       result: TestResult.Passed,
       tests: 4,
@@ -41,7 +41,7 @@ describe('module', () => {
     } as ModuleTableRecord)
   })
 
-  it('makes a module table record with test and lint', async () => {
+  it('should make a module table record with test and lint', async () => {
     const module = new Module(
       'path/to',
       {
@@ -85,7 +85,7 @@ describe('module', () => {
     } as ModuleTableRecord)
   })
 
-  it('makes a failed test table record', async () => {
+  it('should make a failed test table record', async () => {
     const module = new Module('path/to', {
       result: TestResult.Failed,
       tests: 4,
@@ -115,7 +115,7 @@ describe('module', () => {
     ] as FailedTestTableRecord[])
   })
 
-  it('makes a failed lint table record', async () => {
+  it('should make a failed lint table record', async () => {
     const module = new Module(
       'path/to',
       {
@@ -162,7 +162,7 @@ describe('module', () => {
     ] as FailedLintTableRecord[])
   })
 
-  it('makes annotation messages', async () => {
+  it('should make annotation messages', async () => {
     const module = new Module('path/to', {
       result: TestResult.Failed,
       tests: 4,
