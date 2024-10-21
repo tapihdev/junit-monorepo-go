@@ -57,27 +57,34 @@ describe('input', () => {
 
   it('should handle pull-request-number with an input', () => {
     const testCases = [
-      { input: '456', expected: 456 }
+      { input: '456', expected: 456, shouldThrow: false },
+      { input: 'abc', expected: '', shouldThrow: true }
     ]
-    for (const { input, expected } of testCases) {
+    for (const { input, expected, shouldThrow } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(inputFunc.getPullRequestNumber()).toEqual(expected)
+      if (shouldThrow) {
+        expect(() => inputFunc.getPullRequestNumber()).toThrow()
+      } else {
+        expect(inputFunc.getPullRequestNumber()).toEqual(expected)
+      }
     }
   })
 
   it('should handle pull-request-number without an input', () => {
     const testCases = [
-      { input: '', expected: '', shouldThrow: true },
-      { input: '456', expected: 456, shouldThrow: false }
+      { pull_request: undefined, expected: '', shouldThrow: true },
+      { pull_request: { number: 456 }, expected: 456, shouldThrow: false }
     ]
-    for (const { input, expected, shouldThrow } of testCases) {
-        Object.defineProperties(github.context.payload, {
-          pull_request: { value: { number: input }, writable: true }
-        })
+    for (const { pull_request, expected, shouldThrow } of testCases) {
+      Object.defineProperties(github.context.payload, {
+        pull_request: {
+          value: pull_request, writable: true
+        }
+      })
 
       getInputMock.mockReturnValue('')
       if (shouldThrow) {
-        expect(inputFunc.getPullRequestNumber()).toThrow(Error)
+        expect(() => inputFunc.getPullRequestNumber()).toThrow()
       } else {
         expect(inputFunc.getPullRequestNumber()).toEqual(expected)
       }
@@ -103,7 +110,7 @@ describe('input', () => {
     for (const { input, expected, shouldThrow } of testCases) {
       getInputMock.mockReturnValue(input)
       if (shouldThrow) {
-        expect(inputFunc.getFailedTestLimit()).toThrow(Error)
+        expect(() => inputFunc.getFailedTestLimit()).toThrow()
       } else {
         expect(inputFunc.getFailedTestLimit()).toEqual(expected)
       }
@@ -119,7 +126,7 @@ describe('input', () => {
     for (const { input, expected, shouldThrow } of testCases) {
       getInputMock.mockReturnValue(input)
       if (shouldThrow) {
-        expect(inputFunc.getFailedLintLimit()).toThrow(Error)
+        expect(() => inputFunc.getFailedLintLimit()).toThrow()
       } else {
         expect(inputFunc.getFailedLintLimit()).toEqual(expected)
       }
