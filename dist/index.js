@@ -35901,7 +35901,12 @@ function getGitHubToken() {
 }
 function getDirectories() {
     const raw = core.getInput('directories', { required: true });
-    return raw === '' ? [] : raw.split(/,|\n/);
+    return raw === ''
+        ? []
+        : raw
+            .replace(/(,| |\n)+/g, ' ')
+            .split(' ')
+            .map(d => d.trim());
 }
 function getTestReportXml() {
     return core.getInput('test-report-xml', { required: true });
@@ -35981,14 +35986,12 @@ const path = __importStar(__nccwpck_require__(1017));
 const xml_1 = __nccwpck_require__(7822);
 const type_1 = __nccwpck_require__(1409);
 class GolangCILintReport {
-    _path;
     _junit;
-    constructor(_path, _junit) {
-        this._path = _path;
+    constructor(_junit) {
         this._junit = _junit;
     }
     static async fromXml(path) {
-        return new GolangCILintReport(path, await (0, xml_1.parseJUnitReport)(path));
+        return new GolangCILintReport(await (0, xml_1.parseJUnitReport)(path));
     }
     get result() {
         // Passed if there are no test suites, because golangci-lint reports only failures
@@ -36063,16 +36066,14 @@ exports.GotestsumReport = void 0;
 const xml_1 = __nccwpck_require__(7822);
 const type_1 = __nccwpck_require__(1409);
 class GotestsumReport {
-    _path;
     _junit;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(_path, _junit) {
-        this._path = _path;
+    constructor(_junit) {
         this._junit = _junit;
     }
     static async fromXml(path) {
-        return new GotestsumReport(path, await (0, xml_1.parseJUnitReport)(path));
+        return new GotestsumReport(await (0, xml_1.parseJUnitReport)(path));
     }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
@@ -36466,7 +36467,7 @@ class Repository {
             ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
         ].join('\n');
     }
-    makeMarkdownReport(context, failedTestLimit, failedLintLimit) {
+    makeMarkdownReport(context, failedTestLimit, failedLintLimit = 10) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
@@ -36505,12 +36506,10 @@ class Repository {
         const failedLints = this._modules
             .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
             .flat();
-        const failedLintsLimited = failedLintLimit === undefined
-            ? failedLints
-            : failedLints.slice(0, failedTestLimit);
-        if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
-            faileTestsLimited.push({
-                file: `:warning: and ${failedLints.length - failedTestLimit} more...`,
+        const failedLintsLimited = failedLints.slice(0, failedLintLimit);
+        if (failedLints.length > failedLintLimit) {
+            failedLintsLimited.push({
+                file: `:warning: and ${failedLints.length - failedLintLimit} more...`,
                 test: '-',
                 message: '-'
             });

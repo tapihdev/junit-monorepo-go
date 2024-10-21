@@ -7,7 +7,12 @@ export function getGitHubToken(): string {
 
 export function getDirectories(): string[] {
   const raw = core.getInput('directories', { required: true })
-  return raw === '' ? [] : raw.replace(/(,| |\n)+/g, ' ').split(' ').map(d => d.trim())
+  return raw === ''
+    ? []
+    : raw
+      .replace(/(,| |\n)+/g, ' ')
+      .split(' ')
+      .map(d => d.trim())
 }
 
 export function getTestReportXml(): string {
@@ -48,7 +53,11 @@ export function getFailedTestLimit(): number {
   if (raw.match(/^\d+$/) === null) {
     throw new Error('`failed-test-limit` must be a number')
   }
-  return Number(raw)
+  const value = Number(raw)
+  if (value <= 0) {
+    throw new Error('`failed-test-limit` must be greater than 0')
+  }
+  return value
 }
 
 export function getFailedLintLimit(): number {
@@ -56,5 +65,10 @@ export function getFailedLintLimit(): number {
   if (raw.match(/^\d+$/) === null) {
     throw new Error('`failed-lint-limit` must be a number')
   }
-  return Number(raw)
+
+  const value = Number(raw)
+  if (value <= 0) {
+    throw new Error('`failed-lint-limit` must be greater than 0')
+  }
+  return value
 }

@@ -72,24 +72,28 @@ No test results found.
 
   it('should make a markdown report for a run with tests and lint passed', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
-      result: TestResult.Passed,
-      tests: 1,
-      passed: 1,
-      failed: 0,
-      skipped: 0,
-      time: 0.1,
-      version: '1.22.2',
-      failures: [] as TestCase[]
-    } as JUnitReport,
-    {
-      result: TestResult.Passed,
-      tests: 0,
-      passed: 0,
-      failed: 0,
-      skipped: 0,
-      failures: []
-    } as JUnitReport)])
+      new Module(
+        'go/app1',
+        {
+          result: TestResult.Passed,
+          tests: 1,
+          passed: 1,
+          failed: 0,
+          skipped: 0,
+          time: 0.1,
+          version: '1.22.2',
+          failures: [] as TestCase[]
+        } as JUnitReport,
+        {
+          result: TestResult.Passed,
+          tests: 0,
+          passed: 0,
+          failed: 0,
+          skipped: 0,
+          failures: []
+        } as JUnitReport
+      )
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -110,18 +114,16 @@ No test results found.
   it('should make a markdown report for a run with failed tests', async () => {
     const monorepo = new Repository([
       new Module('go/app1', {
-      result: TestResult.Failed,
-      tests: 2,
-      passed: 1,
-      failed: 1,
-      skipped: 0,
-      time: 0.2,
-      version: '1.22.1',
-      failures: [
-        new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-      ]
-    } as JUnitReport)
-  ])
+        result: TestResult.Failed,
+        tests: 2,
+        passed: 1,
+        failed: 1,
+        skipped: 0,
+        time: 0.2,
+        version: '1.22.1',
+        failures: [new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')]
+      } as JUnitReport)
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -164,8 +166,8 @@ No test results found.
           new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed'),
           new TestCase('.', 'bar_test.go', 2, 'Test2/Case', 'failed')
         ]
-      } as JUnitReport),
-      ])
+      } as JUnitReport)
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 1)
     expect(markdown).toMatch(
       `
@@ -197,28 +199,30 @@ No test results found.
 
   it('should make a markdown report for a run with failed lints', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
-        result: TestResult.Passed,
-        tests: 1,
-        passed: 1,
-        failed: 0,
-        skipped: 0,
-        time: 0.1,
-        version: '1.22.2',
-        failures: [] as TestCase[]
-      } as JUnitReport,
-    {
-      result: TestResult.Failed,
-      tests: 1,
-      passed: 0,
-      failed: 1,
-      skipped: 0,
-      failures: [
-        new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-      ]
-    } as JUnitReport
-  )
-  ])
+      new Module(
+        'go/app1',
+        {
+          result: TestResult.Passed,
+          tests: 1,
+          passed: 1,
+          failed: 0,
+          skipped: 0,
+          time: 0.1,
+          version: '1.22.2',
+          failures: [] as TestCase[]
+        } as JUnitReport,
+        {
+          result: TestResult.Failed,
+          tests: 1,
+          passed: 0,
+          failed: 1,
+          skipped: 0,
+          failures: [
+            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
+          ]
+        } as JUnitReport
+      )
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
@@ -249,29 +253,31 @@ No test results found.
 
   it('should make a markdown report for a failed run with failed lints above limit', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
-        result: TestResult.Passed,
-        tests: 1,
-        passed: 1,
-        failed: 0,
-        skipped: 0,
-        time: 0.1,
-        version: '1.22.2',
-        failures: [] as TestCase[]
-      } as JUnitReport,
-    {
-      result: TestResult.Failed,
-      tests: 2,
-      passed: 0,
-      failed: 2,
-      skipped: 0,
-      failures: [
-        new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed'),
-        new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
-      ]
-    } as JUnitReport
-  )
-  ])
+      new Module(
+        'go/app1',
+        {
+          result: TestResult.Passed,
+          tests: 1,
+          passed: 1,
+          failed: 0,
+          skipped: 0,
+          time: 0.1,
+          version: '1.22.2',
+          failures: [] as TestCase[]
+        } as JUnitReport,
+        {
+          result: TestResult.Failed,
+          tests: 2,
+          passed: 0,
+          failed: 2,
+          skipped: 0,
+          failures: [
+            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed'),
+            new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
+          ]
+        } as JUnitReport
+      )
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 10, 1)
     expect(markdown).toMatch(
       `
@@ -311,9 +317,7 @@ No test results found.
         skipped: 0,
         time: 0.1,
         version: '1.22.2',
-        failures: [
-          new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-        ]
+        failures: [new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')]
       } as JUnitReport)
     ])
     const annotations = monorepo.makeAnnotationMessages()
@@ -325,30 +329,32 @@ No test results found.
 
   it('should make a markdown report for a run with failed tests and lints', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
-        result: TestResult.Failed,
-        tests: 2,
-        passed: 1,
-        failed: 1,
-        skipped: 0,
-        time: 0.2,
-        version: '1.22.2',
-        failures: [
-          new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-        ] as TestCase[]
-      } as JUnitReport,
-    {
-      result: TestResult.Failed,
-      tests: 1,
-      passed: 0,
-      failed: 1,
-      skipped: 0,
-      failures: [
-        new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
-      ]
-    } as JUnitReport
-  )
-  ])
+      new Module(
+        'go/app1',
+        {
+          result: TestResult.Failed,
+          tests: 2,
+          passed: 1,
+          failed: 1,
+          skipped: 0,
+          time: 0.2,
+          version: '1.22.2',
+          failures: [
+            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
+          ] as TestCase[]
+        } as JUnitReport,
+        {
+          result: TestResult.Failed,
+          tests: 1,
+          passed: 0,
+          failed: 1,
+          skipped: 0,
+          failures: [
+            new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
+          ]
+        } as JUnitReport
+      )
+    ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `

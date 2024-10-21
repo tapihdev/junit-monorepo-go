@@ -11,9 +11,7 @@ describe('input', () => {
   })
 
   it('should handle github-token', () => {
-    const testCases = [
-      { input: 'abcdef123456', expected: 'abcdef123456' }
-    ]
+    const testCases = [{ input: 'abcdef123456', expected: 'abcdef123456' }]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
       expect(inputFunc.getGitHubToken()).toEqual(expected)
@@ -55,46 +53,44 @@ describe('input', () => {
     }
   })
 
-  it('should handle pull-request-number with an input', () => {
+  it('should handle pull-request-number', () => {
     const testCases = [
-      { input: '456', expected: 456, shouldThrow: false },
-      { input: 'abc', expected: '', shouldThrow: true }
+      { input: '456', context: undefined, expected: 456 },
+      { input: '', context: { number: 456 }, expected: 456 }
     ]
-    for (const { input, expected, shouldThrow } of testCases) {
-      getInputMock.mockReturnValue(input)
-      if (shouldThrow) {
-        expect(() => inputFunc.getPullRequestNumber()).toThrow()
-      } else {
-        expect(inputFunc.getPullRequestNumber()).toEqual(expected)
-      }
-    }
-  })
-
-  it('should handle pull-request-number without an input', () => {
-    const testCases = [
-      { pull_request: undefined, expected: '', shouldThrow: true },
-      { pull_request: { number: 456 }, expected: 456, shouldThrow: false }
-    ]
-    for (const { pull_request, expected, shouldThrow } of testCases) {
+    for (const { input, expected, context } of testCases) {
       Object.defineProperties(github.context.payload, {
         pull_request: {
-          value: pull_request, writable: true
+          value: context,
+          writable: true
         }
       })
 
-      getInputMock.mockReturnValue('')
-      if (shouldThrow) {
-        expect(() => inputFunc.getPullRequestNumber()).toThrow()
-      } else {
-        expect(inputFunc.getPullRequestNumber()).toEqual(expected)
-      }
+      getInputMock.mockReturnValue(input)
+      expect(inputFunc.getPullRequestNumber()).toEqual(expected)
+    }
+  })
+
+  it('should throw error when an invalid pull-request-number is given', () => {
+    const testCases = [
+      { input: 'abc', context: undefined },
+      { input: '', context: undefined },
+    ]
+    for (const { input, context } of testCases) {
+      Object.defineProperties(github.context.payload, {
+        pull_request: {
+          value: context,
+          writable: true
+        }
+      })
+
+      getInputMock.mockReturnValue(input)
+      expect(() => inputFunc.getPullRequestNumber()).toThrow()
     }
   })
 
   it('should handle sha', () => {
-    const testCases = [
-      { input: 'abcdef123456', expected: 'abcdef123456' }
-    ]
+    const testCases = [{ input: 'abcdef123456', expected: 'abcdef123456' }]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
       expect(inputFunc.getSha()).toEqual(expected)
@@ -103,33 +99,49 @@ describe('input', () => {
 
   it('should handle failed-test-limit', () => {
     const testCases = [
-      { input: '5', expected: 5, shouldThrow: false },
-      { input: '', expected: '', shouldThrow: true },
-      { input: 'abc', expected: '', shouldThrow: true }
+      { input: '5', expected: 5 },
+      { input: '10', expected: 10 },
     ]
-    for (const { input, expected, shouldThrow } of testCases) {
+    for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
-      if (shouldThrow) {
-        expect(() => inputFunc.getFailedTestLimit()).toThrow()
-      } else {
-        expect(inputFunc.getFailedTestLimit()).toEqual(expected)
-      }
+      expect(inputFunc.getFailedTestLimit()).toEqual(expected)
+    }
+  })
+
+  it('should throw error when an invalid failed-test-limit is given', () => {
+    const testCases = [
+      { input: '-1' },
+      { input: '0' },
+      { input: '' },
+      { input: 'abc' },
+    ]
+    for (const { input } of testCases) {
+      getInputMock.mockReturnValue(input)
+      expect(() => inputFunc.getFailedTestLimit()).toThrow()
     }
   })
 
   it('should handle failed-lint-limit', () => {
     const testCases = [
-      { input: '5', expected: 5, shouldThrow: false },
-      { input: '', expected: '', shouldThrow: true },
-      { input: 'abc', expected: '', shouldThrow: true }
+      { input: '5', expected: 5 },
+      { input: '10', expected: 10 },
     ]
-    for (const { input, expected, shouldThrow } of testCases) {
+    for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
-      if (shouldThrow) {
-        expect(() => inputFunc.getFailedLintLimit()).toThrow()
-      } else {
-        expect(inputFunc.getFailedLintLimit()).toEqual(expected)
-      }
+      expect(inputFunc.getFailedLintLimit()).toEqual(expected)
+    }
+  })
+
+  it('should throw error when an invalid failed-lint-limit is given', () => {
+    const testCases = [
+      { input: '-1' },
+      { input: '0' },
+      { input: '' },
+      { input: 'abc' },
+    ]
+    for (const { input } of testCases) {
+      getInputMock.mockReturnValue(input)
+      expect(() => inputFunc.getFailedLintLimit()).toThrow()
     }
   })
 })
