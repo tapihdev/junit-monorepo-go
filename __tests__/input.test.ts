@@ -74,7 +74,7 @@ describe('input', () => {
   it('should throw error when an invalid pull-request-number is given', () => {
     const testCases = [
       { input: 'abc', context: undefined },
-      { input: '', context: undefined },
+      { input: '', context: undefined }
     ]
     for (const { input, context } of testCases) {
       Object.defineProperties(github.context.payload, {
@@ -100,7 +100,7 @@ describe('input', () => {
   it('should handle failed-test-limit', () => {
     const testCases = [
       { input: '5', expected: 5 },
-      { input: '10', expected: 10 },
+      { input: '10', expected: 10 }
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
@@ -113,7 +113,7 @@ describe('input', () => {
       { input: '-1' },
       { input: '0' },
       { input: '' },
-      { input: 'abc' },
+      { input: 'abc' }
     ]
     for (const { input } of testCases) {
       getInputMock.mockReturnValue(input)
@@ -124,7 +124,7 @@ describe('input', () => {
   it('should handle failed-lint-limit', () => {
     const testCases = [
       { input: '5', expected: 5 },
-      { input: '10', expected: 10 },
+      { input: '10', expected: 10 }
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
@@ -137,7 +137,7 @@ describe('input', () => {
       { input: '-1' },
       { input: '0' },
       { input: '' },
-      { input: 'abc' },
+      { input: 'abc' }
     ]
     for (const { input } of testCases) {
       getInputMock.mockReturnValue(input)

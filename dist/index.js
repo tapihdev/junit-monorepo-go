@@ -35939,14 +35939,22 @@ function getFailedTestLimit() {
     if (raw.match(/^\d+$/) === null) {
         throw new Error('`failed-test-limit` must be a number');
     }
-    return Number(raw);
+    const value = Number(raw);
+    if (value <= 0) {
+        throw new Error('`failed-test-limit` must be greater than 0');
+    }
+    return value;
 }
 function getFailedLintLimit() {
     const raw = core.getInput('failed-lint-limit', { required: true });
     if (raw.match(/^\d+$/) === null) {
         throw new Error('`failed-lint-limit` must be a number');
     }
-    return Number(raw);
+    const value = Number(raw);
+    if (value <= 0) {
+        throw new Error('`failed-lint-limit` must be greater than 0');
+    }
+    return value;
 }
 
 

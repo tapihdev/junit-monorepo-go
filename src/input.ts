@@ -10,9 +10,9 @@ export function getDirectories(): string[] {
   return raw === ''
     ? []
     : raw
-      .replace(/(,| |\n)+/g, ' ')
-      .split(' ')
-      .map(d => d.trim())
+        .replace(/(,| |\n)+/g, ' ')
+        .split(' ')
+        .map(d => d.trim())
 }
 
 export function getTestReportXml(): string {
