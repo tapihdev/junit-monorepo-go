@@ -17,7 +17,7 @@ export type MarkdownContext = {
 }
 
 export class Repository {
-  constructor(private readonly _modules: Module[]) { }
+  constructor(private readonly _modules: Module[]) {}
 
   static async fromDirectories(
     directories: string[],
@@ -126,9 +126,10 @@ export class Repository {
 #### Result: ${result}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
-${failedTestTable === ''
-        ? ''
-        : `
+${
+  failedTestTable === ''
+    ? ''
+    : `
 <br/>
 
 <details open>
@@ -138,7 +139,8 @@ ${failedTestTable}
 
 </details>
 `
-      }${failedLintTable === ''
+}${
+      failedLintTable === ''
         ? ''
         : `
 <br/>
@@ -150,7 +152,7 @@ ${failedLintTable}
 
 </details>
 `
-      }
+    }
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)
