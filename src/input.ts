@@ -7,7 +7,7 @@ export function getGitHubToken(): string {
 
 export function getDirectories(): string[] {
   const raw = core.getInput('directories', { required: true })
-  return raw === '' ? [] : raw.split(/,|\n/)
+  return raw === '' ? [] : raw.replace(/(,| |\n)+/g, ' ').split(' ').map(d => d.trim())
 }
 
 export function getTestReportXml(): string {
