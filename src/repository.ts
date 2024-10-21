@@ -52,7 +52,7 @@ export class Repository {
   makeMarkdownReport(
     context: MarkdownContext,
     failedTestLimit: number,
-    failedLintLimit?: number
+    failedLintLimit = 10
   ): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
@@ -106,13 +106,10 @@ export class Repository {
     const failedLints = this._modules
       .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
       .flat()
-    const failedLintsLimited =
-      failedLintLimit === undefined
-        ? failedLints
-        : failedLints.slice(0, failedTestLimit)
-    if (failedTestLimit !== undefined && failedTests.length > failedTestLimit) {
-      faileTestsLimited.push({
-        file: `:warning: and ${failedLints.length - failedTestLimit} more...`,
+    const failedLintsLimited = failedLints.slice(0, failedLintLimit)
+    if (failedLints.length > failedLintLimit) {
+      failedLintsLimited.push({
+        file: `:warning: and ${failedLints.length - failedLintLimit} more...`,
         test: '-',
         message: '-'
       })

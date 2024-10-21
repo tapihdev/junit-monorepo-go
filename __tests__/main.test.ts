@@ -70,7 +70,7 @@ describe('action', () => {
       .mockReturnValue(['annotation'])
   })
 
-  it('sets the body output', async () => {
+  it('should set the body output', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
@@ -148,7 +148,7 @@ describe('action', () => {
     expect(errorMock).not.toHaveBeenCalled()
   })
 
-  it('sets the body output with directories input empty', async () => {
+  it('should set the body output with an empty value for `directories`', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
@@ -227,7 +227,7 @@ describe('action', () => {
     expect(errorMock).not.toHaveBeenCalled()
   })
 
-  it('sets a failed status', async () => {
+  it('should set a failed status', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':

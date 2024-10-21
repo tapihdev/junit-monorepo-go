@@ -4,13 +4,10 @@ import { parseJUnitReport, JUnitReport as JunitReportXML } from '../xml'
 import { JUnitReport, TestResult, TestCase } from '../type'
 
 export class GolangCILintReport implements JUnitReport {
-  constructor(
-    private readonly _path: string,
-    private readonly _junit: JunitReportXML
-  ) {}
+  constructor(private readonly _junit: JunitReportXML) {}
 
   static async fromXml(path: string): Promise<GolangCILintReport> {
-    return new GolangCILintReport(path, await parseJUnitReport(path))
+    return new GolangCILintReport(await parseJUnitReport(path))
   }
 
   get result(): TestResult {

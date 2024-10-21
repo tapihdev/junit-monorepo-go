@@ -4,7 +4,32 @@ import { GotestsumReport } from '../../../src/junit/reporter/gotestsum'
 import { TestResult, TestCase } from '../../../src/junit/type'
 
 describe('gotestsum', () => {
-  it('parses the junit report', async () => {
+  it('should parse the junit report with no testsuite', async () => {
+    const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
+      <testsuites tests="0" failures="0" errors="0" time="0.000000">
+        <testsuite tests="0" failures="0" time="0.000000" name="." timestamp="2024-10-21T18:16:20+09:00">
+           <properties>
+             <property name="go.version" value="go1.23.2 linux/amd64"></property>
+           </properties>
+        </testsuite>
+      </testsuites>
+      `)
+
+    const report = await GotestsumReport.fromXml('path/to/junit.xml')
+    expect(report.result).toBe(TestResult.Passed)
+    expect(report.tests).toBe(0)
+    expect(report.passed).toBe(0)
+    expect(report.failed).toBe(0)
+    expect(report.skipped).toBe(0)
+    expect(report.time).toBe(0)
+    expect(report.version).toBe('1.23.2')
+    expect(report.failures).toEqual([] as TestCase[])
+    expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
+      encoding: 'utf8'
+    })
+  })
+
+  it('should parse the junit report with testsuites', async () => {
     const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
       <?xml version="1.0" encoding="UTF-8"?>
       <testsuites tests="4" failures="2" errors="0" time="0.001000">

@@ -4,7 +4,26 @@ import { GolangCILintReport } from '../../../src/junit/reporter/golangcilint'
 import { TestResult, TestCase } from '../../../src/junit/type'
 
 describe('golangcilint', () => {
-  it('parses the junit report', async () => {
+  it('should parse the junit report with no failure', async () => {
+    const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
+    <testsuites></testsuites>
+    `)
+
+    const report = await GolangCILintReport.fromXml('path/to/junit.xml')
+    expect(report.result).toBe(TestResult.Passed)
+    expect(report.tests).toBe(0)
+    expect(report.passed).toBe(0)
+    expect(report.failed).toBe(0)
+    expect(report.skipped).toBe(0)
+    expect(report.time).toBeUndefined()
+    expect(report.version).toBeUndefined()
+    expect(report.failures).toEqual([] as TestCase[])
+    expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
+      encoding: 'utf8'
+    })
+  })
+
+  it('should parse the junit report with failures', async () => {
     const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
     <testsuites>
       <testsuite name="go/app/foo_test.go" tests="3" errors="0" failures="3">
