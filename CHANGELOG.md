@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.0.5](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.4...v0.0.5) - 2024-10-21
+- refactor: gotestsum by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/18
+- feat: golangci-lint reporter by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/20
+- refactor: rename types by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/21
+- feat: remove fromFilename by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/22
+- feat: implement module class by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/23
+- feat: use module class by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/24
+- refactor: remove directory in children by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/25
+- refactor: typed table by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/26
+- feat: report golangci-lint by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/27
+- doc: update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/28
+- test: add e2e test for not found error by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/29
+- test: add more tests by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/30
+- feat: do not comment on empty by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/31
+
 ## [v0.0.4](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.3...v0.0.4) - 2024-10-10
 - feat: add directories input by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/16
 
