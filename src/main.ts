@@ -23,6 +23,10 @@ const mark = '<!-- commented by junit-monorepo-go -->'
 export async function run(): Promise<void> {
   try {
     const directories = getDirectories()
+    if (directories.length === 0) {
+      core.info('no directories provided, skipping action')
+      return
+    }
     const testReportXml = getTestReportXml()
     const lintReportXml = getLintReportXml()
     const token = getGitHubToken()
