@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.6](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.5...v0.0.6) - 2024-10-25
+- feat: ignore lint read error by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/32
+
 ## [v0.0.5](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.4...v0.0.5) - 2024-10-21
 - refactor: gotestsum by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/18
 - feat: golangci-lint reporter by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/20
