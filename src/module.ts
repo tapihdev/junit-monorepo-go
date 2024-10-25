@@ -22,7 +22,9 @@ export class Module {
     testPath: string,
     lintPath?: string
   ): Promise<Module> {
-    const fromXmlIgnoreingError = async (path: string) => {
+    const fromXmlIgnoreingError = async (
+      path: string
+    ): Promise<GolangCILintReport | undefined> => {
       try {
         return await GolangCILintReport.fromXml(path)
       } catch {
