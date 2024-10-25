@@ -1,13 +1,14 @@
+import * as core from '@actions/core'
 import * as path from 'path'
 
 import { GotestsumReport } from './junit/reporter/gotestsum'
+import { GolangCILintReport } from './junit/reporter/golangcilint'
 import { JUnitReport, TestResult } from './junit/type'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
-import { GolangCILintReport } from './junit/reporter/golangcilint'
 
 export class Module {
   constructor(
@@ -21,13 +22,27 @@ export class Module {
     testPath: string,
     lintPath?: string
   ): Promise<Module> {
+    const fromXmlIgnoreingError = async (
+      path: string
+    ): Promise<GolangCILintReport | undefined> => {
+      try {
+        return await GolangCILintReport.fromXml(path)
+      } catch {
+        core.warning(`failed to read ${path}`)
+        return undefined
+      }
+    }
     const [test, lint] = await Promise.all([
       GotestsumReport.fromXml(path.join(directory, testPath)),
       lintPath
-        ? GolangCILintReport.fromXml(path.join(directory, lintPath))
+        ? fromXmlIgnoreingError(path.join(directory, lintPath))
         : undefined
     ])
     return new Module(directory, test, lint)
+  }
+
+  get hasLintReport(): boolean {
+    return this._lintReport !== undefined
   }
 
   get directory(): string {
