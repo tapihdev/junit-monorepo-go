@@ -36370,10 +36370,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Module = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 const path = __importStar(__nccwpck_require__(1017));
 const gotestsum_1 = __nccwpck_require__(681);
-const type_1 = __nccwpck_require__(1409);
 const golangcilint_1 = __nccwpck_require__(2355);
+const type_1 = __nccwpck_require__(1409);
 class Module {
     _directory;
     _testReport;
@@ -36384,10 +36385,19 @@ class Module {
         this._lintReport = _lintReport;
     }
     static async fromXml(directory, testPath, lintPath) {
+        const fromXmlIgnoreingError = async (path) => {
+            try {
+                return await golangcilint_1.GolangCILintReport.fromXml(path);
+            }
+            catch {
+                core.warning(`failed to read ${path}`);
+                return undefined;
+            }
+        };
         const [test, lint] = await Promise.all([
             gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath)),
             lintPath
-                ? golangcilint_1.GolangCILintReport.fromXml(path.join(directory, lintPath))
+                ? fromXmlIgnoreingError(path.join(directory, lintPath))
                 : undefined
         ]);
         return new Module(directory, test, lint);
