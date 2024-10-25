@@ -30,6 +30,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with tests passed', async () => {
+    // TODO: Use mock for Module
     const monorepo = new Repository([
       new Module('go/app1', {
         result: TestResult.Passed,
