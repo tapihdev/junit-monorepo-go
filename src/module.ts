@@ -39,6 +39,10 @@ export class Module {
     return new Module(directory, test, lint)
   }
 
+  get hasLintReport(): boolean {
+    return this._lintReport !== undefined
+  }
+
   get directory(): string {
     return this._directory
   }

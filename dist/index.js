@@ -36402,6 +36402,9 @@ class Module {
         ]);
         return new Module(directory, test, lint);
     }
+    get hasLintReport() {
+        return this._lintReport !== undefined;
+    }
     get directory() {
         return this._directory;
     }
