@@ -17,6 +17,12 @@ describe('module', () => {
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
   })
 
+  it('should throw an error if both test and lint paths are not specified', async () => {
+    await expect(Module.fromXml('path/to')).rejects.toThrow(
+      'Either testPath or lintPath must be specified'
+    )
+  })
+
   it('should make a module table record with test', async () => {
     const module = new Module('path/to', {
       result: TestResult.Passed,
@@ -38,6 +44,30 @@ describe('module', () => {
       testFailed: '1',
       testElapsed: '1.1s',
       lintResult: '-'
+    } as ModuleTableRecord)
+  })
+
+  it('should make a module table record with lint', async () => {
+    const module = new Module('path/to', undefined, {
+      result: TestResult.Passed,
+      tests: 0,
+      passed: 0,
+      failed: 0,
+      skipped: 0,
+      time: 0,
+      version: undefined,
+      failures: []
+    } as JUnitReport)
+
+    expect(module.result).toBe(TestResult.Passed)
+    expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
+      name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+      version: '-',
+      testResult: '-',
+      testPassed: '-',
+      testFailed: '-',
+      testElapsed: '-',
+      lintResult: '✅Passed'
     } as ModuleTableRecord)
   })
 
@@ -163,19 +193,33 @@ describe('module', () => {
   })
 
   it('should make annotation messages', async () => {
-    const module = new Module('path/to', {
-      result: TestResult.Failed,
-      tests: 4,
-      passed: 3,
-      failed: 1,
-      skipped: 0,
-      time: 1.1,
-      version: '1.22.1',
-      failures: [
-        new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
-        new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
-      ]
-    } as JUnitReport)
+    const module = new Module(
+      'path/to',
+      {
+        result: TestResult.Failed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        time: 1.1,
+        version: '1.22.1',
+        failures: [
+          new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred')
+        ]
+      } as JUnitReport,
+      {
+        result: TestResult.Failed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        time: 1.1,
+        version: '1.22.1',
+        failures: [
+          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
+        ]
+      } as JUnitReport
+    )
 
     expect(module.makeAnnotationMessages()).toEqual([
       '::error file=path/to/foo/bar/baz_test.go,line=1::error1\noccurred',

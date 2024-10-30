@@ -36384,8 +36384,13 @@ class Module {
         this._lintReport = _lintReport;
     }
     static async fromXml(directory, testPath, lintPath) {
+        if (!testPath && !lintPath) {
+            throw new Error('Either testPath or lintPath must be specified');
+        }
         const [test, lint] = await Promise.all([
-            gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath)),
+            testPath
+                ? gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath))
+                : undefined,
             lintPath
                 ? golangcilint_1.GolangCILintReport.fromXml(path.join(directory, lintPath))
                 : undefined
@@ -36396,7 +36401,7 @@ class Module {
         return this._directory;
     }
     get result() {
-        return this._testReport.result === type_1.TestResult.Failed ||
+        return this._testReport?.result === type_1.TestResult.Failed ||
             this._lintReport?.result === type_1.TestResult.Failed
             ? type_1.TestResult.Failed
             : type_1.TestResult.Passed;
@@ -36404,11 +36409,15 @@ class Module {
     makeModuleTableRecord(owner, repo, sha) {
         return {
             name: `[${this._directory}](https://github.com/${owner}/${repo}/blob/${sha}/${this._directory})`,
-            version: this._testReport.version ?? '-',
-            testResult: this._testReport.result === type_1.TestResult.Failed ? '❌Failed' : '✅Passed',
-            testPassed: this._testReport.passed.toString(),
-            testFailed: this._testReport.failed.toString(),
-            testElapsed: this._testReport.time?.toFixed(1).concat('s') ?? '-',
+            version: this._testReport?.version ?? '-',
+            testResult: this._testReport === undefined
+                ? '-'
+                : this._testReport.result === type_1.TestResult.Failed
+                    ? '❌Failed'
+                    : '✅Passed',
+            testPassed: this._testReport?.passed.toString() ?? '-',
+            testFailed: this._testReport?.failed.toString() ?? '-',
+            testElapsed: this._testReport?.time?.toFixed(1).concat('s') ?? '-',
             lintResult: this._lintReport === undefined
                 ? '-'
                 : this._lintReport.result === type_1.TestResult.Failed
@@ -36417,7 +36426,7 @@ class Module {
         };
     }
     makeFailedTestTableRecords(owner, repo, sha) {
-        return this._testReport.failures.map(failure => {
+        return (this._testReport?.failures.map(failure => {
             const { subDir, file, line, test, message } = failure;
             const fullPath = path.join(this._directory, subDir, file);
             const fileTitle = `${fullPath}:${line}`;
@@ -36425,7 +36434,7 @@ class Module {
             const fileColumn = `[${fileTitle}](${fileLink})`;
             const joinedMessage = message.replace(/\n/g, ' ');
             return { file: fileColumn, test, message: joinedMessage };
-        });
+        }) ?? []);
     }
     makeFailedLintTableRecords(owner, repo, sha) {
         return (this._lintReport?.failures.map(failure => {
@@ -36439,7 +36448,8 @@ class Module {
         }) ?? []);
     }
     makeAnnotationMessages() {
-        return this._testReport.failures.map(failure => {
+        const merged = (this._testReport?.failures ?? []).concat(this._lintReport?.failures ?? []);
+        return merged.map(failure => {
             const { subDir, file, line, message } = failure;
             const fullPath = path.join(this._directory, subDir, file);
             return `::error file=${fullPath},line=${line}::${message}`;
