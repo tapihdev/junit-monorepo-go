@@ -14,10 +14,12 @@ inputs:
     description: 'The GitHub token to use for authentication'
     required: true
   test-report-xml:
-    description: 'The filename of the gotestsum report'
+    description: |
+      The filename of the gotestsum report (either this or `lint-report-xml` is required)
     required: false
   lint-report-xml:
-    description: 'The filename of the golangci-lint report (optional)'
+    description: |
+      The filename of the golangci-lint report (either this or `test-report-xml` is required)
     required: false
   directories:
     description: The directories to search for JUnit test reports
