@@ -21,7 +21,7 @@ export class Module {
     testPath?: string,
     lintPath?: string
   ): Promise<Module> {
-    if (!testPath && !lintPath) {
+    if (testPath === undefined && lintPath === undefined) {
       throw new Error('Either testPath or lintPath must be specified')
     }
     const [test, lint] = await Promise.all([

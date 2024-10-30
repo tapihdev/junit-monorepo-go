@@ -15,8 +15,12 @@ export function getDirectories(): string[] {
         .map(d => d.trim())
 }
 
-export function getTestReportXml(): string {
-  return core.getInput('test-report-xml', { required: true })
+export function getTestReportXml(): string | undefined {
+  const raw = core.getInput('test-report-xml', { required: false })
+  if (raw === '') {
+    return undefined
+  }
+  return raw
 }
 
 export function getLintReportXml(): string | undefined {

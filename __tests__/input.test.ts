@@ -20,6 +20,7 @@ describe('input', () => {
 
   it('should handle test-report-xml', () => {
     const testCases = [
+      { input: '', expected: undefined },
       { input: 'path/to/test.xml', expected: 'path/to/test.xml' }
     ]
     for (const { input, expected } of testCases) {

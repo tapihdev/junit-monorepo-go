@@ -12,6 +12,12 @@ const context = {
 }
 
 describe('repository', () => {
+  it('should throw an error if both test and lint paths are not specified', async () => {
+    await expect(Repository.fromDirectories(['path/to'])).rejects.toThrow(
+      'Either test-report-xml or lint-report-xml must be specified'
+    )
+  })
+
   it('should make a markdown report for empty CI', async () => {
     const monorepo = new Repository([])
     const markdown = monorepo.makeMarkdownReport(context, 10)

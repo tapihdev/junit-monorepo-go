@@ -21,9 +21,14 @@ export class Repository {
 
   static async fromDirectories(
     directories: string[],
-    testReportXml: string,
+    testReportXml?: string,
     lintReportXml?: string
   ): Promise<Repository> {
+    if (testReportXml === undefined && lintReportXml === undefined) {
+      throw new Error(
+        'Either test-report-xml or lint-report-xml must be specified'
+      )
+    }
     const modules = await Promise.all(
       directories.map(
         async directory =>
