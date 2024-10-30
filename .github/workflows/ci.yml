@@ -66,7 +66,7 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          directories: |
+          test-dirs: |
             .github/testdata/go/does-not-exist
             .github/testdata/go/app1
             .github/testdata/go/app2
@@ -91,7 +91,11 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          directories: |
+          test-dirs: |
+            .github/testdata/go/app1
+            .github/testdata/go/app2
+            .github/testdata/go/app3
+          lint-dirs: |
             .github/testdata/go/app1
             .github/testdata/go/app2
             .github/testdata/go/app3
@@ -105,7 +109,11 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          directories: |
+          test-dirs: |
+            .github/testdata/go/app1
+            .github/testdata/go/app2
+            .github/testdata/go/app3
+          lint-dirs: |
             .github/testdata/go/app1
             .github/testdata/go/app2
             .github/testdata/go/app3

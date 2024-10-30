@@ -39,6 +39,14 @@ export class Module {
     return this._directory
   }
 
+  get hasLintReport(): boolean {
+    return this._lintReport !== undefined
+  }
+
+  get hasTestReport(): boolean {
+    return this._testReport !== undefined
+  }
+
   get result(): TestResult {
     return this._testReport?.result === TestResult.Failed ||
       this._lintReport?.result === TestResult.Failed

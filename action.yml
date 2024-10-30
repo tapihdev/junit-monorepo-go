@@ -13,17 +13,24 @@ inputs:
   github-token:
     description: 'The GitHub token to use for authentication'
     required: true
-  test-report-xml:
-    description: |
-      The filename of the gotestsum report (either this or `lint-report-xml` is required)
-    required: false
-  lint-report-xml:
-    description: |
-      The filename of the golangci-lint report (either this or `test-report-xml` is required)
-    required: false
-  directories:
-    description: The directories to search for JUnit test reports
+  test-dirs:
+    description:
+      The directories that contain the gotestsum reports (seperated by
+      commas/spaces/line breaks)
     required: true
+  test-report-xml:
+    description: The filename of the gotestsum report
+    required: true
+    default: 'test.xml'
+  lint-dirs:
+    description:
+      The comma-seperated directories that contain the golangci-lint reports
+      (seperated by commas/spaces/line breaks)
+    required: true
+  lint-report-xml:
+    description: The filename of the golangci-lint report
+    required: true
+    default: 'lint.xml'
   pull-request-number:
     description: 'The pull request number to comment on'
     required: true

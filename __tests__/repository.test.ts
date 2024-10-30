@@ -12,10 +12,34 @@ const context = {
 }
 
 describe('repository', () => {
-  it('should throw an error if both test and lint paths are not specified', async () => {
-    await expect(Repository.fromDirectories(['path/to'])).rejects.toThrow(
-      'Either test-report-xml or lint-report-xml must be specified'
+  it('should construct a repository from directories', async () => {
+    // TODO: mock Module and write tests
+    const fromXMLMock = jest.spyOn(Module, 'fromXml').mockResolvedValue(
+      new Module('go/app1', {
+        result: TestResult.Passed,
+        tests: 1,
+        passed: 1,
+        failed: 0,
+        skipped: 0,
+        time: 0.1,
+        version: '1.22.2',
+        failures: [] as TestCase[]
+      } as JUnitReport)
     )
+    const monorepo = await Repository.fromDirectories(
+      ['go/app1'],
+      [],
+      'test.xml',
+      'lint.xml'
+    )
+
+    expect(fromXMLMock).toHaveBeenNthCalledWith(
+      1,
+      'go/app1',
+      'test.xml',
+      undefined
+    )
+    expect(monorepo.numModules).toBe(1)
   })
 
   it('should make a markdown report for empty CI', async () => {

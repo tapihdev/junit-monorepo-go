@@ -2,14 +2,15 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 import {
-  getDirectories,
   getTestReportXml,
   getLintReportXml,
   getGitHubToken,
   getPullRequestNumber,
   getSha,
   getFailedTestLimit,
-  getFailedLintLimit
+  getFailedLintLimit,
+  getTestDirs,
+  getLintDirs
 } from './input'
 import { Client as GitHubClient } from './github'
 import { Repository } from './repository'
@@ -22,9 +23,10 @@ const mark = '<!-- commented by junit-monorepo-go -->'
  */
 export async function run(): Promise<void> {
   try {
-    const directories = getDirectories()
-    if (directories.length === 0) {
-      core.info('no directories provided, skipping action')
+    const testDirs = getTestDirs()
+    const lintDirs = getLintDirs()
+    if (testDirs.length === 0 && lintDirs.length === 0) {
+      core.warning('no directories provided, skipping action')
       return
     }
     const testReportXml = getTestReportXml()
@@ -37,7 +39,8 @@ export async function run(): Promise<void> {
 
     core.info(`* search and read junit reports`)
     const repository = await Repository.fromDirectories(
-      directories,
+      testDirs,
+      lintDirs,
       testReportXml,
       lintReportXml
     )

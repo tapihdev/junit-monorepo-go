@@ -20,7 +20,6 @@ describe('input', () => {
 
   it('should handle test-report-xml', () => {
     const testCases = [
-      { input: '', expected: undefined },
       { input: 'path/to/test.xml', expected: 'path/to/test.xml' }
     ]
     for (const { input, expected } of testCases) {
@@ -29,7 +28,7 @@ describe('input', () => {
     }
   })
 
-  it('should handle directories', () => {
+  it('should handle test directories', () => {
     const testCases = [
       { input: '', expected: [] },
       { input: 'go/app1,go/app2', expected: ['go/app1', 'go/app2'] },
@@ -39,13 +38,26 @@ describe('input', () => {
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(inputFunc.getDirectories()).toEqual(expected)
+      expect(inputFunc.getTestDirs()).toEqual(expected)
+    }
+  })
+
+  it('should handle lint directories', () => {
+    const testCases = [
+      { input: '', expected: [] },
+      { input: 'go/app1,go/app2', expected: ['go/app1', 'go/app2'] },
+      { input: 'go/app1\n go/app2', expected: ['go/app1', 'go/app2'] },
+      { input: 'go/app1, go/app2', expected: ['go/app1', 'go/app2'] },
+      { input: 'go/app1 go/app2', expected: ['go/app1', 'go/app2'] }
+    ]
+    for (const { input, expected } of testCases) {
+      getInputMock.mockReturnValue(input)
+      expect(inputFunc.getLintDirs()).toEqual(expected)
     }
   })
 
   it('should handle lint-report-xml', () => {
     const testCases = [
-      { input: '', expected: undefined },
       { input: 'path/to/lint.xml', expected: 'path/to/lint.xml' }
     ]
     for (const { input, expected } of testCases) {

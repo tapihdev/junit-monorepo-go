@@ -35887,7 +35887,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getGitHubToken = getGitHubToken;
-exports.getDirectories = getDirectories;
+exports.getTestDirs = getTestDirs;
+exports.getLintDirs = getLintDirs;
 exports.getTestReportXml = getTestReportXml;
 exports.getLintReportXml = getLintReportXml;
 exports.getPullRequestNumber = getPullRequestNumber;
@@ -35899,8 +35900,8 @@ const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
-function getDirectories() {
-    const raw = core.getInput('directories', { required: true });
+function getDirs(name) {
+    const raw = core.getInput(name, { required: true });
     return raw === ''
         ? []
         : raw
@@ -35908,19 +35909,17 @@ function getDirectories() {
             .split(' ')
             .map(d => d.trim());
 }
+function getTestDirs() {
+    return getDirs('test-dirs');
+}
+function getLintDirs() {
+    return getDirs('lint-dirs');
+}
 function getTestReportXml() {
-    const raw = core.getInput('test-report-xml', { required: false });
-    if (raw === '') {
-        return undefined;
-    }
-    return raw;
+    return core.getInput('test-report-xml', { required: true });
 }
 function getLintReportXml() {
-    const raw = core.getInput('lint-report-xml', { required: false });
-    if (raw === '') {
-        return undefined;
-    }
-    return raw;
+    return core.getInput('lint-report-xml', { required: true });
 }
 function getPullRequestNumber() {
     const raw = core.getInput('pull-request-number', { required: false });
@@ -36285,9 +36284,10 @@ const mark = '<!-- commented by junit-monorepo-go -->';
  */
 async function run() {
     try {
-        const directories = (0, input_1.getDirectories)();
-        if (directories.length === 0) {
-            core.info('no directories provided, skipping action');
+        const testDirs = (0, input_1.getTestDirs)();
+        const lintDirs = (0, input_1.getLintDirs)();
+        if (testDirs.length === 0 && lintDirs.length === 0) {
+            core.warning('no directories provided, skipping action');
             return;
         }
         const testReportXml = (0, input_1.getTestReportXml)();
@@ -36298,7 +36298,7 @@ async function run() {
         const failedTestLimit = (0, input_1.getFailedTestLimit)();
         const failedLintLimit = (0, input_1.getFailedLintLimit)();
         core.info(`* search and read junit reports`);
-        const repository = await repository_1.Repository.fromDirectories(directories, testReportXml, lintReportXml);
+        const repository = await repository_1.Repository.fromDirectories(testDirs, lintDirs, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -36404,6 +36404,12 @@ class Module {
     get directory() {
         return this._directory;
     }
+    get hasLintReport() {
+        return this._lintReport !== undefined;
+    }
+    get hasTestReport() {
+        return this._testReport !== undefined;
+    }
     get result() {
         return this._testReport?.result === type_1.TestResult.Failed ||
             this._lintReport?.result === type_1.TestResult.Failed
@@ -36479,12 +36485,26 @@ class Repository {
     constructor(_modules) {
         this._modules = _modules;
     }
-    static async fromDirectories(directories, testReportXml, lintReportXml) {
-        if (testReportXml === undefined && lintReportXml === undefined) {
-            throw new Error('Either test-report-xml or lint-report-xml must be specified');
-        }
-        const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, testReportXml, lintReportXml)));
+    static async fromDirectories(testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const map = new Map();
+        testDirectories.forEach(d => map.set(d, [true, false]));
+        lintDirectories.forEach(d => {
+            if (map.has(d)) {
+                map.set(d, [true, true]);
+            }
+            else {
+                map.set(d, [false, true]);
+            }
+        });
+        const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
+            const testPath = test ? testReportXml : undefined;
+            const lintPath = lint ? lintReportXml : undefined;
+            return module_1.Module.fromXml(directory, testPath, lintPath);
+        }));
         return new Repository(modules);
+    }
+    get numModules() {
+        return this._modules.length;
     }
     renderTable(header, separator, records) {
         if (records.length === 0) {

@@ -20,22 +20,32 @@ export class Repository {
   constructor(private readonly _modules: Module[]) {}
 
   static async fromDirectories(
-    directories: string[],
-    testReportXml?: string,
-    lintReportXml?: string
+    testDirectories: string[],
+    lintDirectories: string[],
+    testReportXml: string,
+    lintReportXml: string
   ): Promise<Repository> {
-    if (testReportXml === undefined && lintReportXml === undefined) {
-      throw new Error(
-        'Either test-report-xml or lint-report-xml must be specified'
-      )
-    }
+    const map = new Map<string, [boolean, boolean]>()
+    testDirectories.forEach(d => map.set(d, [true, false]))
+    lintDirectories.forEach(d => {
+      if (map.has(d)) {
+        map.set(d, [true, true])
+      } else {
+        map.set(d, [false, true])
+      }
+    })
     const modules = await Promise.all(
-      directories.map(
-        async directory =>
-          await Module.fromXml(directory, testReportXml, lintReportXml)
-      )
+      Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
+        const testPath = test ? testReportXml : undefined
+        const lintPath = lint ? lintReportXml : undefined
+        return Module.fromXml(directory, testPath, lintPath)
+      })
     )
     return new Repository(modules)
+  }
+
+  get numModules(): number {
+    return this._modules.length
   }
 
   private renderTable<T extends AnyRecord>(

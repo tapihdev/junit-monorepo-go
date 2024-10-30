@@ -15,6 +15,8 @@ describe('module', () => {
     const module = await Module.fromXml('path/to', 'junit.xml')
     expect(module.directory).toBe('path/to')
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(false)
   })
 
   it('should throw an error if both test and lint paths are not specified', async () => {
@@ -36,6 +38,8 @@ describe('module', () => {
     } as JUnitReport)
 
     expect(module.result).toBe(TestResult.Passed)
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(false)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
       name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
       version: '1.22.1',
@@ -60,6 +64,8 @@ describe('module', () => {
     } as JUnitReport)
 
     expect(module.result).toBe(TestResult.Passed)
+    expect(module.hasTestReport).toBe(false)
+    expect(module.hasLintReport).toBe(true)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
       name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
       version: '-',
@@ -104,6 +110,8 @@ describe('module', () => {
     )
 
     expect(module.result).toBe(TestResult.Failed)
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(true)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
       name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
       version: '1.22.1',
@@ -131,6 +139,8 @@ describe('module', () => {
     } as JUnitReport)
 
     expect(module.result).toBe(TestResult.Failed)
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(false)
     expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual([
       {
         file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
@@ -178,6 +188,8 @@ describe('module', () => {
     )
 
     expect(module.result).toBe(TestResult.Failed)
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(true)
     expect(module.makeFailedLintTableRecords('owner', 'repo', 'sha')).toEqual([
       {
         file: '[path/to/foo/bar/baz_test.go:1](https://github.com/owner/repo/blob/sha/path/to/foo/bar/baz_test.go#L1)',
