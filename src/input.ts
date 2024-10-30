@@ -5,8 +5,8 @@ export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
 }
 
-export function getDirectories(): string[] {
-  const raw = core.getInput('directories', { required: true })
+function getDirs(name: string): string[] {
+  const raw = core.getInput(name, { required: true })
   return raw === ''
     ? []
     : raw
@@ -15,20 +15,20 @@ export function getDirectories(): string[] {
         .map(d => d.trim())
 }
 
-export function getTestReportXml(): string | undefined {
-  const raw = core.getInput('test-report-xml', { required: false })
-  if (raw === '') {
-    return undefined
-  }
-  return raw
+export function getTestDirs(): string[] {
+  return getDirs('test-dirs')
 }
 
-export function getLintReportXml(): string | undefined {
-  const raw = core.getInput('lint-report-xml', { required: false })
-  if (raw === '') {
-    return undefined
-  }
-  return raw
+export function getLintDirs(): string[] {
+  return getDirs('lint-dirs')
+}
+
+export function getTestReportXml(): string {
+  return core.getInput('test-report-xml', { required: true })
+}
+
+export function getLintReportXml(): string {
+  return core.getInput('lint-report-xml', { required: true })
 }
 
 export function getPullRequestNumber(): number {

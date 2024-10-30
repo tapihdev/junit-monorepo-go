@@ -18,6 +18,7 @@ const runMock = jest.spyOn(main, 'run')
 
 // Mock the GitHub Actions core library
 let infoMock: jest.SpiedFunction<typeof core.info>
+let warningMock: jest.SpiedFunction<typeof core.warning>
 let errorMock: jest.SpiedFunction<typeof core.error>
 let getInputMock: jest.SpiedFunction<typeof core.getInput>
 let summaryAddRawMock: jest.SpiedFunction<typeof core.summary.addRaw>
@@ -47,6 +48,7 @@ describe('action', () => {
 
     // Mock the GitHub core library functions
     infoMock = jest.spyOn(core, 'info').mockImplementation()
+    warningMock = jest.spyOn(core, 'warning').mockImplementation()
     errorMock = jest.spyOn(core, 'error').mockImplementation()
     getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
     summaryAddRawMock = jest.spyOn(core.summary, 'addRaw').mockReturnThis()
@@ -75,8 +77,10 @@ describe('action', () => {
       switch (name) {
         case 'github-token':
           return 'xxx'
-        case 'directories':
+        case 'test-dirs':
           return 'go/app1,go/app2'
+        case 'lint-dirs':
+          return 'go/app1,go/app3'
         case 'test-report-xml':
           return 'test.xml'
         case 'lint-report-xml':
@@ -118,6 +122,7 @@ describe('action', () => {
     expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
+      ['go/app1', 'go/app3'],
       'test.xml',
       'lint.xml'
     )
@@ -148,12 +153,12 @@ describe('action', () => {
     expect(errorMock).not.toHaveBeenCalled()
   })
 
-  it('should do nothing when `directories` is empty', async () => {
+  it('should do nothing when both `test-dirs` and `lint-dirs` are empty', async () => {
     getInputMock.mockReturnValue('')
 
     await main.run()
     expect(runMock).toHaveReturned()
-    expect(infoMock).toHaveBeenNthCalledWith(
+    expect(warningMock).toHaveBeenNthCalledWith(
       1,
       'no directories provided, skipping action'
     )
@@ -165,8 +170,10 @@ describe('action', () => {
       switch (name) {
         case 'github-token':
           return 'xxx'
-        case 'directories':
+        case 'test-dirs':
           return 'go/app'
+        case 'lint-dirs':
+          return ''
         case 'test-report-xml':
           return 'test.xml'
         case 'lint-report-xml':

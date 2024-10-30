@@ -101,7 +101,8 @@ jobs:
         uses: tapihdev/junit-monorepo-go@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          directories: 'go/app1,go/app2'
+          test-dirs: 'go/app1,go/app2'
+          lint-dirs: 'go/app1,go/app2'
           test-report-xml: test.xml
           lint-report-xml: lint.xml
           pull-request-number: ${{ github.event.pull_request.number }}
@@ -110,16 +111,17 @@ jobs:
 
 ### Inputs
 
-| **Input**             | **Required** | **Description**                                                                      |
-| --------------------- | ------------ | ------------------------------------------------------------------------------------ |
-| `github-token`        | yes          | The GitHub token to use for authentication                                           |
-| `directories`         | yes          | The directories to search for JUnit reports                                          |
-| `test-report-xml`     | no           | The name of the JUnit report XML file (either this or `lint-report-xml` is required) |
-| `lint-report-xml`     | no           | The name of the lint report XML file (either this or `test-report-xml` is required)  |
-| `pull-request-number` | yes          | The pull request number to comment on                                                |
-| `sha`                 | yes          | The commit SHA of the pull request                                                   |
-| `failed-test-limit`   | no           | The number of failed tests to display (default: 30)                                  |
-| `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)                                  |
+| **Input**             | **Required** | **Description**                                                                                 |
+| --------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| `github-token`        | yes          | The GitHub token to use for authentication                                                      |
+| `test-dirs`           | yes          | The directories that contain the gotestsum reports (seperated by commas/spaces/line breaks)     |
+| `lint-dirs`           | yes          | The directories that contain the golangci-lint reports (seperated by commas/spaces/line breaks) |
+| `test-report-xml`     | no           | The name of the JUnit report XML file (either this or `lint-report-xml` is required)            |
+| `lint-report-xml`     | no           | The name of the lint report XML file (either this or `test-report-xml` is required)             |
+| `pull-request-number` | yes          | The pull request number to comment on                                                           |
+| `sha`                 | yes          | The commit SHA of the pull request                                                              |
+| `failed-test-limit`   | no           | The number of failed tests to display (default: 30)                                             |
+| `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)                                             |
 
 ### Outputs
 
