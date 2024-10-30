@@ -1,6 +1,5 @@
 import { Module } from '../src/module'
 import { GotestsumReport } from '../src/junit/reporter/gotestsum'
-import { GolangCILintReport } from '../src/junit/reporter/golangcilint'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 import {
   ModuleTableRecord,
@@ -10,33 +9,12 @@ import {
 
 describe('module', () => {
   it('should construct a module', async () => {
-    const testFromXMLMock = jest
+    const fromXMLMock = jest
       .spyOn(GotestsumReport, 'fromXml')
       .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
-    const lintFromXMLMock = jest
-      .spyOn(GolangCILintReport, 'fromXml')
-      .mockResolvedValue(new GolangCILintReport({ testsuites: {} }))
-
-    const module = await Module.fromXml('path/to', 'junit.xml', 'lint.xml')
+    const module = await Module.fromXml('path/to', 'junit.xml')
     expect(module.directory).toBe('path/to')
-    expect(testFromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
-    expect(lintFromXMLMock).toHaveBeenCalledWith('path/to/lint.xml')
-    expect(module.hasLintReport).toBe(true)
-  })
-
-  it('should return undefined when failed to read lint report', async () => {
-    const testFromXMLMock = jest
-      .spyOn(GotestsumReport, 'fromXml')
-      .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
-    const lintFromXMLMock = jest
-      .spyOn(GolangCILintReport, 'fromXml')
-      .mockRejectedValue(new Error('failed to read lint report'))
-
-    const module = await Module.fromXml('path/to', 'junit.xml', 'lint.xml')
-    expect(module.directory).toBe('path/to')
-    expect(testFromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
-    expect(lintFromXMLMock).toHaveBeenCalledWith('path/to/lint.xml')
-    expect(module.hasLintReport).toBe(false)
+    expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
   })
 
   it('should make a module table record with test', async () => {
