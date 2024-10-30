@@ -15,7 +15,7 @@ inputs:
     required: true
   test-report-xml:
     description: 'The filename of the gotestsum report'
-    required: true
+    required: false
   lint-report-xml:
     description: 'The filename of the golangci-lint report (optional)'
     required: false

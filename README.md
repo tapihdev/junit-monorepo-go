@@ -114,7 +114,7 @@ jobs:
 | --------------------- | ------------ | --------------------------------------------------- |
 | `github-token`        | yes          | The GitHub token to use for authentication          |
 | `directories`         | yes          | The directories to search for JUnit reports         |
-| `test-report-xml`     | yes          | The name of the JUnit report XML file               |
+| `test-report-xml`     | no           | The name of the JUnit report XML file               |
 | `lint-report-xml`     | no           | The name of the lint report XML file                |
 | `pull-request-number` | yes          | The pull request number to comment on               |
 | `sha`                 | yes          | The commit SHA of the pull request                  |

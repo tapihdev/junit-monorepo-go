@@ -35909,7 +35909,11 @@ function getDirectories() {
             .map(d => d.trim());
 }
 function getTestReportXml() {
-    return core.getInput('test-report-xml', { required: true });
+    const raw = core.getInput('test-report-xml', { required: false });
+    if (raw === '') {
+        return undefined;
+    }
+    return raw;
 }
 function getLintReportXml() {
     const raw = core.getInput('lint-report-xml', { required: false });
@@ -36384,7 +36388,7 @@ class Module {
         this._lintReport = _lintReport;
     }
     static async fromXml(directory, testPath, lintPath) {
-        if (!testPath && !lintPath) {
+        if (testPath === undefined && lintPath === undefined) {
             throw new Error('Either testPath or lintPath must be specified');
         }
         const [test, lint] = await Promise.all([
@@ -36476,6 +36480,9 @@ class Repository {
         this._modules = _modules;
     }
     static async fromDirectories(directories, testReportXml, lintReportXml) {
+        if (testReportXml === undefined && lintReportXml === undefined) {
+            throw new Error('Either test-report-xml or lint-report-xml must be specified');
+        }
         const modules = await Promise.all(directories.map(async (directory) => await module_1.Module.fromXml(directory, testReportXml, lintReportXml)));
         return new Repository(modules);
     }
