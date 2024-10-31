@@ -8,7 +8,7 @@ import {
   FailedLintTableRecord
 } from './type'
 
-interface Module {
+export interface Module {
   directory: string
   hasLintReport: boolean
   hasTestReport: boolean
@@ -32,18 +32,13 @@ interface Module {
   makeAnnotationMessages(): string[]
 }
 
-export class GoModule implements Module {
-  constructor(
-    private readonly _directory: string,
-    private readonly _testReport?: Reporter,
-    private readonly _lintReport?: Reporter
-  ) {}
-
+export class ModuleFactory {
+  // Only GoModule is supported for now
   static async fromXml(
     directory: string,
     testPath?: string,
     lintPath?: string
-  ): Promise<GoModule> {
+  ): Promise<Module> {
     if (testPath === undefined && lintPath === undefined) {
       throw new Error('Either testPath or lintPath must be specified')
     }
@@ -57,6 +52,14 @@ export class GoModule implements Module {
     ])
     return new GoModule(directory, test, lint)
   }
+}
+
+export class GoModule implements Module {
+  constructor(
+    private readonly _directory: string,
+    private readonly _testReport?: Reporter,
+    private readonly _lintReport?: Reporter
+  ) {}
 
   get directory(): string {
     return this._directory

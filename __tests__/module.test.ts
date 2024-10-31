@@ -1,5 +1,4 @@
-import { GoModule } from '../src/module'
-import { GotestsumReport } from '../src/junit/gotestsum'
+import { GoModule, ModuleFactory } from '../src/module'
 import { Reporter, Result, Case } from '../src/junit/reporter'
 import {
   ModuleTableRecord,
@@ -21,7 +20,7 @@ describe('module', () => {
   // })
 
   it('should throw an error if both test and lint paths are not specified', async () => {
-    await expect(GoModule.fromXml('path/to')).rejects.toThrow(
+    await expect(ModuleFactory.fromXml('path/to')).rejects.toThrow(
       'Either testPath or lintPath must be specified'
     )
   })

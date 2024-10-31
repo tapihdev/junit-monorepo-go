@@ -1,5 +1,5 @@
 import { Repository } from '../src/repository'
-import { GoModule } from '../src/module'
+import { GoModule, ModuleFactory } from '../src/module'
 import { Reporter, Result, Case } from '../src/junit/reporter'
 
 const context = {
@@ -14,7 +14,7 @@ const context = {
 describe('repository', () => {
   it('should construct a repository from directories', async () => {
     // TODO: mock Module and write tests
-    const fromXMLMock = jest.spyOn(GoModule, 'fromXml').mockResolvedValue(
+    const fromXMLMock = jest.spyOn(ModuleFactory, 'fromXml').mockResolvedValue(
       new GoModule('go/app1', {
         result: Result.Passed,
         tests: 1,
