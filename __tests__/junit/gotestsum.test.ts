@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-import { GotestsumReport } from '../../src/junit/gotestsum'
+import { ReporterFactory } from '../../src/junit/factory'
 import { Result, Case } from '../../src/junit/reporter'
 
 describe('gotestsum', () => {
@@ -15,7 +15,7 @@ describe('gotestsum', () => {
       </testsuites>
       `)
 
-    const report = await GotestsumReport.fromXml('path/to/junit.xml')
+    const report = await ReporterFactory.fromXml('test', 'path/to/junit.xml')
     expect(report.result).toBe(Result.Passed)
     expect(report.tests).toBe(0)
     expect(report.passed).toBe(0)
@@ -54,7 +54,7 @@ describe('gotestsum', () => {
       </testsuites>
       `)
 
-    const report = await GotestsumReport.fromXml('path/to/junit.xml')
+    const report = await ReporterFactory.fromXml('test', 'path/to/junit.xml')
     expect(report.result).toBe(Result.Failed)
     expect(report.tests).toBe(4)
     expect(report.passed).toBe(2)

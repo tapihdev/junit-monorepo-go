@@ -7,10 +7,6 @@ export class GotestsumReport implements Reporter {
 
   constructor(private readonly _junit: JUnitReport) {}
 
-  static async fromXml(path: string): Promise<GotestsumReport> {
-    return new GotestsumReport(await parseJUnitReport(path))
-  }
-
   get result(): Result {
     if (this._junit.testsuites.$ === undefined) {
       return Result.Unknown

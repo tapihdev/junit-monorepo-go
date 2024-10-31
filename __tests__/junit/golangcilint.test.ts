@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 
-import { GolangCILintReport } from '../../src/junit/golangcilint'
+import { ReporterFactory } from '../../src/junit/factory'
 import { Result, Case } from '../../src/junit/reporter'
 
 describe('golangcilint', () => {
@@ -8,8 +8,7 @@ describe('golangcilint', () => {
     const readFileMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
     <testsuites></testsuites>
     `)
-
-    const report = await GolangCILintReport.fromXml('path/to/junit.xml')
+    const report = await ReporterFactory.fromXml('lint', 'path/to/junit.xml')
     expect(report.result).toBe(Result.Passed)
     expect(report.tests).toBe(0)
     expect(report.passed).toBe(0)
@@ -47,7 +46,7 @@ Details: Bar]]></failure>
     </testsuites>
     `)
 
-    const report = await GolangCILintReport.fromXml('path/to/junit.xml')
+    const report = await ReporterFactory.fromXml('lint', 'path/to/junit.xml')
     expect(report.result).toBe(Result.Failed)
     expect(report.tests).toBe(5)
     expect(report.passed).toBe(0)

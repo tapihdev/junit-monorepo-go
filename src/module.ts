@@ -1,13 +1,12 @@
 import * as path from 'path'
 
-import { GotestsumReport } from './junit/gotestsum'
 import { Reporter, Result } from './junit/reporter'
+import { ReporterFactory } from './junit/factory'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
-import { GolangCILintReport } from './junit/golangcilint'
 
 interface Module {
   directory: string
@@ -50,10 +49,10 @@ export class GoModule implements Module {
     }
     const [test, lint] = await Promise.all([
       testPath
-        ? GotestsumReport.fromXml(path.join(directory, testPath))
+        ? ReporterFactory.fromXml('test', path.join(directory, testPath))
         : undefined,
       lintPath
-        ? GolangCILintReport.fromXml(path.join(directory, lintPath))
+        ? ReporterFactory.fromXml('lint', path.join(directory, lintPath))
         : undefined
     ])
     return new GoModule(directory, test, lint)

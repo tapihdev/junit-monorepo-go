@@ -6,10 +6,6 @@ import { Reporter, Result, Case } from './reporter'
 export class GolangCILintReport implements Reporter {
   constructor(private readonly _junit: JUnitReport) {}
 
-  static async fromXml(path: string): Promise<GolangCILintReport> {
-    return new GolangCILintReport(await parseJUnitReport(path))
-  }
-
   get result(): Result {
     // Passed if there are no test suites, because golangci-lint reports only failures
     return this._junit.testsuites.testsuite === undefined
