@@ -35901,7 +35901,7 @@ function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
 function getDirs(name) {
-    const raw = core.getInput(name, { required: true });
+    const raw = core.getInput(name, { required: false });
     return raw === ''
         ? []
         : raw

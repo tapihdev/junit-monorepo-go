@@ -114,8 +114,8 @@ jobs:
 | **Input**             | **Required** | **Description**                                                                                 |
 | --------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
 | `github-token`        | yes          | The GitHub token to use for authentication                                                      |
-| `test-dirs`           | yes          | The directories that contain the gotestsum reports (seperated by commas/spaces/line breaks)     |
-| `lint-dirs`           | yes          | The directories that contain the golangci-lint reports (seperated by commas/spaces/line breaks) |
+| `test-dirs`           | no           | The directories that contain the gotestsum reports (seperated by commas/spaces/line breaks)     |
+| `lint-dirs`           | no           | The directories that contain the golangci-lint reports (seperated by commas/spaces/line breaks) |
 | `test-report-xml`     | no           | The name of the JUnit report XML file (either this or `lint-report-xml` is required)            |
 | `lint-report-xml`     | no           | The name of the lint report XML file (either this or `test-report-xml` is required)             |
 | `pull-request-number` | yes          | The pull request number to comment on                                                           |

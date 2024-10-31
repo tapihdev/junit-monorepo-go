@@ -17,7 +17,7 @@ inputs:
     description:
       The directories that contain the gotestsum reports (seperated by
       commas/spaces/line breaks)
-    required: true
+    required: false
   test-report-xml:
     description: The filename of the gotestsum report
     required: true
@@ -26,7 +26,7 @@ inputs:
     description:
       The comma-seperated directories that contain the golangci-lint reports
       (seperated by commas/spaces/line breaks)
-    required: true
+    required: false
   lint-report-xml:
     description: The filename of the golangci-lint report
     required: true
