@@ -1,4 +1,4 @@
-import { Repository } from '../src/repository'
+import { Repository, RepositoryFactory } from '../src/repository'
 import { GoModule, ModuleFactory } from '../src/module'
 import { Reporter, Result, Case } from '../src/junit/reporter'
 
@@ -26,7 +26,7 @@ describe('repository', () => {
         failures: [] as Case[]
       } as Reporter)
     )
-    const monorepo = await Repository.fromDirectories(
+    const monorepo = await RepositoryFactory.fromDirectories(
       ['go/app1'],
       [],
       'test.xml',

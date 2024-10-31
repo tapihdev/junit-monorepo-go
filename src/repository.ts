@@ -16,9 +16,7 @@ export type MarkdownContext = {
   actor: string
 }
 
-export class Repository {
-  constructor(private readonly _modules: Module[]) {}
-
+export class RepositoryFactory {
   static async fromDirectories(
     testDirectories: string[],
     lintDirectories: string[],
@@ -43,6 +41,10 @@ export class Repository {
     )
     return new Repository(modules)
   }
+}
+
+export class Repository {
+  constructor(private readonly _modules: Module[]) {}
 
   get numModules(): number {
     return this._modules.length

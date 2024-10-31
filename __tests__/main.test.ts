@@ -11,7 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { Repository } from '../src/repository'
+import { Repository, RepositoryFactory } from '../src/repository'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -26,8 +26,8 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let monorepoFromDirectoriesMock: jest.SpiedFunction<
-  typeof Repository.fromDirectories
+let repositoryFactoryFromDirectoriesMock: jest.SpiedFunction<
+  typeof RepositoryFactory.fromDirectories
 >
 let makeMarkdownReportMock: jest.SpiedFunction<Repository['makeMarkdownReport']>
 let makeAnnotationMessagesMock: jest.SpiedFunction<
@@ -59,8 +59,8 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
 
-    monorepoFromDirectoriesMock = jest
-      .spyOn(Repository, 'fromDirectories')
+    repositoryFactoryFromDirectoriesMock = jest
+      .spyOn(RepositoryFactory, 'fromDirectories')
       .mockResolvedValue(new Repository([]))
     makeMarkdownReportMock = jest
       .spyOn(Repository.prototype, 'makeMarkdownReport')
@@ -117,7 +117,7 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
     expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
-    expect(monorepoFromDirectoriesMock).toHaveBeenNthCalledWith(
+    expect(repositoryFactoryFromDirectoriesMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
       ['go/app1', 'go/app3'],
