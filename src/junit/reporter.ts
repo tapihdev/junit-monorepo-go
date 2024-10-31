@@ -1,4 +1,4 @@
-export interface Reportable {
+export interface Reporter {
   readonly result: Result
   readonly tests: number
   readonly passed: number

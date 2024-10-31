@@ -1,5 +1,5 @@
 import { GoModule } from './module'
-import { Result } from './junit/reportable'
+import { Result } from './junit/reporter'
 import {
   AnyRecord,
   FailedTestTableRecord,

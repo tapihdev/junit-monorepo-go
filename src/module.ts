@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { GotestsumReport } from './junit/gotestsum'
-import { Reportable, Result } from './junit/reportable'
+import { Reporter, Result } from './junit/reporter'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -36,8 +36,8 @@ interface Module {
 export class GoModule implements Module {
   constructor(
     private readonly _directory: string,
-    private readonly _testReport?: Reportable,
-    private readonly _lintReport?: Reportable
+    private readonly _testReport?: Reporter,
+    private readonly _lintReport?: Reporter
   ) {}
 
   static async fromXml(

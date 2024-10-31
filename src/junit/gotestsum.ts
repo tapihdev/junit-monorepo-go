@@ -1,11 +1,11 @@
-import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { Reportable, Result, Case } from './reportable'
+import { parseJUnitReport, JUnitReport } from './xml'
+import { Reporter, Result, Case } from './reporter'
 
-export class GotestsumReport implements Reportable {
+export class GotestsumReport implements Reporter {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
-  constructor(private readonly _junit: JunitReportXML) {}
+  constructor(private readonly _junit: JUnitReport) {}
 
   static async fromXml(path: string): Promise<GotestsumReport> {
     return new GotestsumReport(await parseJUnitReport(path))

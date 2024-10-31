@@ -1,6 +1,6 @@
 import { GoModule } from '../src/module'
 import { GotestsumReport } from '../src/junit/gotestsum'
-import { Reportable, Result, Case } from '../src/junit/reportable'
+import { Reporter, Result, Case } from '../src/junit/reporter'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -35,7 +35,7 @@ describe('module', () => {
       time: 1.1,
       version: '1.22.1',
       failures: []
-    } as Reportable)
+    } as Reporter)
 
     expect(module.result).toBe(Result.Passed)
     expect(module.hasTestReport).toBe(true)
@@ -61,7 +61,7 @@ describe('module', () => {
       time: 0,
       version: undefined,
       failures: []
-    } as Reportable)
+    } as Reporter)
 
     expect(module.result).toBe(Result.Passed)
     expect(module.hasTestReport).toBe(false)
@@ -89,7 +89,7 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: []
-      } as Reportable,
+      } as Reporter,
       {
         result: Result.Failed,
         tests: 4,
@@ -112,7 +112,7 @@ describe('module', () => {
             message: 'error2\noccurred'
           }
         ] as Case[]
-      } as Reportable
+      } as Reporter
     )
 
     expect(module.result).toBe(Result.Failed)
@@ -154,7 +154,7 @@ describe('module', () => {
           message: 'error2\noccurred'
         }
       ] as Case[]
-    } as Reportable)
+    } as Reporter)
 
     expect(module.result).toBe(Result.Failed)
     expect(module.hasTestReport).toBe(true)
@@ -185,7 +185,7 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: []
-      } as Reportable,
+      } as Reporter,
       {
         result: Result.Failed,
         tests: 4,
@@ -208,7 +208,7 @@ describe('module', () => {
             message: 'error2\noccurred'
           }
         ] as Case[]
-      } as Reportable
+      } as Reporter
     )
 
     expect(module.result).toBe(Result.Failed)
@@ -248,7 +248,7 @@ describe('module', () => {
             message: 'error1\noccurred'
           }
         ] as Case[]
-      } as Reportable,
+      } as Reporter,
       {
         result: Result.Failed,
         tests: 4,
@@ -266,7 +266,7 @@ describe('module', () => {
             message: 'error2\noccurred'
           }
         ] as Case[]
-      } as Reportable
+      } as Reporter
     )
 
     expect(module.makeAnnotationMessages()).toEqual([

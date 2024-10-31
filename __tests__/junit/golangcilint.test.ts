@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
 import { GolangCILintReport } from '../../src/junit/golangcilint'
-import { Result, Case } from '../../src/junit/reportable'
+import { Result, Case } from '../../src/junit/reporter'
 
 describe('golangcilint', () => {
   it('should parse the junit report with no failure', async () => {

@@ -1,6 +1,6 @@
 import { Repository } from '../src/repository'
 import { GoModule } from '../src/module'
-import { Reportable, Result, Case } from '../src/junit/reportable'
+import { Reporter, Result, Case } from '../src/junit/reporter'
 
 const context = {
   owner: 'owner',
@@ -24,7 +24,7 @@ describe('repository', () => {
         time: 0.1,
         version: '1.22.2',
         failures: [] as Case[]
-      } as Reportable)
+      } as Reporter)
     )
     const monorepo = await Repository.fromDirectories(
       ['go/app1'],
@@ -70,7 +70,7 @@ No test results found.
         time: 0.1,
         version: '1.22.2',
         failures: [] as Case[]
-      } as Reportable),
+      } as Reporter),
       new GoModule('go/app2', {
         result: Result.Passed,
         tests: 2,
@@ -80,7 +80,7 @@ No test results found.
         time: 0.2,
         version: '1.22.1',
         failures: [] as Case[]
-      } as Reportable)
+      } as Reporter)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -113,7 +113,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as Case[]
-        } as Reportable,
+        } as Reporter,
         {
           result: Result.Passed,
           tests: 0,
@@ -121,7 +121,7 @@ No test results found.
           failed: 0,
           skipped: 0,
           failures: []
-        } as Reportable
+        } as Reporter
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -160,7 +160,7 @@ No test results found.
             message: 'failed'
           }
         ] as Case[]
-      } as Reportable)
+      } as Reporter)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -216,7 +216,7 @@ No test results found.
             message: 'failed'
           }
         ] as Case[]
-      } as Reportable)
+      } as Reporter)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 1)
     expect(markdown).toMatch(
@@ -260,7 +260,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as Case[]
-        } as Reportable,
+        } as Reporter,
         {
           result: Result.Failed,
           tests: 1,
@@ -276,7 +276,7 @@ No test results found.
               message: 'failed'
             }
           ] as Case[]
-        } as Reportable
+        } as Reporter
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -320,7 +320,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as Case[]
-        } as Reportable,
+        } as Reporter,
         {
           result: Result.Failed,
           tests: 2,
@@ -343,7 +343,7 @@ No test results found.
               message: 'failed'
             }
           ] as Case[]
-        } as Reportable
+        } as Reporter
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10, 1)
@@ -394,7 +394,7 @@ No test results found.
             message: 'failed'
           }
         ]
-      } as Reportable)
+      } as Reporter)
     ])
     const annotations = monorepo.makeAnnotationMessages()
 
@@ -424,7 +424,7 @@ No test results found.
               message: 'failed'
             }
           ] as Case[]
-        } as Reportable,
+        } as Reporter,
         {
           result: Result.Failed,
           tests: 1,
@@ -440,7 +440,7 @@ No test results found.
               message: 'failed'
             }
           ] as Case[]
-        } as Reportable
+        } as Reporter
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)

@@ -1,10 +1,10 @@
 import * as path from 'path'
 
-import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { Reportable, Result, Case } from './reportable'
+import { parseJUnitReport, JUnitReport } from './xml'
+import { Reporter, Result, Case } from './reporter'
 
-export class GolangCILintReport implements Reportable {
-  constructor(private readonly _junit: JunitReportXML) {}
+export class GolangCILintReport implements Reporter {
+  constructor(private readonly _junit: JUnitReport) {}
 
   static async fromXml(path: string): Promise<GolangCILintReport> {
     return new GolangCILintReport(await parseJUnitReport(path))
