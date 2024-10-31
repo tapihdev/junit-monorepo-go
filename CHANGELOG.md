@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.7](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.6...v0.0.7) - 2024-10-31
+- fix: accept empty dirs by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/40
+
 ## [v0.0.6](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.5...v0.0.6) - 2024-10-31
 - feat: ignore lint read error by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/32
 - chore: Revert "Merge pull request #32 from tapihdev/tapih/ignore-lint-read-error" by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/34
