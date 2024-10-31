@@ -26,7 +26,7 @@ describe('repository', () => {
         failures: [] as Case[]
       } as Reporter)
     )
-    const monorepo = await RepositoryFactory.fromDirectories(
+    const repository = await RepositoryFactory.fromDirectories(
       ['go/app1'],
       [],
       'test.xml',
@@ -39,12 +39,12 @@ describe('repository', () => {
       'test.xml',
       undefined
     )
-    expect(monorepo.numModules).toBe(1)
+    expect(repository.numModules).toBe(1)
   })
 
   it('should make a markdown report for empty CI', async () => {
-    const monorepo = new Repository([])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const repository = new Repository([])
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -60,7 +60,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with tests passed', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule('go/app1', {
         result: Result.Passed,
         tests: 1,
@@ -82,7 +82,7 @@ No test results found.
         failures: [] as Case[]
       } as Reporter)
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -101,7 +101,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with tests and lint passed', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule(
         'go/app1',
         {
@@ -124,7 +124,7 @@ No test results found.
         } as Reporter
       )
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -142,7 +142,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with failed tests', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule('go/app1', {
         result: Result.Failed,
         tests: 2,
@@ -162,7 +162,7 @@ No test results found.
         ] as Case[]
       } as Reporter)
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -191,7 +191,7 @@ No test results found.
   })
 
   it('should make a markdown report for a failed run with failed tests above limit', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule('go/app1', {
         result: Result.Failed,
         tests: 3,
@@ -218,7 +218,7 @@ No test results found.
         ] as Case[]
       } as Reporter)
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 1)
+    const markdown = repository.makeMarkdownReport(context, 1)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -248,7 +248,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with failed lints', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule(
         'go/app1',
         {
@@ -279,7 +279,7 @@ No test results found.
         } as Reporter
       )
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -308,7 +308,7 @@ No test results found.
   })
 
   it('should make a markdown report for a failed run with failed lints above limit', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule(
         'go/app1',
         {
@@ -346,7 +346,7 @@ No test results found.
         } as Reporter
       )
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10, 1)
+    const markdown = repository.makeMarkdownReport(context, 10, 1)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -376,7 +376,7 @@ No test results found.
   })
 
   it('should make annotation messages', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule('go/app1', {
         result: Result.Failed,
         tests: 1,
@@ -396,7 +396,7 @@ No test results found.
         ]
       } as Reporter)
     ])
-    const annotations = monorepo.makeAnnotationMessages()
+    const annotations = repository.makeAnnotationMessages()
 
     expect(annotations).toEqual([
       '::error file=go/app1/foo_test.go,line=1::failed'
@@ -404,7 +404,7 @@ No test results found.
   })
 
   it('should make a markdown report for a run with failed tests and lints', async () => {
-    const monorepo = new Repository([
+    const repository = new Repository([
       new GoModule(
         'go/app1',
         {
@@ -443,7 +443,7 @@ No test results found.
         } as Reporter
       )
     ])
-    const markdown = monorepo.makeMarkdownReport(context, 10)
+    const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
       `
 ## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
@@ -483,8 +483,8 @@ No test results found.
   })
 
   it('should make annotation messages for an empty run', async () => {
-    const monorepo = new Repository([])
-    const annotations = monorepo.makeAnnotationMessages()
+    const repository = new Repository([])
+    const annotations = repository.makeAnnotationMessages()
 
     expect(annotations).toEqual([])
   })
