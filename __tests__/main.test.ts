@@ -18,7 +18,6 @@ const runMock = jest.spyOn(main, 'run')
 
 // Mock the GitHub Actions core library
 let infoMock: jest.SpiedFunction<typeof core.info>
-let warningMock: jest.SpiedFunction<typeof core.warning>
 let errorMock: jest.SpiedFunction<typeof core.error>
 let getInputMock: jest.SpiedFunction<typeof core.getInput>
 let summaryAddRawMock: jest.SpiedFunction<typeof core.summary.addRaw>
@@ -48,7 +47,6 @@ describe('action', () => {
 
     // Mock the GitHub core library functions
     infoMock = jest.spyOn(core, 'info').mockImplementation()
-    warningMock = jest.spyOn(core, 'warning').mockImplementation()
     errorMock = jest.spyOn(core, 'error').mockImplementation()
     getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
     summaryAddRawMock = jest.spyOn(core.summary, 'addRaw').mockReturnThis()
@@ -150,18 +148,6 @@ describe('action', () => {
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
-    expect(errorMock).not.toHaveBeenCalled()
-  })
-
-  it('should do nothing when both `test-dirs` and `lint-dirs` are empty', async () => {
-    getInputMock.mockReturnValue('')
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-    expect(warningMock).toHaveBeenNthCalledWith(
-      1,
-      'no directories provided, skipping action'
-    )
     expect(errorMock).not.toHaveBeenCalled()
   })
 

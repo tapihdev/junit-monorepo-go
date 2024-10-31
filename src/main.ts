@@ -25,10 +25,6 @@ export async function run(): Promise<void> {
   try {
     const testDirs = getTestDirs()
     const lintDirs = getLintDirs()
-    if (testDirs.length === 0 && lintDirs.length === 0) {
-      core.warning('no directories provided, skipping action')
-      return
-    }
     const testReportXml = getTestReportXml()
     const lintReportXml = getLintReportXml()
     const token = getGitHubToken()
