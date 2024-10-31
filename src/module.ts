@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { GotestsumReport } from './junit/gotestsum'
-import { JUnitReport, TestResult } from './junit/type'
+import { Reportable, TestResult } from './junit/reportable'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -12,8 +12,8 @@ import { GolangCILintReport } from './junit/golangcilint'
 export class Module {
   constructor(
     private readonly _directory: string,
-    private readonly _testReport?: JUnitReport,
-    private readonly _lintReport?: JUnitReport
+    private readonly _testReport?: Reportable,
+    private readonly _lintReport?: Reportable
   ) {}
 
   static async fromXml(

@@ -1,7 +1,7 @@
 import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { JUnitReport, TestResult, TestCase } from './type'
+import { Reportable, TestResult, TestCase } from './reportable'
 
-export class GotestsumReport implements JUnitReport {
+export class GotestsumReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
@@ -85,9 +85,13 @@ export class GotestsumReport implements JUnitReport {
   }
 
   get failures(): TestCase[] {
+    if (this._junit.testsuites.testsuite === undefined) {
+      return []
+    }
+
     return (
       this._junit.testsuites.testsuite
-        ?.map(
+        .map(
           suite =>
             suite.testcase?.filter(
               testcase => testcase.failure !== undefined
@@ -106,19 +110,19 @@ export class GotestsumReport implements JUnitReport {
             )
           }
 
-          // gotestsum reports failures in the following format:
-          // 1. === RUN   Test&#xA;    baz_test.go:1: error;
-          // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
-          // This function takes only the first one and extracts the file and line number.
-          return new TestCase(
-            testcase.$.classname,
-            match === null ? '' : match[1],
-            match === null ? 0 : parseInt(match[2]),
-            testcase.$.name,
+          return {
+            subDir: testcase.$.classname,
+            file: match === null ? '' : match[1],
+            line: match === null ? 0 : parseInt(match[2]),
+            test: testcase.$.name,
             message
-          )
+          }
         })
-        .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []
+        // gotestsum reports failures in the following format:
+        // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+        // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+        // This line filters out the second format.
+        .filter(testcase => testcase.file !== '' && testcase.line !== 0)
     )
   }
 }

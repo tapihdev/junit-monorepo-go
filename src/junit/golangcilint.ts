@@ -1,9 +1,9 @@
 import * as path from 'path'
 
 import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { JUnitReport, TestResult, TestCase } from './type'
+import { Reportable, TestResult, TestCase } from './reportable'
 
-export class GolangCILintReport implements JUnitReport {
+export class GolangCILintReport implements Reportable {
   constructor(private readonly _junit: JunitReportXML) {}
 
   static async fromXml(path: string): Promise<GolangCILintReport> {
@@ -58,50 +58,50 @@ export class GolangCILintReport implements JUnitReport {
   }
 
   get failures(): TestCase[] {
-    return (
-      this._junit.testsuites.testsuite
-        ?.map(
-          suite =>
-            suite.testcase?.filter(
-              testcase => testcase.failure !== undefined
-            ) ?? []
-        )
-        .flat()
-        .map(testcase => {
-          if (testcase.failure === undefined || testcase.failure.length === 0) {
-            // This should never happen because golangci-lint testcases must have a failure
-            throw new Error('golangci-lint test case has no failure')
-          }
-          if (testcase.failure.length > 1) {
-            // This should never happen because golangci-lint testcases must have only one failure
-            throw new Error('golangci-lint test case has multiple failures')
-          }
+    if (this._junit.testsuites.testsuite === undefined) {
+      return []
+    }
+    return this._junit.testsuites.testsuite
+      .map(
+        suite =>
+          suite.testcase?.filter(testcase => testcase.failure !== undefined) ??
+          []
+      )
+      .flat()
+      .map(testcase => {
+        if (testcase.failure === undefined || testcase.failure.length === 0) {
+          // This should never happen because golangci-lint testcases must have a failure
+          throw new Error('golangci-lint test case has no failure')
+        }
+        if (testcase.failure.length > 1) {
+          // This should never happen because golangci-lint testcases must have only one failure
+          throw new Error('golangci-lint test case has multiple failures')
+        }
 
-          // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
-          // Output: Error: Foo: Bar
-          const message = testcase.failure[0].$.message
-            .split(': ')
-            .slice(1)
-            .join(': ')
-            .trim()
+        // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
+        // Output: Error: Foo: Bar
+        const message = testcase.failure[0].$.message
+          .split(': ')
+          .slice(1)
+          .join(': ')
+          .trim()
 
-          // Input:
-          //   classname: path/to/file.go:line:column
-          // Output:
-          //   file: file.go
-          //   subDir: path/to
-          //   line: line
-          const [fullPath, line] = testcase.$.classname.split(':')
-          const file = path.basename(fullPath)
-          const subDir = path.dirname(fullPath)
-          return new TestCase(
-            subDir,
-            file,
-            parseInt(line),
-            testcase.$.name,
-            message
-          )
-        }) ?? []
-    )
+        // Input:
+        //   classname: path/to/file.go:line:column
+        // Output:
+        //   file: file.go
+        //   subDir: path/to
+        //   line: line
+        const [fullPath, line] = testcase.$.classname.split(':')
+        const file = path.basename(fullPath)
+        const subDir = path.dirname(fullPath)
+        return {
+          subDir,
+          file,
+          line: parseInt(line),
+          test: testcase.$.name,
+          message
+        }
+      })
   }
 }

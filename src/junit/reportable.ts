@@ -1,4 +1,4 @@
-export interface JUnitReport {
+export interface Reportable {
   readonly result: TestResult
   readonly tests: number
   readonly passed: number
@@ -16,12 +16,10 @@ export enum TestResult {
   Unknown = 'unknown'
 }
 
-export class TestCase {
-  constructor(
-    readonly subDir: string,
-    readonly file: string,
-    readonly line: number,
-    readonly test: string,
-    readonly message: string
-  ) {}
+export type TestCase = {
+  subDir: string
+  file: string
+  line: number
+  test: string
+  message: string
 }

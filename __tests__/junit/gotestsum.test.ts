@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
 import { GotestsumReport } from '../../src/junit/gotestsum'
-import { TestResult, TestCase } from '../../src/junit/type'
+import { TestResult, TestCase } from '../../src/junit/reportable'
 
 describe('gotestsum', () => {
   it('should parse the junit report with no testsuite', async () => {

@@ -1,6 +1,6 @@
 import { Module } from '../src/module'
 import { GotestsumReport } from '../src/junit/gotestsum'
-import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
+import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -35,7 +35,7 @@ describe('module', () => {
       time: 1.1,
       version: '1.22.1',
       failures: []
-    } as JUnitReport)
+    } as Reportable)
 
     expect(module.result).toBe(TestResult.Passed)
     expect(module.hasTestReport).toBe(true)
@@ -61,7 +61,7 @@ describe('module', () => {
       time: 0,
       version: undefined,
       failures: []
-    } as JUnitReport)
+    } as Reportable)
 
     expect(module.result).toBe(TestResult.Passed)
     expect(module.hasTestReport).toBe(false)
@@ -89,7 +89,7 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: []
-      } as JUnitReport,
+      } as Reportable,
       {
         result: TestResult.Failed,
         tests: 4,
@@ -97,16 +97,22 @@ describe('module', () => {
         failed: 1,
         skipped: 0,
         failures: [
-          new TestCase(
-            'foo/bar',
-            'baz_test.go',
-            1,
-            'Test1',
-            'error1\noccurred'
-          ),
-          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
-        ]
-      } as JUnitReport
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 1,
+            test: 'Test1',
+            message: 'error1\noccurred'
+          },
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 2,
+            test: 'Test2',
+            message: 'error2\noccurred'
+          }
+        ] as TestCase[]
+      } as Reportable
     )
 
     expect(module.result).toBe(TestResult.Failed)
@@ -133,10 +139,22 @@ describe('module', () => {
       time: 1.1,
       version: '1.22.1',
       failures: [
-        new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred'),
-        new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
-      ]
-    } as JUnitReport)
+        {
+          subDir: 'foo/bar',
+          file: 'baz_test.go',
+          line: 1,
+          test: 'Test1',
+          message: 'error1\noccurred'
+        },
+        {
+          subDir: 'foo/bar',
+          file: 'baz_test.go',
+          line: 2,
+          test: 'Test2',
+          message: 'error2\noccurred'
+        }
+      ] as TestCase[]
+    } as Reportable)
 
     expect(module.result).toBe(TestResult.Failed)
     expect(module.hasTestReport).toBe(true)
@@ -167,7 +185,7 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: []
-      } as JUnitReport,
+      } as Reportable,
       {
         result: TestResult.Failed,
         tests: 4,
@@ -175,16 +193,22 @@ describe('module', () => {
         failed: 1,
         skipped: 0,
         failures: [
-          new TestCase(
-            'foo/bar',
-            'baz_test.go',
-            1,
-            'Test1',
-            'error1\noccurred'
-          ),
-          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
-        ]
-      } as JUnitReport
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 1,
+            test: 'Test1',
+            message: 'error1\noccurred'
+          },
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 2,
+            test: 'Test2',
+            message: 'error2\noccurred'
+          }
+        ] as TestCase[]
+      } as Reportable
     )
 
     expect(module.result).toBe(TestResult.Failed)
@@ -216,9 +240,15 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: [
-          new TestCase('foo/bar', 'baz_test.go', 1, 'Test1', 'error1\noccurred')
-        ]
-      } as JUnitReport,
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 1,
+            test: 'Test1',
+            message: 'error1\noccurred'
+          }
+        ] as TestCase[]
+      } as Reportable,
       {
         result: TestResult.Failed,
         tests: 4,
@@ -228,9 +258,15 @@ describe('module', () => {
         time: 1.1,
         version: '1.22.1',
         failures: [
-          new TestCase('foo/bar', 'baz_test.go', 2, 'Test2', 'error2\noccurred')
-        ]
-      } as JUnitReport
+          {
+            subDir: 'foo/bar',
+            file: 'baz_test.go',
+            line: 2,
+            test: 'Test2',
+            message: 'error2\noccurred'
+          }
+        ] as TestCase[]
+      } as Reportable
     )
 
     expect(module.makeAnnotationMessages()).toEqual([

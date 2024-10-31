@@ -1,6 +1,3 @@
-/**
- * Types to parse JUnit XML reports
- */
 import * as fs from 'fs'
 import { parseStringPromise } from 'xml2js'
 

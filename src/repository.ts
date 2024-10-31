@@ -1,5 +1,5 @@
 import { Module } from './module'
-import { TestResult } from './junit/type'
+import { TestResult } from './junit/reportable'
 import {
   AnyRecord,
   FailedTestTableRecord,

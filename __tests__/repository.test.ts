@@ -1,6 +1,6 @@
 import { Repository } from '../src/repository'
 import { Module } from '../src/module'
-import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
+import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
 
 const context = {
   owner: 'owner',
@@ -24,7 +24,7 @@ describe('repository', () => {
         time: 0.1,
         version: '1.22.2',
         failures: [] as TestCase[]
-      } as JUnitReport)
+      } as Reportable)
     )
     const monorepo = await Repository.fromDirectories(
       ['go/app1'],
@@ -70,7 +70,7 @@ No test results found.
         time: 0.1,
         version: '1.22.2',
         failures: [] as TestCase[]
-      } as JUnitReport),
+      } as Reportable),
       new Module('go/app2', {
         result: TestResult.Passed,
         tests: 2,
@@ -80,7 +80,7 @@ No test results found.
         time: 0.2,
         version: '1.22.1',
         failures: [] as TestCase[]
-      } as JUnitReport)
+      } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -113,7 +113,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as TestCase[]
-        } as JUnitReport,
+        } as Reportable,
         {
           result: TestResult.Passed,
           tests: 0,
@@ -121,7 +121,7 @@ No test results found.
           failed: 0,
           skipped: 0,
           failures: []
-        } as JUnitReport
+        } as Reportable
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -151,8 +151,16 @@ No test results found.
         skipped: 0,
         time: 0.2,
         version: '1.22.1',
-        failures: [new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')]
-      } as JUnitReport)
+        failures: [
+          {
+            subDir: '.',
+            file: 'foo_test.go',
+            line: 1,
+            test: 'Test1/Case',
+            message: 'failed'
+          }
+        ] as TestCase[]
+      } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -193,10 +201,22 @@ No test results found.
         time: 0.2,
         version: '1.22.1',
         failures: [
-          new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed'),
-          new TestCase('.', 'bar_test.go', 2, 'Test2/Case', 'failed')
-        ]
-      } as JUnitReport)
+          {
+            subDir: '.',
+            file: 'foo_test.go',
+            line: 1,
+            test: 'Test1/Case',
+            message: 'failed'
+          },
+          {
+            subDir: '.',
+            file: 'bar_test.go',
+            line: 2,
+            test: 'Test2/Case',
+            message: 'failed'
+          }
+        ] as TestCase[]
+      } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 1)
     expect(markdown).toMatch(
@@ -240,7 +260,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as TestCase[]
-        } as JUnitReport,
+        } as Reportable,
         {
           result: TestResult.Failed,
           tests: 1,
@@ -248,9 +268,15 @@ No test results found.
           failed: 1,
           skipped: 0,
           failures: [
-            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
-          ]
-        } as JUnitReport
+            {
+              subDir: '.',
+              file: 'foo_test.go',
+              line: 1,
+              test: 'Test1/Case',
+              message: 'failed'
+            }
+          ] as TestCase[]
+        } as Reportable
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -294,7 +320,7 @@ No test results found.
           time: 0.1,
           version: '1.22.2',
           failures: [] as TestCase[]
-        } as JUnitReport,
+        } as Reportable,
         {
           result: TestResult.Failed,
           tests: 2,
@@ -302,10 +328,22 @@ No test results found.
           failed: 2,
           skipped: 0,
           failures: [
-            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed'),
-            new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
-          ]
-        } as JUnitReport
+            {
+              subDir: '.',
+              file: 'foo_test.go',
+              line: 1,
+              test: 'Test1/Case',
+              message: 'failed'
+            },
+            {
+              subDir: '.',
+              file: 'bar_test.go',
+              line: 1,
+              test: 'Test2/Case',
+              message: 'failed'
+            }
+          ] as TestCase[]
+        } as Reportable
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10, 1)
@@ -347,8 +385,16 @@ No test results found.
         skipped: 0,
         time: 0.1,
         version: '1.22.2',
-        failures: [new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')]
-      } as JUnitReport)
+        failures: [
+          {
+            subDir: '.',
+            file: 'foo_test.go',
+            line: 1,
+            test: 'Test1/Case',
+            message: 'failed'
+          }
+        ]
+      } as Reportable)
     ])
     const annotations = monorepo.makeAnnotationMessages()
 
@@ -370,9 +416,15 @@ No test results found.
           time: 0.2,
           version: '1.22.2',
           failures: [
-            new TestCase('.', 'foo_test.go', 1, 'Test1/Case', 'failed')
+            {
+              subDir: '.',
+              file: 'foo_test.go',
+              line: 1,
+              test: 'Test1/Case',
+              message: 'failed'
+            }
           ] as TestCase[]
-        } as JUnitReport,
+        } as Reportable,
         {
           result: TestResult.Failed,
           tests: 1,
@@ -380,9 +432,15 @@ No test results found.
           failed: 1,
           skipped: 0,
           failures: [
-            new TestCase('.', 'bar_test.go', 1, 'Test2/Case', 'failed')
-          ]
-        } as JUnitReport
+            {
+              subDir: '.',
+              file: 'bar_test.go',
+              line: 1,
+              test: 'Test2/Case',
+              message: 'failed'
+            }
+          ] as TestCase[]
+        } as Reportable
       )
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)

@@ -35963,7 +35963,7 @@ function getFailedLintLimit() {
 
 /***/ }),
 
-/***/ 2355:
+/***/ 2599:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -35995,7 +35995,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GolangCILintReport = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const xml_1 = __nccwpck_require__(7822);
-const type_1 = __nccwpck_require__(1409);
+const reportable_1 = __nccwpck_require__(56);
 class GolangCILintReport {
     _junit;
     constructor(_junit) {
@@ -36007,8 +36007,8 @@ class GolangCILintReport {
     get result() {
         // Passed if there are no test suites, because golangci-lint reports only failures
         return this._junit.testsuites.testsuite === undefined
-            ? type_1.TestResult.Passed
-            : type_1.TestResult.Failed;
+            ? reportable_1.TestResult.Passed
+            : reportable_1.TestResult.Failed;
     }
     get tests() {
         return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
@@ -36030,8 +36030,12 @@ class GolangCILintReport {
         return undefined;
     }
     get failures() {
-        return (this._junit.testsuites.testsuite
-            ?.map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
+        if (this._junit.testsuites.testsuite === undefined) {
+            return [];
+        }
+        return this._junit.testsuites.testsuite
+            .map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ??
+            [])
             .flat()
             .map(testcase => {
             if (testcase.failure === undefined || testcase.failure.length === 0) {
@@ -36058,8 +36062,14 @@ class GolangCILintReport {
             const [fullPath, line] = testcase.$.classname.split(':');
             const file = path.basename(fullPath);
             const subDir = path.dirname(fullPath);
-            return new type_1.TestCase(subDir, file, parseInt(line), testcase.$.name, message);
-        }) ?? []);
+            return {
+                subDir,
+                file,
+                line: parseInt(line),
+                test: testcase.$.name,
+                message
+            };
+        });
     }
 }
 exports.GolangCILintReport = GolangCILintReport;
@@ -36067,7 +36077,7 @@ exports.GolangCILintReport = GolangCILintReport;
 
 /***/ }),
 
-/***/ 681:
+/***/ 6755:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -36075,7 +36085,7 @@ exports.GolangCILintReport = GolangCILintReport;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GotestsumReport = void 0;
 const xml_1 = __nccwpck_require__(7822);
-const type_1 = __nccwpck_require__(1409);
+const reportable_1 = __nccwpck_require__(56);
 class GotestsumReport {
     _junit;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
@@ -36088,16 +36098,16 @@ class GotestsumReport {
     }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
-            return type_1.TestResult.Unknown;
+            return reportable_1.TestResult.Unknown;
         }
         if (this._junit.testsuites.$.failures !== '0') {
-            return type_1.TestResult.Failed;
+            return reportable_1.TestResult.Failed;
         }
         if (this._junit.testsuites.$.skipped !== undefined &&
             this._junit.testsuites.$.skipped !== '0') {
-            return type_1.TestResult.Skipped;
+            return reportable_1.TestResult.Skipped;
         }
-        return type_1.TestResult.Passed;
+        return reportable_1.TestResult.Passed;
     }
     get tests() {
         return parseInt(this._junit.testsuites.$?.tests ?? '0');
@@ -36142,8 +36152,11 @@ class GotestsumReport {
         return match[1];
     }
     get failures() {
+        if (this._junit.testsuites.testsuite === undefined) {
+            return [];
+        }
         return (this._junit.testsuites.testsuite
-            ?.map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
+            .map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
             .flat()
             .map(testcase => {
             const message = testcase.failure?.map(failure => failure._ ?? '').join('\n') ?? '';
@@ -36152,13 +36165,19 @@ class GotestsumReport {
                 // This should never happen
                 throw new Error(`message does match the regex but length is not 3: ${message}`);
             }
+            return {
+                subDir: testcase.$.classname,
+                file: match === null ? '' : match[1],
+                line: match === null ? 0 : parseInt(match[2]),
+                test: testcase.$.name,
+                message
+            };
+        })
             // gotestsum reports failures in the following format:
             // 1. === RUN   Test&#xA;    baz_test.go:1: error;
             // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
-            // This function takes only the first one and extracts the file and line number.
-            return new type_1.TestCase(testcase.$.classname, match === null ? '' : match[1], match === null ? 0 : parseInt(match[2]), testcase.$.name, message);
-        })
-            .filter(testcase => testcase.file !== '' && testcase.line !== 0) ?? []);
+            // This line filters out the second format.
+            .filter(testcase => testcase.file !== '' && testcase.line !== 0));
     }
 }
 exports.GotestsumReport = GotestsumReport;
@@ -36166,13 +36185,13 @@ exports.GotestsumReport = GotestsumReport;
 
 /***/ }),
 
-/***/ 1409:
+/***/ 56:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestCase = exports.TestResult = void 0;
+exports.TestResult = void 0;
 var TestResult;
 (function (TestResult) {
     TestResult["Passed"] = "passed";
@@ -36180,21 +36199,6 @@ var TestResult;
     TestResult["Skipped"] = "skipped";
     TestResult["Unknown"] = "unknown";
 })(TestResult || (exports.TestResult = TestResult = {}));
-class TestCase {
-    subDir;
-    file;
-    line;
-    test;
-    message;
-    constructor(subDir, file, line, test, message) {
-        this.subDir = subDir;
-        this.file = file;
-        this.line = line;
-        this.test = test;
-        this.message = message;
-    }
-}
-exports.TestCase = TestCase;
 
 
 /***/ }),
@@ -36229,9 +36233,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseJUnitReport = parseJUnitReport;
-/**
- * Types to parse JUnit XML reports
- */
 const fs = __importStar(__nccwpck_require__(7147));
 const xml2js_1 = __nccwpck_require__(6189);
 async function parseJUnitReport(path) {
@@ -36371,9 +36372,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Module = void 0;
 const path = __importStar(__nccwpck_require__(1017));
-const gotestsum_1 = __nccwpck_require__(681);
-const type_1 = __nccwpck_require__(1409);
-const golangcilint_1 = __nccwpck_require__(2355);
+const gotestsum_1 = __nccwpck_require__(6755);
+const reportable_1 = __nccwpck_require__(56);
+const golangcilint_1 = __nccwpck_require__(2599);
 class Module {
     _directory;
     _testReport;
@@ -36407,10 +36408,10 @@ class Module {
         return this._testReport !== undefined;
     }
     get result() {
-        return this._testReport?.result === type_1.TestResult.Failed ||
-            this._lintReport?.result === type_1.TestResult.Failed
-            ? type_1.TestResult.Failed
-            : type_1.TestResult.Passed;
+        return this._testReport?.result === reportable_1.TestResult.Failed ||
+            this._lintReport?.result === reportable_1.TestResult.Failed
+            ? reportable_1.TestResult.Failed
+            : reportable_1.TestResult.Passed;
     }
     makeModuleTableRecord(owner, repo, sha) {
         return {
@@ -36418,7 +36419,7 @@ class Module {
             version: this._testReport?.version ?? '-',
             testResult: this._testReport === undefined
                 ? '-'
-                : this._testReport.result === type_1.TestResult.Failed
+                : this._testReport.result === reportable_1.TestResult.Failed
                     ? '❌Failed'
                     : '✅Passed',
             testPassed: this._testReport?.passed.toString() ?? '-',
@@ -36426,7 +36427,7 @@ class Module {
             testElapsed: this._testReport?.time?.toFixed(1).concat('s') ?? '-',
             lintResult: this._lintReport === undefined
                 ? '-'
-                : this._lintReport.result === type_1.TestResult.Failed
+                : this._lintReport.result === reportable_1.TestResult.Failed
                     ? '❌Failed'
                     : '✅Passed'
         };
@@ -36475,7 +36476,7 @@ exports.Module = Module;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Repository = void 0;
 const module_1 = __nccwpck_require__(6611);
-const type_1 = __nccwpck_require__(1409);
+const reportable_1 = __nccwpck_require__(56);
 class Repository {
     _modules;
     constructor(_modules) {
@@ -36516,7 +36517,7 @@ class Repository {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-        const result = this._modules.every(m => m.result === type_1.TestResult.Passed)
+        const result = this._modules.every(m => m.result === reportable_1.TestResult.Passed)
             ? '`Passed`🙆‍♀️'
             : '`Failed`🙅‍♂️';
         const moduleTable = this.renderTable({
