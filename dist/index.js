@@ -36286,10 +36286,6 @@ async function run() {
     try {
         const testDirs = (0, input_1.getTestDirs)();
         const lintDirs = (0, input_1.getLintDirs)();
-        if (testDirs.length === 0 && lintDirs.length === 0) {
-            core.warning('no directories provided, skipping action');
-            return;
-        }
         const testReportXml = (0, input_1.getTestReportXml)();
         const lintReportXml = (0, input_1.getLintReportXml)();
         const token = (0, input_1.getGitHubToken)();
