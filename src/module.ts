@@ -1,13 +1,13 @@
 import * as path from 'path'
 
-import { GotestsumReport } from './junit/reporter/gotestsum'
+import { GotestsumReport } from './junit/gotestsum'
 import { JUnitReport, TestResult } from './junit/type'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
-import { GolangCILintReport } from './junit/reporter/golangcilint'
+import { GolangCILintReport } from './junit/golangcilint'
 
 export class Module {
   constructor(

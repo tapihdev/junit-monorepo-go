@@ -1,7 +1,7 @@
 import * as path from 'path'
 
-import { parseJUnitReport, JUnitReport as JunitReportXML } from '../xml'
-import { JUnitReport, TestResult, TestCase } from '../type'
+import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
+import { JUnitReport, TestResult, TestCase } from './type'
 
 export class GolangCILintReport implements JUnitReport {
   constructor(private readonly _junit: JunitReportXML) {}

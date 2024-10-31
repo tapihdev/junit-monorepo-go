@@ -1,5 +1,5 @@
 import { Module } from '../src/module'
-import { GotestsumReport } from '../src/junit/reporter/gotestsum'
+import { GotestsumReport } from '../src/junit/gotestsum'
 import { JUnitReport, TestResult, TestCase } from '../src/junit/type'
 import {
   ModuleTableRecord,
