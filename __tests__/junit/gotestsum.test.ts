@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
 import { GotestsumReport } from '../../src/junit/gotestsum'
-import { TestResult, TestCase } from '../../src/junit/reportable'
+import { Result, Case } from '../../src/junit/reportable'
 
 describe('gotestsum', () => {
   it('should parse the junit report with no testsuite', async () => {
@@ -16,14 +16,14 @@ describe('gotestsum', () => {
       `)
 
     const report = await GotestsumReport.fromXml('path/to/junit.xml')
-    expect(report.result).toBe(TestResult.Passed)
+    expect(report.result).toBe(Result.Passed)
     expect(report.tests).toBe(0)
     expect(report.passed).toBe(0)
     expect(report.failed).toBe(0)
     expect(report.skipped).toBe(0)
     expect(report.time).toBe(0)
     expect(report.version).toBe('1.23.2')
-    expect(report.failures).toEqual([] as TestCase[])
+    expect(report.failures).toEqual([] as Case[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
     })
@@ -55,7 +55,7 @@ describe('gotestsum', () => {
       `)
 
     const report = await GotestsumReport.fromXml('path/to/junit.xml')
-    expect(report.result).toBe(TestResult.Failed)
+    expect(report.result).toBe(Result.Failed)
     expect(report.tests).toBe(4)
     expect(report.passed).toBe(2)
     expect(report.failed).toBe(2)
@@ -70,7 +70,7 @@ describe('gotestsum', () => {
         test: 'Test2',
         message: '=== RUN   Test2\n    baz_test.go:1: error;'
       }
-    ] as TestCase[])
+    ] as Case[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
     })

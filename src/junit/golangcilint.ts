@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { Reportable, TestResult, TestCase } from './reportable'
+import { Reportable, Result, Case } from './reportable'
 
 export class GolangCILintReport implements Reportable {
   constructor(private readonly _junit: JunitReportXML) {}
@@ -10,11 +10,11 @@ export class GolangCILintReport implements Reportable {
     return new GolangCILintReport(await parseJUnitReport(path))
   }
 
-  get result(): TestResult {
+  get result(): Result {
     // Passed if there are no test suites, because golangci-lint reports only failures
     return this._junit.testsuites.testsuite === undefined
-      ? TestResult.Passed
-      : TestResult.Failed
+      ? Result.Passed
+      : Result.Failed
   }
 
   get tests(): number {
@@ -57,7 +57,7 @@ export class GolangCILintReport implements Reportable {
     return undefined
   }
 
-  get failures(): TestCase[] {
+  get failures(): Case[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }

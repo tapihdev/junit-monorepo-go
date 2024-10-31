@@ -1,22 +1,22 @@
 export interface Reportable {
-  readonly result: TestResult
+  readonly result: Result
   readonly tests: number
   readonly passed: number
   readonly failed: number
   readonly skipped: number
   readonly time?: number
   readonly version?: string
-  readonly failures: TestCase[]
+  readonly failures: Case[]
 }
 
-export enum TestResult {
+export enum Result {
   Passed = 'passed',
   Failed = 'failed',
   Skipped = 'skipped',
   Unknown = 'unknown'
 }
 
-export type TestCase = {
+export type Case = {
   subDir: string
   file: string
   line: number

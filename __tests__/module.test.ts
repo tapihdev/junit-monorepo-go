@@ -1,6 +1,6 @@
 import { GoModule } from '../src/module'
 import { GotestsumReport } from '../src/junit/gotestsum'
-import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
+import { Reportable, Result, Case } from '../src/junit/reportable'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -27,7 +27,7 @@ describe('module', () => {
 
   it('should make a module table record with test', async () => {
     const module = new GoModule('path/to', {
-      result: TestResult.Passed,
+      result: Result.Passed,
       tests: 4,
       passed: 3,
       failed: 1,
@@ -37,7 +37,7 @@ describe('module', () => {
       failures: []
     } as Reportable)
 
-    expect(module.result).toBe(TestResult.Passed)
+    expect(module.result).toBe(Result.Passed)
     expect(module.hasTestReport).toBe(true)
     expect(module.hasLintReport).toBe(false)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
@@ -53,7 +53,7 @@ describe('module', () => {
 
   it('should make a module table record with lint', async () => {
     const module = new GoModule('path/to', undefined, {
-      result: TestResult.Passed,
+      result: Result.Passed,
       tests: 0,
       passed: 0,
       failed: 0,
@@ -63,7 +63,7 @@ describe('module', () => {
       failures: []
     } as Reportable)
 
-    expect(module.result).toBe(TestResult.Passed)
+    expect(module.result).toBe(Result.Passed)
     expect(module.hasTestReport).toBe(false)
     expect(module.hasLintReport).toBe(true)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
@@ -81,7 +81,7 @@ describe('module', () => {
     const module = new GoModule(
       'path/to',
       {
-        result: TestResult.Passed,
+        result: Result.Passed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -91,7 +91,7 @@ describe('module', () => {
         failures: []
       } as Reportable,
       {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -111,11 +111,11 @@ describe('module', () => {
             test: 'Test2',
             message: 'error2\noccurred'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable
     )
 
-    expect(module.result).toBe(TestResult.Failed)
+    expect(module.result).toBe(Result.Failed)
     expect(module.hasTestReport).toBe(true)
     expect(module.hasLintReport).toBe(true)
     expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual({
@@ -131,7 +131,7 @@ describe('module', () => {
 
   it('should make a failed test table record', async () => {
     const module = new GoModule('path/to', {
-      result: TestResult.Failed,
+      result: Result.Failed,
       tests: 4,
       passed: 3,
       failed: 1,
@@ -153,10 +153,10 @@ describe('module', () => {
           test: 'Test2',
           message: 'error2\noccurred'
         }
-      ] as TestCase[]
+      ] as Case[]
     } as Reportable)
 
-    expect(module.result).toBe(TestResult.Failed)
+    expect(module.result).toBe(Result.Failed)
     expect(module.hasTestReport).toBe(true)
     expect(module.hasLintReport).toBe(false)
     expect(module.makeFailedTestTableRecords('owner', 'repo', 'sha')).toEqual([
@@ -177,7 +177,7 @@ describe('module', () => {
     const module = new GoModule(
       'path/to',
       {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -187,7 +187,7 @@ describe('module', () => {
         failures: []
       } as Reportable,
       {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -207,11 +207,11 @@ describe('module', () => {
             test: 'Test2',
             message: 'error2\noccurred'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable
     )
 
-    expect(module.result).toBe(TestResult.Failed)
+    expect(module.result).toBe(Result.Failed)
     expect(module.hasTestReport).toBe(true)
     expect(module.hasLintReport).toBe(true)
     expect(module.makeFailedLintTableRecords('owner', 'repo', 'sha')).toEqual([
@@ -232,7 +232,7 @@ describe('module', () => {
     const module = new GoModule(
       'path/to',
       {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -247,10 +247,10 @@ describe('module', () => {
             test: 'Test1',
             message: 'error1\noccurred'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable,
       {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 4,
         passed: 3,
         failed: 1,
@@ -265,7 +265,7 @@ describe('module', () => {
             test: 'Test2',
             message: 'error2\noccurred'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable
     )
 

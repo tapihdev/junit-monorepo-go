@@ -1,5 +1,5 @@
 import { GoModule } from './module'
-import { TestResult } from './junit/reportable'
+import { Result } from './junit/reportable'
 import {
   AnyRecord,
   FailedTestTableRecord,
@@ -73,7 +73,7 @@ export class Repository {
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
-    const result = this._modules.every(m => m.result === TestResult.Passed)
+    const result = this._modules.every(m => m.result === Result.Passed)
       ? '`Passed`🙆‍♀️'
       : '`Failed`🙅‍♂️'
 

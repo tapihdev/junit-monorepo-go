@@ -1,5 +1,5 @@
 import { parseJUnitReport, JUnitReport as JunitReportXML } from './xml'
-import { Reportable, TestResult, TestCase } from './reportable'
+import { Reportable, Result, Case } from './reportable'
 
 export class GotestsumReport implements Reportable {
   private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
@@ -11,23 +11,23 @@ export class GotestsumReport implements Reportable {
     return new GotestsumReport(await parseJUnitReport(path))
   }
 
-  get result(): TestResult {
+  get result(): Result {
     if (this._junit.testsuites.$ === undefined) {
-      return TestResult.Unknown
+      return Result.Unknown
     }
 
     if (this._junit.testsuites.$.failures !== '0') {
-      return TestResult.Failed
+      return Result.Failed
     }
 
     if (
       this._junit.testsuites.$.skipped !== undefined &&
       this._junit.testsuites.$.skipped !== '0'
     ) {
-      return TestResult.Skipped
+      return Result.Skipped
     }
 
-    return TestResult.Passed
+    return Result.Passed
   }
 
   get tests(): number {
@@ -84,7 +84,7 @@ export class GotestsumReport implements Reportable {
     return match[1]
   }
 
-  get failures(): TestCase[] {
+  get failures(): Case[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }

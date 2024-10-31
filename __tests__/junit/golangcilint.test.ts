@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 
 import { GolangCILintReport } from '../../src/junit/golangcilint'
-import { TestResult, TestCase } from '../../src/junit/reportable'
+import { Result, Case } from '../../src/junit/reportable'
 
 describe('golangcilint', () => {
   it('should parse the junit report with no failure', async () => {
@@ -10,14 +10,14 @@ describe('golangcilint', () => {
     `)
 
     const report = await GolangCILintReport.fromXml('path/to/junit.xml')
-    expect(report.result).toBe(TestResult.Passed)
+    expect(report.result).toBe(Result.Passed)
     expect(report.tests).toBe(0)
     expect(report.passed).toBe(0)
     expect(report.failed).toBe(0)
     expect(report.skipped).toBe(0)
     expect(report.time).toBeUndefined()
     expect(report.version).toBeUndefined()
-    expect(report.failures).toEqual([] as TestCase[])
+    expect(report.failures).toEqual([] as Case[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
     })
@@ -48,7 +48,7 @@ Details: Bar]]></failure>
     `)
 
     const report = await GolangCILintReport.fromXml('path/to/junit.xml')
-    expect(report.result).toBe(TestResult.Failed)
+    expect(report.result).toBe(Result.Failed)
     expect(report.tests).toBe(5)
     expect(report.passed).toBe(0)
     expect(report.failed).toBe(5)
@@ -70,7 +70,7 @@ Details: Bar]]></failure>
         test: 'errcheck',
         message: 'Error'
       }
-    ] as TestCase[])
+    ] as Case[])
     expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
       encoding: 'utf8'
     })

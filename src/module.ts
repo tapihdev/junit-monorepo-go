@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { GotestsumReport } from './junit/gotestsum'
-import { Reportable, TestResult } from './junit/reportable'
+import { Reportable, Result } from './junit/reportable'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -13,7 +13,7 @@ interface Module {
   directory: string
   hasLintReport: boolean
   hasTestReport: boolean
-  result: TestResult
+  result: Result
 
   makeModuleTableRecord(
     owner: string,
@@ -71,11 +71,11 @@ export class GoModule implements Module {
     return this._testReport !== undefined
   }
 
-  get result(): TestResult {
-    return this._testReport?.result === TestResult.Failed ||
-      this._lintReport?.result === TestResult.Failed
-      ? TestResult.Failed
-      : TestResult.Passed
+  get result(): Result {
+    return this._testReport?.result === Result.Failed ||
+      this._lintReport?.result === Result.Failed
+      ? Result.Failed
+      : Result.Passed
   }
 
   makeModuleTableRecord(
@@ -89,7 +89,7 @@ export class GoModule implements Module {
       testResult:
         this._testReport === undefined
           ? '-'
-          : this._testReport.result === TestResult.Failed
+          : this._testReport.result === Result.Failed
             ? '❌Failed'
             : '✅Passed',
       testPassed: this._testReport?.passed.toString() ?? '-',
@@ -98,7 +98,7 @@ export class GoModule implements Module {
       lintResult:
         this._lintReport === undefined
           ? '-'
-          : this._lintReport.result === TestResult.Failed
+          : this._lintReport.result === Result.Failed
             ? '❌Failed'
             : '✅Passed'
     }

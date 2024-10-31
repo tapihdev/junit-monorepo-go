@@ -1,6 +1,6 @@
 import { Repository } from '../src/repository'
 import { GoModule } from '../src/module'
-import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
+import { Reportable, Result, Case } from '../src/junit/reportable'
 
 const context = {
   owner: 'owner',
@@ -16,14 +16,14 @@ describe('repository', () => {
     // TODO: mock Module and write tests
     const fromXMLMock = jest.spyOn(GoModule, 'fromXml').mockResolvedValue(
       new GoModule('go/app1', {
-        result: TestResult.Passed,
+        result: Result.Passed,
         tests: 1,
         passed: 1,
         failed: 0,
         skipped: 0,
         time: 0.1,
         version: '1.22.2',
-        failures: [] as TestCase[]
+        failures: [] as Case[]
       } as Reportable)
     )
     const monorepo = await Repository.fromDirectories(
@@ -62,24 +62,24 @@ No test results found.
   it('should make a markdown report for a run with tests passed', async () => {
     const monorepo = new Repository([
       new GoModule('go/app1', {
-        result: TestResult.Passed,
+        result: Result.Passed,
         tests: 1,
         passed: 1,
         failed: 0,
         skipped: 0,
         time: 0.1,
         version: '1.22.2',
-        failures: [] as TestCase[]
+        failures: [] as Case[]
       } as Reportable),
       new GoModule('go/app2', {
-        result: TestResult.Passed,
+        result: Result.Passed,
         tests: 2,
         passed: 2,
         failed: 0,
         skipped: 0,
         time: 0.2,
         version: '1.22.1',
-        failures: [] as TestCase[]
+        failures: [] as Case[]
       } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -105,17 +105,17 @@ No test results found.
       new GoModule(
         'go/app1',
         {
-          result: TestResult.Passed,
+          result: Result.Passed,
           tests: 1,
           passed: 1,
           failed: 0,
           skipped: 0,
           time: 0.1,
           version: '1.22.2',
-          failures: [] as TestCase[]
+          failures: [] as Case[]
         } as Reportable,
         {
-          result: TestResult.Passed,
+          result: Result.Passed,
           tests: 0,
           passed: 0,
           failed: 0,
@@ -144,7 +144,7 @@ No test results found.
   it('should make a markdown report for a run with failed tests', async () => {
     const monorepo = new Repository([
       new GoModule('go/app1', {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 2,
         passed: 1,
         failed: 1,
@@ -159,7 +159,7 @@ No test results found.
             test: 'Test1/Case',
             message: 'failed'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 10)
@@ -193,7 +193,7 @@ No test results found.
   it('should make a markdown report for a failed run with failed tests above limit', async () => {
     const monorepo = new Repository([
       new GoModule('go/app1', {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 3,
         passed: 1,
         failed: 2,
@@ -215,7 +215,7 @@ No test results found.
             test: 'Test2/Case',
             message: 'failed'
           }
-        ] as TestCase[]
+        ] as Case[]
       } as Reportable)
     ])
     const markdown = monorepo.makeMarkdownReport(context, 1)
@@ -252,17 +252,17 @@ No test results found.
       new GoModule(
         'go/app1',
         {
-          result: TestResult.Passed,
+          result: Result.Passed,
           tests: 1,
           passed: 1,
           failed: 0,
           skipped: 0,
           time: 0.1,
           version: '1.22.2',
-          failures: [] as TestCase[]
+          failures: [] as Case[]
         } as Reportable,
         {
-          result: TestResult.Failed,
+          result: Result.Failed,
           tests: 1,
           passed: 0,
           failed: 1,
@@ -275,7 +275,7 @@ No test results found.
               test: 'Test1/Case',
               message: 'failed'
             }
-          ] as TestCase[]
+          ] as Case[]
         } as Reportable
       )
     ])
@@ -312,17 +312,17 @@ No test results found.
       new GoModule(
         'go/app1',
         {
-          result: TestResult.Passed,
+          result: Result.Passed,
           tests: 1,
           passed: 1,
           failed: 0,
           skipped: 0,
           time: 0.1,
           version: '1.22.2',
-          failures: [] as TestCase[]
+          failures: [] as Case[]
         } as Reportable,
         {
-          result: TestResult.Failed,
+          result: Result.Failed,
           tests: 2,
           passed: 0,
           failed: 2,
@@ -342,7 +342,7 @@ No test results found.
               test: 'Test2/Case',
               message: 'failed'
             }
-          ] as TestCase[]
+          ] as Case[]
         } as Reportable
       )
     ])
@@ -378,7 +378,7 @@ No test results found.
   it('should make annotation messages', async () => {
     const monorepo = new Repository([
       new GoModule('go/app1', {
-        result: TestResult.Failed,
+        result: Result.Failed,
         tests: 1,
         passed: 0,
         failed: 1,
@@ -408,7 +408,7 @@ No test results found.
       new GoModule(
         'go/app1',
         {
-          result: TestResult.Failed,
+          result: Result.Failed,
           tests: 2,
           passed: 1,
           failed: 1,
@@ -423,10 +423,10 @@ No test results found.
               test: 'Test1/Case',
               message: 'failed'
             }
-          ] as TestCase[]
+          ] as Case[]
         } as Reportable,
         {
-          result: TestResult.Failed,
+          result: Result.Failed,
           tests: 1,
           passed: 0,
           failed: 1,
@@ -439,7 +439,7 @@ No test results found.
               test: 'Test2/Case',
               message: 'failed'
             }
-          ] as TestCase[]
+          ] as Case[]
         } as Reportable
       )
     ])
