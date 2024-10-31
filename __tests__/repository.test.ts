@@ -1,5 +1,5 @@
 import { Repository } from '../src/repository'
-import { Module } from '../src/module'
+import { GoModule } from '../src/module'
 import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
 
 const context = {
@@ -14,8 +14,8 @@ const context = {
 describe('repository', () => {
   it('should construct a repository from directories', async () => {
     // TODO: mock Module and write tests
-    const fromXMLMock = jest.spyOn(Module, 'fromXml').mockResolvedValue(
-      new Module('go/app1', {
+    const fromXMLMock = jest.spyOn(GoModule, 'fromXml').mockResolvedValue(
+      new GoModule('go/app1', {
         result: TestResult.Passed,
         tests: 1,
         passed: 1,
@@ -61,7 +61,7 @@ No test results found.
 
   it('should make a markdown report for a run with tests passed', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
+      new GoModule('go/app1', {
         result: TestResult.Passed,
         tests: 1,
         passed: 1,
@@ -71,7 +71,7 @@ No test results found.
         version: '1.22.2',
         failures: [] as TestCase[]
       } as Reportable),
-      new Module('go/app2', {
+      new GoModule('go/app2', {
         result: TestResult.Passed,
         tests: 2,
         passed: 2,
@@ -102,7 +102,7 @@ No test results found.
 
   it('should make a markdown report for a run with tests and lint passed', async () => {
     const monorepo = new Repository([
-      new Module(
+      new GoModule(
         'go/app1',
         {
           result: TestResult.Passed,
@@ -143,7 +143,7 @@ No test results found.
 
   it('should make a markdown report for a run with failed tests', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
+      new GoModule('go/app1', {
         result: TestResult.Failed,
         tests: 2,
         passed: 1,
@@ -192,7 +192,7 @@ No test results found.
 
   it('should make a markdown report for a failed run with failed tests above limit', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
+      new GoModule('go/app1', {
         result: TestResult.Failed,
         tests: 3,
         passed: 1,
@@ -249,7 +249,7 @@ No test results found.
 
   it('should make a markdown report for a run with failed lints', async () => {
     const monorepo = new Repository([
-      new Module(
+      new GoModule(
         'go/app1',
         {
           result: TestResult.Passed,
@@ -309,7 +309,7 @@ No test results found.
 
   it('should make a markdown report for a failed run with failed lints above limit', async () => {
     const monorepo = new Repository([
-      new Module(
+      new GoModule(
         'go/app1',
         {
           result: TestResult.Passed,
@@ -377,7 +377,7 @@ No test results found.
 
   it('should make annotation messages', async () => {
     const monorepo = new Repository([
-      new Module('go/app1', {
+      new GoModule('go/app1', {
         result: TestResult.Failed,
         tests: 1,
         passed: 0,
@@ -405,7 +405,7 @@ No test results found.
 
   it('should make a markdown report for a run with failed tests and lints', async () => {
     const monorepo = new Repository([
-      new Module(
+      new GoModule(
         'go/app1',
         {
           result: TestResult.Failed,

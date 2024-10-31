@@ -1,4 +1,4 @@
-import { Module } from '../src/module'
+import { GoModule } from '../src/module'
 import { GotestsumReport } from '../src/junit/gotestsum'
 import { Reportable, TestResult, TestCase } from '../src/junit/reportable'
 import {
@@ -12,7 +12,7 @@ describe('module', () => {
     const fromXMLMock = jest
       .spyOn(GotestsumReport, 'fromXml')
       .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
-    const module = await Module.fromXml('path/to', 'junit.xml')
+    const module = await GoModule.fromXml('path/to', 'junit.xml')
     expect(module.directory).toBe('path/to')
     expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
     expect(module.hasTestReport).toBe(true)
@@ -20,13 +20,13 @@ describe('module', () => {
   })
 
   it('should throw an error if both test and lint paths are not specified', async () => {
-    await expect(Module.fromXml('path/to')).rejects.toThrow(
+    await expect(GoModule.fromXml('path/to')).rejects.toThrow(
       'Either testPath or lintPath must be specified'
     )
   })
 
   it('should make a module table record with test', async () => {
-    const module = new Module('path/to', {
+    const module = new GoModule('path/to', {
       result: TestResult.Passed,
       tests: 4,
       passed: 3,
@@ -52,7 +52,7 @@ describe('module', () => {
   })
 
   it('should make a module table record with lint', async () => {
-    const module = new Module('path/to', undefined, {
+    const module = new GoModule('path/to', undefined, {
       result: TestResult.Passed,
       tests: 0,
       passed: 0,
@@ -78,7 +78,7 @@ describe('module', () => {
   })
 
   it('should make a module table record with test and lint', async () => {
-    const module = new Module(
+    const module = new GoModule(
       'path/to',
       {
         result: TestResult.Passed,
@@ -130,7 +130,7 @@ describe('module', () => {
   })
 
   it('should make a failed test table record', async () => {
-    const module = new Module('path/to', {
+    const module = new GoModule('path/to', {
       result: TestResult.Failed,
       tests: 4,
       passed: 3,
@@ -174,7 +174,7 @@ describe('module', () => {
   })
 
   it('should make a failed lint table record', async () => {
-    const module = new Module(
+    const module = new GoModule(
       'path/to',
       {
         result: TestResult.Failed,
@@ -229,7 +229,7 @@ describe('module', () => {
   })
 
   it('should make annotation messages', async () => {
-    const module = new Module(
+    const module = new GoModule(
       'path/to',
       {
         result: TestResult.Failed,

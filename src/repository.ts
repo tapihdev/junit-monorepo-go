@@ -1,4 +1,4 @@
-import { Module } from './module'
+import { GoModule } from './module'
 import { TestResult } from './junit/reportable'
 import {
   AnyRecord,
@@ -17,7 +17,7 @@ export type MarkdownContext = {
 }
 
 export class Repository {
-  constructor(private readonly _modules: Module[]) {}
+  constructor(private readonly _modules: GoModule[]) {}
 
   static async fromDirectories(
     testDirectories: string[],
@@ -38,7 +38,7 @@ export class Repository {
       Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
         const testPath = test ? testReportXml : undefined
         const lintPath = lint ? lintReportXml : undefined
-        return Module.fromXml(directory, testPath, lintPath)
+        return GoModule.fromXml(directory, testPath, lintPath)
       })
     )
     return new Repository(modules)

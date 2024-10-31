@@ -36370,12 +36370,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Module = void 0;
+exports.GoModule = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const gotestsum_1 = __nccwpck_require__(6755);
 const reportable_1 = __nccwpck_require__(56);
 const golangcilint_1 = __nccwpck_require__(2599);
-class Module {
+class GoModule {
     _directory;
     _testReport;
     _lintReport;
@@ -36396,7 +36396,7 @@ class Module {
                 ? golangcilint_1.GolangCILintReport.fromXml(path.join(directory, lintPath))
                 : undefined
         ]);
-        return new Module(directory, test, lint);
+        return new GoModule(directory, test, lint);
     }
     get directory() {
         return this._directory;
@@ -36463,7 +36463,7 @@ class Module {
         });
     }
 }
-exports.Module = Module;
+exports.GoModule = GoModule;
 
 
 /***/ }),
@@ -36496,7 +36496,7 @@ class Repository {
         const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
             const testPath = test ? testReportXml : undefined;
             const lintPath = lint ? lintReportXml : undefined;
-            return module_1.Module.fromXml(directory, testPath, lintPath);
+            return module_1.GoModule.fromXml(directory, testPath, lintPath);
         }));
         return new Repository(modules);
     }

@@ -9,7 +9,31 @@ import {
 } from './type'
 import { GolangCILintReport } from './junit/golangcilint'
 
-export class Module {
+interface Module {
+  directory: string
+  hasLintReport: boolean
+  hasTestReport: boolean
+  result: TestResult
+
+  makeModuleTableRecord(
+    owner: string,
+    repo: string,
+    sha: string
+  ): ModuleTableRecord
+  makeFailedTestTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): FailedTestTableRecord[]
+  makeFailedLintTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): FailedLintTableRecord[]
+  makeAnnotationMessages(): string[]
+}
+
+export class GoModule implements Module {
   constructor(
     private readonly _directory: string,
     private readonly _testReport?: Reportable,
@@ -20,7 +44,7 @@ export class Module {
     directory: string,
     testPath?: string,
     lintPath?: string
-  ): Promise<Module> {
+  ): Promise<GoModule> {
     if (testPath === undefined && lintPath === undefined) {
       throw new Error('Either testPath or lintPath must be specified')
     }
@@ -32,7 +56,7 @@ export class Module {
         ? GolangCILintReport.fromXml(path.join(directory, lintPath))
         : undefined
     ])
-    return new Module(directory, test, lint)
+    return new GoModule(directory, test, lint)
   }
 
   get directory(): string {
