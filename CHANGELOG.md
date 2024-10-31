@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.0.6](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.5...v0.0.6) - 2024-10-31
+- feat: ignore lint read error by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/32
+- chore: Revert "Merge pull request #32 from tapihdev/tapih/ignore-lint-read-error" by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/34
+- feat: make test optional by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/35
+- feat: make test optional by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/36
+- doc: update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/37
+- feat: accept lint-dirs by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/38
+- feat: comment if empty by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/39
+
 ## [v0.0.5](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.4...v0.0.5) - 2024-10-21
 - refactor: gotestsum by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/18
 - feat: golangci-lint reporter by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/20
