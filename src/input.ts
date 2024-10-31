@@ -6,7 +6,7 @@ export function getGitHubToken(): string {
 }
 
 function getDirs(name: string): string[] {
-  const raw = core.getInput(name, { required: true })
+  const raw = core.getInput(name, { required: false })
   return raw === ''
     ? []
     : raw
