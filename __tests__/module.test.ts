@@ -21,7 +21,11 @@ describe('ModuleFactory', () => {
         version: '1.22.1',
         failures: []
       } as Reporter)
-    const module = await ModuleFactory.fromXml('path/to', 'test.xml', 'lint.xml')
+    const module = await ModuleFactory.fromXml(
+      'path/to',
+      'test.xml',
+      'lint.xml'
+    )
     expect(fromXMLMock).toHaveBeenCalledWith('test', 'path/to/test.xml')
     expect(fromXMLMock).toHaveBeenCalledWith('lint', 'path/to/lint.xml')
     expect(module.directory).toBe('path/to')
@@ -30,14 +34,15 @@ describe('ModuleFactory', () => {
   })
 })
 
-describe('Module', () => {
+describe('Module#fromXml', () => {
   it('should throw an error if both test and lint paths are not specified', async () => {
     await expect(ModuleFactory.fromXml('path/to')).rejects.toThrow(
       'Either testPath or lintPath must be specified'
     )
   })
+})
 
-  it('should create module table records', async () => {
+describe('Module#makeModuleTableRecord', () => {
     const testCases = [
       {
         name: `should make a module table record with test`,
@@ -152,7 +157,7 @@ describe('Module', () => {
       }
     ]
 
-    for (const { name, input, expected } of testCases) {
+    it.each(testCases)(`%s`, async ({ input, expected }) => {
       const module = new GoModule('path/to', input.test, input.lint)
       expect(module.result).toBe(expected.result)
       expect(module.hasTestReport).toBe(expected.hasTestReport)
@@ -160,9 +165,10 @@ describe('Module', () => {
       expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual(
         expected.table
       )
-    }
-  })
+    })
+})
 
+describe('Module#makeFailedTestTableRecords', () => {
   it('should make a failed test table record', async () => {
     const module = new GoModule('path/to', {
       result: Result.Failed,
@@ -206,7 +212,9 @@ describe('Module', () => {
       }
     ] as FailedTestTableRecord[])
   })
+})
 
+describe('Module#makeFailedLintTableRecords', () => {
   it('should make a failed lint table record', async () => {
     const module = new GoModule(
       'path/to',
@@ -261,7 +269,9 @@ describe('Module', () => {
       }
     ] as FailedLintTableRecord[])
   })
+})
 
+describe('Module#makeAnnotationMessages', () => {
   it('should make annotation messages', async () => {
     const module = new GoModule(
       'path/to',
