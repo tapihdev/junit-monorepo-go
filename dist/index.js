@@ -35963,6 +35963,31 @@ function getFailedLintLimit() {
 
 /***/ }),
 
+/***/ 1275:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReporterFactory = void 0;
+const gotestsum_1 = __nccwpck_require__(6755);
+const golangcilint_1 = __nccwpck_require__(2599);
+const xml_1 = __nccwpck_require__(7822);
+class ReporterFactory {
+    static async fromXml(type, path) {
+        switch (type) {
+            case 'test':
+                return new gotestsum_1.GotestsumReport(await (0, xml_1.parseJUnitReport)(path));
+            case 'lint':
+                return new golangcilint_1.GolangCILintReport(await (0, xml_1.parseJUnitReport)(path));
+        }
+    }
+}
+exports.ReporterFactory = ReporterFactory;
+
+
+/***/ }),
+
 /***/ 2599:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -35994,21 +36019,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GolangCILintReport = void 0;
 const path = __importStar(__nccwpck_require__(1017));
-const xml_1 = __nccwpck_require__(7822);
-const reportable_1 = __nccwpck_require__(56);
+const reporter_1 = __nccwpck_require__(5690);
 class GolangCILintReport {
     _junit;
     constructor(_junit) {
         this._junit = _junit;
     }
-    static async fromXml(path) {
-        return new GolangCILintReport(await (0, xml_1.parseJUnitReport)(path));
-    }
     get result() {
         // Passed if there are no test suites, because golangci-lint reports only failures
         return this._junit.testsuites.testsuite === undefined
-            ? reportable_1.TestResult.Passed
-            : reportable_1.TestResult.Failed;
+            ? reporter_1.Result.Passed
+            : reporter_1.Result.Failed;
     }
     get tests() {
         return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
@@ -36084,8 +36105,7 @@ exports.GolangCILintReport = GolangCILintReport;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GotestsumReport = void 0;
-const xml_1 = __nccwpck_require__(7822);
-const reportable_1 = __nccwpck_require__(56);
+const reporter_1 = __nccwpck_require__(5690);
 class GotestsumReport {
     _junit;
     static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
@@ -36093,21 +36113,18 @@ class GotestsumReport {
     constructor(_junit) {
         this._junit = _junit;
     }
-    static async fromXml(path) {
-        return new GotestsumReport(await (0, xml_1.parseJUnitReport)(path));
-    }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
-            return reportable_1.TestResult.Unknown;
+            return reporter_1.Result.Unknown;
         }
         if (this._junit.testsuites.$.failures !== '0') {
-            return reportable_1.TestResult.Failed;
+            return reporter_1.Result.Failed;
         }
         if (this._junit.testsuites.$.skipped !== undefined &&
             this._junit.testsuites.$.skipped !== '0') {
-            return reportable_1.TestResult.Skipped;
+            return reporter_1.Result.Skipped;
         }
-        return reportable_1.TestResult.Passed;
+        return reporter_1.Result.Passed;
     }
     get tests() {
         return parseInt(this._junit.testsuites.$?.tests ?? '0');
@@ -36185,20 +36202,20 @@ exports.GotestsumReport = GotestsumReport;
 
 /***/ }),
 
-/***/ 56:
+/***/ 5690:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestResult = void 0;
-var TestResult;
-(function (TestResult) {
-    TestResult["Passed"] = "passed";
-    TestResult["Failed"] = "failed";
-    TestResult["Skipped"] = "skipped";
-    TestResult["Unknown"] = "unknown";
-})(TestResult || (exports.TestResult = TestResult = {}));
+exports.Result = void 0;
+var Result;
+(function (Result) {
+    Result["Passed"] = "passed";
+    Result["Failed"] = "failed";
+    Result["Skipped"] = "skipped";
+    Result["Unknown"] = "unknown";
+})(Result || (exports.Result = Result = {}));
 
 
 /***/ }),
@@ -36295,7 +36312,7 @@ async function run() {
         const failedTestLimit = (0, input_1.getFailedTestLimit)();
         const failedLintLimit = (0, input_1.getFailedLintLimit)();
         core.info(`* search and read junit reports`);
-        const repository = await repository_1.Repository.fromDirectories(testDirs, lintDirs, testReportXml, lintReportXml);
+        const repository = await repository_1.RepositoryFactory.fromDirectories(testDirs, lintDirs, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -36370,11 +36387,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModule = void 0;
+exports.GoModule = exports.ModuleFactory = void 0;
 const path = __importStar(__nccwpck_require__(1017));
-const gotestsum_1 = __nccwpck_require__(6755);
-const reportable_1 = __nccwpck_require__(56);
-const golangcilint_1 = __nccwpck_require__(2599);
+const reporter_1 = __nccwpck_require__(5690);
+const factory_1 = __nccwpck_require__(1275);
+class ModuleFactory {
+    // Only GoModule is supported for now
+    static async fromXml(directory, testPath, lintPath) {
+        if (testPath === undefined && lintPath === undefined) {
+            throw new Error('Either testPath or lintPath must be specified');
+        }
+        const [test, lint] = await Promise.all([
+            testPath
+                ? factory_1.ReporterFactory.fromXml('test', path.join(directory, testPath))
+                : undefined,
+            lintPath
+                ? factory_1.ReporterFactory.fromXml('lint', path.join(directory, lintPath))
+                : undefined
+        ]);
+        return new GoModule(directory, test, lint);
+    }
+}
+exports.ModuleFactory = ModuleFactory;
 class GoModule {
     _directory;
     _testReport;
@@ -36383,20 +36417,6 @@ class GoModule {
         this._directory = _directory;
         this._testReport = _testReport;
         this._lintReport = _lintReport;
-    }
-    static async fromXml(directory, testPath, lintPath) {
-        if (testPath === undefined && lintPath === undefined) {
-            throw new Error('Either testPath or lintPath must be specified');
-        }
-        const [test, lint] = await Promise.all([
-            testPath
-                ? gotestsum_1.GotestsumReport.fromXml(path.join(directory, testPath))
-                : undefined,
-            lintPath
-                ? golangcilint_1.GolangCILintReport.fromXml(path.join(directory, lintPath))
-                : undefined
-        ]);
-        return new GoModule(directory, test, lint);
     }
     get directory() {
         return this._directory;
@@ -36408,10 +36428,10 @@ class GoModule {
         return this._testReport !== undefined;
     }
     get result() {
-        return this._testReport?.result === reportable_1.TestResult.Failed ||
-            this._lintReport?.result === reportable_1.TestResult.Failed
-            ? reportable_1.TestResult.Failed
-            : reportable_1.TestResult.Passed;
+        return this._testReport?.result === reporter_1.Result.Failed ||
+            this._lintReport?.result === reporter_1.Result.Failed
+            ? reporter_1.Result.Failed
+            : reporter_1.Result.Passed;
     }
     makeModuleTableRecord(owner, repo, sha) {
         return {
@@ -36419,7 +36439,7 @@ class GoModule {
             version: this._testReport?.version ?? '-',
             testResult: this._testReport === undefined
                 ? '-'
-                : this._testReport.result === reportable_1.TestResult.Failed
+                : this._testReport.result === reporter_1.Result.Failed
                     ? '❌Failed'
                     : '✅Passed',
             testPassed: this._testReport?.passed.toString() ?? '-',
@@ -36427,7 +36447,7 @@ class GoModule {
             testElapsed: this._testReport?.time?.toFixed(1).concat('s') ?? '-',
             lintResult: this._lintReport === undefined
                 ? '-'
-                : this._lintReport.result === reportable_1.TestResult.Failed
+                : this._lintReport.result === reporter_1.Result.Failed
                     ? '❌Failed'
                     : '✅Passed'
         };
@@ -36474,14 +36494,10 @@ exports.GoModule = GoModule;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Repository = void 0;
+exports.Repository = exports.RepositoryFactory = void 0;
 const module_1 = __nccwpck_require__(6611);
-const reportable_1 = __nccwpck_require__(56);
-class Repository {
-    _modules;
-    constructor(_modules) {
-        this._modules = _modules;
-    }
+const reporter_1 = __nccwpck_require__(5690);
+class RepositoryFactory {
     static async fromDirectories(testDirectories, lintDirectories, testReportXml, lintReportXml) {
         const map = new Map();
         testDirectories.forEach(d => map.set(d, [true, false]));
@@ -36496,9 +36512,16 @@ class Repository {
         const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
             const testPath = test ? testReportXml : undefined;
             const lintPath = lint ? lintReportXml : undefined;
-            return module_1.GoModule.fromXml(directory, testPath, lintPath);
+            return module_1.ModuleFactory.fromXml(directory, testPath, lintPath);
         }));
         return new Repository(modules);
+    }
+}
+exports.RepositoryFactory = RepositoryFactory;
+class Repository {
+    _modules;
+    constructor(_modules) {
+        this._modules = _modules;
     }
     get numModules() {
         return this._modules.length;
@@ -36517,7 +36540,7 @@ class Repository {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-        const result = this._modules.every(m => m.result === reportable_1.TestResult.Passed)
+        const result = this._modules.every(m => m.result === reporter_1.Result.Passed)
             ? '`Passed`🙆‍♀️'
             : '`Failed`🙅‍♂️';
         const moduleTable = this.renderTable({
