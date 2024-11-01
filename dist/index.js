@@ -36108,7 +36108,11 @@ exports.GotestsumReport = void 0;
 const reporter_1 = __nccwpck_require__(5690);
 class GotestsumReport {
     _junit;
-    static failureRegex = /\s*([\w\d]+_test.go):(\d+):/;
+    // gotestsum reports failures in the following format:
+    // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+    // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+    // This line filters out the second format.
+    static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
     constructor(_junit) {
         this._junit = _junit;
@@ -36172,29 +36176,30 @@ class GotestsumReport {
         if (this._junit.testsuites.testsuite === undefined) {
             return [];
         }
-        return (this._junit.testsuites.testsuite
-            .map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ?? [])
+        const casesWithFailures = this._junit.testsuites.testsuite
+            .map(suite => suite.testcase ?? [])
             .flat()
+            .filter(testcase => testcase.failure !== undefined);
+        return casesWithFailures
             .map(testcase => {
-            const message = testcase.failure?.map(failure => failure._ ?? '').join('\n') ?? '';
-            const match = message.match(GotestsumReport.failureRegex);
-            if (match !== null && match.length !== 3) {
-                // This should never happen
-                throw new Error(`message does match the regex but length is not 3: ${message}`);
-            }
-            return {
-                subDir: testcase.$.classname,
-                file: match === null ? '' : match[1],
-                line: match === null ? 0 : parseInt(match[2]),
-                test: testcase.$.name,
-                message
-            };
+            const macthedFailures = testcase.failure
+                ?.map(failure => failure._?.match(GotestsumReport.failureRegex) ?? null)
+                .filter(match => match !== null) ?? [];
+            return macthedFailures.map(match => {
+                if (match !== null && match.length !== 3) {
+                    // This should never happen
+                    throw new Error(`message does match the regex but length is not 3: ${match.groups}`);
+                }
+                return {
+                    subDir: testcase.$.classname,
+                    file: match[1],
+                    line: parseInt(match[2]),
+                    test: testcase.$.name,
+                    message: match[0]
+                };
+            });
         })
-            // gotestsum reports failures in the following format:
-            // 1. === RUN   Test&#xA;    baz_test.go:1: error;
-            // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
-            // This line filters out the second format.
-            .filter(testcase => testcase.file !== '' && testcase.line !== 0));
+            .flat();
     }
 }
 exports.GotestsumReport = GotestsumReport;
