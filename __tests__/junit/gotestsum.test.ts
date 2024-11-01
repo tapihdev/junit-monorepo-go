@@ -5,7 +5,6 @@ import { Result, Case } from '../../src/junit/reporter'
 
 describe('gotestsum', () => {
   it('should report test results', async () => {
-    // table driven tests
     const testCases = [
       {
         name: 'should parse the junit report with no testsuite',

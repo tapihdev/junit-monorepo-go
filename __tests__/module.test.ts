@@ -1,4 +1,5 @@
 import { GoModule, ModuleFactory } from '../src/module'
+import { ReporterFactory } from '../src/junit/factory'
 import { Reporter, Result, Case } from '../src/junit/reporter'
 import {
   ModuleTableRecord,
@@ -6,19 +7,30 @@ import {
   FailedLintTableRecord
 } from '../src/type'
 
-describe('module', () => {
-  // TODO: Ignore this test for now
-  // it('should construct a module', async () => {
-  //   const fromXMLMock = jest
-  //     .spyOn(GotestsumReport, 'fromXml')
-  //     .mockResolvedValue(new GotestsumReport({ testsuites: {} }))
-  //   const module = await GoModule.fromXml('path/to', 'junit.xml')
-  //   expect(module.directory).toBe('path/to')
-  //   expect(fromXMLMock).toHaveBeenCalledWith('path/to/junit.xml')
-  //   expect(module.hasTestReport).toBe(true)
-  //   expect(module.hasLintReport).toBe(false)
-  // })
+describe('ModuleFactory', () => {
+  it('should construct a module', async () => {
+    const fromXMLMock = jest
+      .spyOn(ReporterFactory, 'fromXml')
+      .mockResolvedValue({
+        result: Result.Passed,
+        tests: 4,
+        passed: 3,
+        failed: 1,
+        skipped: 0,
+        time: 1.1,
+        version: '1.22.1',
+        failures: []
+      } as Reporter)
+    const module = await ModuleFactory.fromXml('path/to', 'test.xml', 'lint.xml')
+    expect(fromXMLMock).toHaveBeenCalledWith('test', 'path/to/test.xml')
+    expect(fromXMLMock).toHaveBeenCalledWith('lint', 'path/to/lint.xml')
+    expect(module.directory).toBe('path/to')
+    expect(module.hasTestReport).toBe(true)
+    expect(module.hasLintReport).toBe(true)
+  })
+})
 
+describe('Module', () => {
   it('should throw an error if both test and lint paths are not specified', async () => {
     await expect(ModuleFactory.fromXml('path/to')).rejects.toThrow(
       'Either testPath or lintPath must be specified'
@@ -26,7 +38,6 @@ describe('module', () => {
   })
 
   it('should create module table records', async () => {
-    // table driven
     const testCases = [
       {
         name: `should make a module table record with test`,
