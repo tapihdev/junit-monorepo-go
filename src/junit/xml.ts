@@ -25,23 +25,25 @@ type TestSuite = {
   $: {
     name: string
     tests: string
-    errors: string
+    errors?: string
     failures: string
     skipped?: string
     time?: string
-    timestamp?: Date
+    timestamp?: string
   }
   testcase?: TestCase[]
   properties?: Property[]
 }
 
 type Property = {
-  property: {
-    $: {
-      name: string
-      value: string
-    }[]
-  }
+  property: [
+    {
+      $: {
+        name: string
+        value: string
+      }
+    }
+  ]
 }
 
 type TestCase = {
