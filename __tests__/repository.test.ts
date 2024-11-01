@@ -1,7 +1,6 @@
 import { Repository, RepositoryFactory } from '../src/repository'
 import { Module, ModuleFactory } from '../src/module'
-import { Reporter, Result, Case } from '../src/junit/reporter'
-import { hasUncaughtExceptionCaptureCallback } from 'process'
+import { Result } from '../src/junit/reporter'
 
 const context = {
   owner: 'owner',

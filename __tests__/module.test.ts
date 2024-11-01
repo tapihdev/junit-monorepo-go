@@ -1,11 +1,11 @@
 import { GoModule, ModuleFactory } from '../src/module'
-import { ReporterFactory } from '../src/junit/factory'
-import { Reporter, Result, Case } from '../src/junit/reporter'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from '../src/type'
+import { ReporterFactory } from '../src/junit/factory'
+import { Reporter, Result, Case } from '../src/junit/reporter'
 
 describe('ModuleFactory', () => {
   it('should construct a module', async () => {
