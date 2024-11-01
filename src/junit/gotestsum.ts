@@ -2,7 +2,11 @@ import { JUnitReport } from './xml'
 import { Reporter, Result, Case } from './reporter'
 
 export class GotestsumReport implements Reporter {
-  private static failureRegex = /\s*([\w\d]+_test.go):(\d+):/
+  // gotestsum reports failures in the following format:
+  // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+  // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+  // This line filters out the second format.
+  private static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
   constructor(private readonly _junit: JUnitReport) {}
@@ -85,40 +89,36 @@ export class GotestsumReport implements Reporter {
       return []
     }
 
-    return (
-      this._junit.testsuites.testsuite
-        .map(
-          suite =>
-            suite.testcase?.filter(
-              testcase => testcase.failure !== undefined
-            ) ?? []
-        )
-        .flat()
-        .map(testcase => {
-          const message =
-            testcase.failure?.map(failure => failure._ ?? '').join('\n') ?? ''
+    const casesWithFailures = this._junit.testsuites.testsuite
+      .map(suite => suite.testcase ?? [])
+      .flat()
+      .filter(testcase => testcase.failure !== undefined)
 
-          const match = message.match(GotestsumReport.failureRegex)
+    return casesWithFailures
+      .map(testcase => {
+        const macthedFailures =
+          testcase.failure
+            ?.map(
+              failure => failure._?.match(GotestsumReport.failureRegex) ?? null
+            )
+            .filter(match => match !== null) ?? []
+
+        return macthedFailures.map(match => {
           if (match !== null && match.length !== 3) {
             // This should never happen
             throw new Error(
-              `message does match the regex but length is not 3: ${message}`
+              `message does match the regex but length is not 3: ${match.groups}`
             )
           }
-
           return {
             subDir: testcase.$.classname,
-            file: match === null ? '' : match[1],
-            line: match === null ? 0 : parseInt(match[2]),
+            file: match[1],
+            line: parseInt(match[2]),
             test: testcase.$.name,
-            message
-          }
+            message: match[0]
+          } as Case
         })
-        // gotestsum reports failures in the following format:
-        // 1. === RUN   Test&#xA;    baz_test.go:1: error;
-        // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
-        // This line filters out the second format.
-        .filter(testcase => testcase.file !== '' && testcase.line !== 0)
-    )
+      })
+      .flat()
   }
 }
