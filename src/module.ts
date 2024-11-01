@@ -10,8 +10,8 @@ import {
 
 export interface Module {
   directory: string
-  hasLintReport: boolean
   hasTestReport: boolean
+  hasLintReport: boolean
   result: Result
 
   makeModuleTableRecord(

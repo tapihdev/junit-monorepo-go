@@ -1,5 +1,5 @@
 import { Repository, RepositoryFactory } from '../src/repository'
-import { GoModule, ModuleFactory } from '../src/module'
+import { Module, ModuleFactory } from '../src/module'
 import { Reporter, Result, Case } from '../src/junit/reporter'
 
 const context = {
@@ -11,21 +11,28 @@ const context = {
   actor: 'actor'
 }
 
-describe('repository', () => {
+describe('RepositoryFactory', () => {
   it('should construct a repository from directories', async () => {
-    // TODO: mock Module and write tests
-    const fromXMLMock = jest.spyOn(ModuleFactory, 'fromXml').mockResolvedValue(
-      new GoModule('go/app1', {
-        result: Result.Passed,
-        tests: 1,
-        passed: 1,
-        failed: 0,
-        skipped: 0,
-        time: 0.1,
+    const fromXMLMock = jest.spyOn(ModuleFactory, 'fromXml').mockResolvedValue({
+      directory: 'go/app1',
+      hasTestReport: true,
+      hasLintReport: false,
+      result: Result.Passed,
+
+      makeModuleTableRecord: jest.fn().mockReturnValue({
+        name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
         version: '1.22.2',
-        failures: [] as Case[]
-      } as Reporter)
-    )
+        testResult: '✅Passed',
+        testPassed: '1',
+        testFailed: '0',
+        testElapsed: '0.1s',
+        lintResult: '-'
+      }),
+
+      makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+      makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+      makeAnnotationMessages: jest.fn().mockReturnValue([])
+    } as Module)
     const repository = await RepositoryFactory.fromDirectories(
       ['go/app1'],
       [],
@@ -41,7 +48,9 @@ describe('repository', () => {
     )
     expect(repository.numModules).toBe(1)
   })
+})
 
+describe('repository', () => {
   it('should make a markdown report for empty CI', async () => {
     const repository = new Repository([])
     const markdown = repository.makeMarkdownReport(context, 10)
@@ -61,26 +70,46 @@ No test results found.
 
   it('should make a markdown report for a run with tests passed', async () => {
     const repository = new Repository([
-      new GoModule('go/app1', {
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: false,
         result: Result.Passed,
-        tests: 1,
-        passed: 1,
-        failed: 0,
-        skipped: 0,
-        time: 0.1,
-        version: '1.22.2',
-        failures: [] as Case[]
-      } as Reporter),
-      new GoModule('go/app2', {
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
+          version: '1.22.2',
+          testResult: '✅Passed',
+          testPassed: '1',
+          testFailed: '0',
+          testElapsed: '0.1s',
+          lintResult: '-'
+        }),
+
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      } as Module,
+      {
+        directory: 'go/app2',
+        hasTestReport: true,
+        hasLintReport: false,
         result: Result.Passed,
-        tests: 2,
-        passed: 2,
-        failed: 0,
-        skipped: 0,
-        time: 0.2,
-        version: '1.22.1',
-        failures: [] as Case[]
-      } as Reporter)
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app2](https://github.com/owner/repo/blob/abcdef123456/go/app2)',
+          version: '1.22.1',
+          testResult: '✅Passed',
+          testPassed: '2',
+          testFailed: '0',
+          testElapsed: '0.2s',
+          lintResult: '-'
+        }),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -102,27 +131,26 @@ No test results found.
 
   it('should make a markdown report for a run with tests and lint passed', async () => {
     const repository = new Repository([
-      new GoModule(
-        'go/app1',
-        {
-          result: Result.Passed,
-          tests: 1,
-          passed: 1,
-          failed: 0,
-          skipped: 0,
-          time: 0.1,
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: true,
+        result: Result.Passed,
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
           version: '1.22.2',
-          failures: [] as Case[]
-        } as Reporter,
-        {
-          result: Result.Passed,
-          tests: 0,
-          passed: 0,
-          failed: 0,
-          skipped: 0,
-          failures: []
-        } as Reporter
-      )
+          testResult: '✅Passed',
+          testPassed: '1',
+          testFailed: '0',
+          testElapsed: '0.1s',
+          lintResult: '✅Passed'
+        }),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -143,24 +171,33 @@ No test results found.
 
   it('should make a markdown report for a run with failed tests', async () => {
     const repository = new Repository([
-      new GoModule('go/app1', {
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: false,
         result: Result.Failed,
-        tests: 2,
-        passed: 1,
-        failed: 1,
-        skipped: 0,
-        time: 0.2,
-        version: '1.22.1',
-        failures: [
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
+          version: '1.22.1',
+          testResult: '❌Failed',
+          testPassed: '1',
+          testFailed: '1',
+          testElapsed: '0.2s',
+          lintResult: '-'
+        }),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([
           {
-            subDir: '.',
-            file: 'foo_test.go',
-            line: 1,
+            file: '[go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1)',
             test: 'Test1/Case',
             message: 'failed'
           }
-        ] as Case[]
-      } as Reporter)
+        ]),
+
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -192,31 +229,38 @@ No test results found.
 
   it('should make a markdown report for a failed run with failed tests above limit', async () => {
     const repository = new Repository([
-      new GoModule('go/app1', {
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: false,
         result: Result.Failed,
-        tests: 3,
-        passed: 1,
-        failed: 2,
-        skipped: 0,
-        time: 0.2,
-        version: '1.22.1',
-        failures: [
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
+          version: '1.22.1',
+          testResult: '❌Failed',
+          testPassed: '1',
+          testFailed: '2',
+          testElapsed: '0.2s',
+          lintResult: '-'
+        }),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([
           {
-            subDir: '.',
-            file: 'foo_test.go',
-            line: 1,
+            file: '[go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1)',
             test: 'Test1/Case',
             message: 'failed'
           },
           {
-            subDir: '.',
-            file: 'bar_test.go',
-            line: 2,
+            file: '[go/app1/bar_test.go:2](https://github.com/owner/repo/blob/abcdef123456/go/app1/bar_test.go#L2)',
             test: 'Test2/Case',
             message: 'failed'
           }
-        ] as Case[]
-      } as Reporter)
+        ]),
+
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 1)
     expect(markdown).toMatch(
@@ -249,35 +293,33 @@ No test results found.
 
   it('should make a markdown report for a run with failed lints', async () => {
     const repository = new Repository([
-      new GoModule(
-        'go/app1',
-        {
-          result: Result.Passed,
-          tests: 1,
-          passed: 1,
-          failed: 0,
-          skipped: 0,
-          time: 0.1,
+      {
+        directory: 'go/app1',
+        hasTestReport: false,
+        hasLintReport: true,
+        result: Result.Failed,
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
           version: '1.22.2',
-          failures: [] as Case[]
-        } as Reporter,
-        {
-          result: Result.Failed,
-          tests: 1,
-          passed: 0,
-          failed: 1,
-          skipped: 0,
-          failures: [
-            {
-              subDir: '.',
-              file: 'foo_test.go',
-              line: 1,
-              test: 'Test1/Case',
-              message: 'failed'
-            }
-          ] as Case[]
-        } as Reporter
-      )
+          testResult: '✅Passed',
+          testPassed: '1',
+          testFailed: '0',
+          testElapsed: '0.1s',
+          lintResult: '❌Failed'
+        }),
+
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([
+          {
+            file: '[go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1)',
+            test: 'Test1/Case',
+            message: 'failed'
+          }
+        ]),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -309,42 +351,38 @@ No test results found.
 
   it('should make a markdown report for a failed run with failed lints above limit', async () => {
     const repository = new Repository([
-      new GoModule(
-        'go/app1',
-        {
-          result: Result.Passed,
-          tests: 1,
-          passed: 1,
-          failed: 0,
-          skipped: 0,
-          time: 0.1,
+      {
+        directory: 'go/app1',
+        hasTestReport: false,
+        hasLintReport: true,
+        result: Result.Failed,
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
           version: '1.22.2',
-          failures: [] as Case[]
-        } as Reporter,
-        {
-          result: Result.Failed,
-          tests: 2,
-          passed: 0,
-          failed: 2,
-          skipped: 0,
-          failures: [
-            {
-              subDir: '.',
-              file: 'foo_test.go',
-              line: 1,
-              test: 'Test1/Case',
-              message: 'failed'
-            },
-            {
-              subDir: '.',
-              file: 'bar_test.go',
-              line: 1,
-              test: 'Test2/Case',
-              message: 'failed'
-            }
-          ] as Case[]
-        } as Reporter
-      )
+          testResult: '✅Passed',
+          testPassed: '1',
+          testFailed: '0',
+          testElapsed: '0.1s',
+          lintResult: '❌Failed'
+        }),
+
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([
+          {
+            file: '[go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1)',
+            test: 'Test1/Case',
+            message: 'failed'
+          },
+          {
+            file: '[go/app1/bar_test.go:2](https://github.com/owner/repo/blob/abcdef123456/go/app1/bar_test.go#L2)',
+            test: 'Test2/Case',
+            message: 'failed'
+          }
+        ]),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10, 1)
     expect(markdown).toMatch(
@@ -375,73 +413,42 @@ No test results found.
     )
   })
 
-  it('should make annotation messages', async () => {
+  it('should make a markdown report for a run with failed tests and lints', async () => {
     const repository = new Repository([
-      new GoModule('go/app1', {
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: true,
         result: Result.Failed,
-        tests: 1,
-        passed: 0,
-        failed: 1,
-        skipped: 0,
-        time: 0.1,
-        version: '1.22.2',
-        failures: [
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({
+          name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
+          version: '1.22.2',
+          testResult: '❌Failed',
+          testPassed: '1',
+          testFailed: '1',
+          testElapsed: '0.2s',
+          lintResult: '❌Failed'
+        }),
+
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([
           {
-            subDir: '.',
-            file: 'foo_test.go',
-            line: 1,
+            file: '[go/app1/foo_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/foo_test.go#L1)',
             test: 'Test1/Case',
             message: 'failed'
           }
-        ]
-      } as Reporter)
-    ])
-    const annotations = repository.makeAnnotationMessages()
+        ]),
 
-    expect(annotations).toEqual([
-      '::error file=go/app1/foo_test.go,line=1::failed'
-    ])
-  })
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([
+          {
+            file: '[go/app1/bar_test.go:1](https://github.com/owner/repo/blob/abcdef123456/go/app1/bar_test.go#L1)',
+            test: 'Test2/Case',
+            message: 'failed'
+          }
+        ]),
 
-  it('should make a markdown report for a run with failed tests and lints', async () => {
-    const repository = new Repository([
-      new GoModule(
-        'go/app1',
-        {
-          result: Result.Failed,
-          tests: 2,
-          passed: 1,
-          failed: 1,
-          skipped: 0,
-          time: 0.2,
-          version: '1.22.2',
-          failures: [
-            {
-              subDir: '.',
-              file: 'foo_test.go',
-              line: 1,
-              test: 'Test1/Case',
-              message: 'failed'
-            }
-          ] as Case[]
-        } as Reporter,
-        {
-          result: Result.Failed,
-          tests: 1,
-          passed: 0,
-          failed: 1,
-          skipped: 0,
-          failures: [
-            {
-              subDir: '.',
-              file: 'bar_test.go',
-              line: 1,
-              test: 'Test2/Case',
-              message: 'failed'
-            }
-          ] as Case[]
-        } as Reporter
-      )
+        makeAnnotationMessages: jest.fn().mockReturnValue([])
+      }
     ])
     const markdown = repository.makeMarkdownReport(context, 10)
     expect(markdown).toMatch(
@@ -487,5 +494,28 @@ No test results found.
     const annotations = repository.makeAnnotationMessages()
 
     expect(annotations).toEqual([])
+  })
+
+  it('should make annotation messages', async () => {
+    const repository = new Repository([
+      {
+        directory: 'go/app1',
+        hasTestReport: true,
+        hasLintReport: false,
+        result: Result.Failed,
+
+        makeModuleTableRecord: jest.fn().mockReturnValue({}),
+        makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
+        makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
+        makeAnnotationMessages: jest
+          .fn()
+          .mockReturnValue(['::error file=go/app1/foo_test.go,line=1::failed'])
+      }
+    ])
+    const annotations = repository.makeAnnotationMessages()
+
+    expect(annotations).toEqual([
+      '::error file=go/app1/foo_test.go,line=1::failed'
+    ])
   })
 })
