@@ -1,4 +1,4 @@
-import { parseJUnitReport, JUnitReport } from './xml'
+import { JUnitReport } from './xml'
 import { Reporter, Result, Case } from './reporter'
 
 export class GotestsumReport implements Reporter {

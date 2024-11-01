@@ -43,129 +43,129 @@ describe('Module#fromXml', () => {
 })
 
 describe('Module#makeModuleTableRecord', () => {
-    const testCases = [
-      {
-        name: `should make a module table record with test`,
-        input: {
-          test: {
-            result: Result.Passed,
-            tests: 4,
-            passed: 3,
-            failed: 1,
-            skipped: 0,
-            time: 1.1,
-            version: '1.22.1',
-            failures: []
-          } as Reporter,
-          lint: undefined
-        },
-        expected: {
+  const testCases = [
+    {
+      name: `should make a module table record with test`,
+      input: {
+        test: {
           result: Result.Passed,
-          hasTestReport: true,
-          hasLintReport: false,
-          table: {
-            name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
-            version: '1.22.1',
-            testResult: '✅Passed',
-            testPassed: '3',
-            testFailed: '1',
-            testElapsed: '1.1s',
-            lintResult: '-'
-          } as ModuleTableRecord
-        }
+          tests: 4,
+          passed: 3,
+          failed: 1,
+          skipped: 0,
+          time: 1.1,
+          version: '1.22.1',
+          failures: []
+        } as Reporter,
+        lint: undefined
       },
-      {
-        name: `should make a module table record with lint`,
-        input: {
-          test: undefined,
-          lint: {
-            result: Result.Passed,
-            tests: 0,
-            passed: 0,
-            failed: 0,
-            skipped: 0,
-            version: undefined,
-            failures: []
-          } as Reporter
-        },
-        expected: {
-          result: Result.Passed,
-          hasTestReport: false,
-          hasLintReport: true,
-          table: {
-            name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
-            version: '-',
-            testResult: '-',
-            testPassed: '-',
-            testFailed: '-',
-            testElapsed: '-',
-            lintResult: '✅Passed'
-          } as ModuleTableRecord
-        }
-      },
-      {
-        name: `should make a module table record with test and lint`,
-        input: {
-          test: {
-            result: Result.Passed,
-            tests: 4,
-            passed: 3,
-            failed: 1,
-            skipped: 0,
-            time: 1.1,
-            version: '1.22.1',
-            failures: []
-          } as Reporter,
-          lint: {
-            result: Result.Failed,
-            tests: 1,
-            passed: 0,
-            failed: 1,
-            skipped: 0,
-            failures: [
-              {
-                subDir: 'foo/bar',
-                file: 'baz_test.go',
-                line: 1,
-                test: 'Test1',
-                message: 'error1\noccurred'
-              },
-              {
-                subDir: 'foo/bar',
-                file: 'baz_test.go',
-                line: 2,
-                test: 'Test2',
-                message: 'error2\noccurred'
-              }
-            ] as Case[]
-          } as Reporter
-        },
-        expected: {
-          result: Result.Failed,
-          hasTestReport: true,
-          hasLintReport: true,
-          table: {
-            name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
-            version: '1.22.1',
-            testResult: '✅Passed',
-            testPassed: '3',
-            testFailed: '1',
-            testElapsed: '1.1s',
-            lintResult: '❌Failed'
-          } as ModuleTableRecord
-        }
+      expected: {
+        result: Result.Passed,
+        hasTestReport: true,
+        hasLintReport: false,
+        table: {
+          name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+          version: '1.22.1',
+          testResult: '✅Passed',
+          testPassed: '3',
+          testFailed: '1',
+          testElapsed: '1.1s',
+          lintResult: '-'
+        } as ModuleTableRecord
       }
-    ]
+    },
+    {
+      name: `should make a module table record with lint`,
+      input: {
+        test: undefined,
+        lint: {
+          result: Result.Passed,
+          tests: 0,
+          passed: 0,
+          failed: 0,
+          skipped: 0,
+          version: undefined,
+          failures: []
+        } as Reporter
+      },
+      expected: {
+        result: Result.Passed,
+        hasTestReport: false,
+        hasLintReport: true,
+        table: {
+          name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+          version: '-',
+          testResult: '-',
+          testPassed: '-',
+          testFailed: '-',
+          testElapsed: '-',
+          lintResult: '✅Passed'
+        } as ModuleTableRecord
+      }
+    },
+    {
+      name: `should make a module table record with test and lint`,
+      input: {
+        test: {
+          result: Result.Passed,
+          tests: 4,
+          passed: 3,
+          failed: 1,
+          skipped: 0,
+          time: 1.1,
+          version: '1.22.1',
+          failures: []
+        } as Reporter,
+        lint: {
+          result: Result.Failed,
+          tests: 1,
+          passed: 0,
+          failed: 1,
+          skipped: 0,
+          failures: [
+            {
+              subDir: 'foo/bar',
+              file: 'baz_test.go',
+              line: 1,
+              test: 'Test1',
+              message: 'error1\noccurred'
+            },
+            {
+              subDir: 'foo/bar',
+              file: 'baz_test.go',
+              line: 2,
+              test: 'Test2',
+              message: 'error2\noccurred'
+            }
+          ] as Case[]
+        } as Reporter
+      },
+      expected: {
+        result: Result.Failed,
+        hasTestReport: true,
+        hasLintReport: true,
+        table: {
+          name: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
+          version: '1.22.1',
+          testResult: '✅Passed',
+          testPassed: '3',
+          testFailed: '1',
+          testElapsed: '1.1s',
+          lintResult: '❌Failed'
+        } as ModuleTableRecord
+      }
+    }
+  ]
 
-    it.each(testCases)(`%s`, async ({ input, expected }) => {
-      const module = new GoModule('path/to', input.test, input.lint)
-      expect(module.result).toBe(expected.result)
-      expect(module.hasTestReport).toBe(expected.hasTestReport)
-      expect(module.hasLintReport).toBe(expected.hasLintReport)
-      expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual(
-        expected.table
-      )
-    })
+  it.each(testCases)(`%s`, async ({ input, expected }) => {
+    const module = new GoModule('path/to', input.test, input.lint)
+    expect(module.result).toBe(expected.result)
+    expect(module.hasTestReport).toBe(expected.hasTestReport)
+    expect(module.hasLintReport).toBe(expected.hasLintReport)
+    expect(module.makeModuleTableRecord('owner', 'repo', 'sha')).toEqual(
+      expected.table
+    )
+  })
 })
 
 describe('Module#makeFailedTestTableRecords', () => {
