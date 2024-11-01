@@ -5,6 +5,16 @@ import { JUnitReport, parseJUnitReport } from '../../src/junit/xml'
 describe('gotestsum', () => {
   const testCases = [
     {
+      name: 'should parse the junit report with empty testsuites',
+      input: `
+        <testsuites></testsuites>
+        `,
+      expected: {
+        // NOTE: xml2js returns an empty string instead of an empty object
+        testsuites: ''
+      }
+    },
+    {
       name: 'should parse the junit report with no testsuite',
       input: `
         <testsuites tests="0" failures="0" errors="0" time="0.000000">
@@ -170,6 +180,87 @@ describe('gotestsum', () => {
                         type: ''
                       },
                       _: '=== RUN   Test4\n--- FAIL: Test4 (0.00s)\n'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      } as JUnitReport
+    },
+    {
+      name: 'should parse the junit report with testsuites that does not have properties',
+      input: `
+      <testsuites>
+        <testsuite name="go/app/foo_test.go" tests="3" errors="0" failures="3">
+          <testcase name="errcheck" classname="go/app/foo_test.go:12:34">
+            <failure message="go/app/foo_test.go:39:21: Error" type=""><![CDATA[: Error
+Category: errcheck
+File: go/app/foo_test.go
+Line: 12
+Details: Foo]]></failure>
+          </testcase>
+        </testsuite>
+        <testsuite name="go/app/bar_test.go" tests="2" errors="0" failures="2">
+          <testcase name="errcheck" classname="go/app/bar_test.go:56:78">
+            <failure message="go/app/bar_test.go:56:78: Error" type=""><![CDATA[: Error
+Category: errcheck
+File: go/app/bar_test.go
+Line: 56
+Details: Bar]]></failure>
+          </testcase>
+        </testsuite>
+      </testsuites>
+      `,
+      expected: {
+        testsuites: {
+          testsuite: [
+            {
+              $: {
+                name: 'go/app/foo_test.go',
+                tests: '3',
+                errors: '0',
+                failures: '3'
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'go/app/foo_test.go:12:34',
+                    name: 'errcheck'
+                  },
+                  failure: [
+                    {
+                      $: {
+                        message: 'go/app/foo_test.go:39:21: Error',
+                        type: ''
+                      },
+                      _: ': Error\nCategory: errcheck\nFile: go/app/foo_test.go\nLine: 12\nDetails: Foo'
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              $: {
+                name: 'go/app/bar_test.go',
+                tests: '2',
+                errors: '0',
+                failures: '2'
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'go/app/bar_test.go:56:78',
+                    name: 'errcheck'
+                  },
+                  failure: [
+                    {
+                      $: {
+                        message: 'go/app/bar_test.go:56:78: Error',
+                        type: ''
+                      },
+                      _: ': Error\nCategory: errcheck\nFile: go/app/bar_test.go\nLine: 56\nDetails: Bar'
                     }
                   ]
                 }

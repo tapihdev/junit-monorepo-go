@@ -1,15 +1,14 @@
-import * as fs from 'fs'
-
-import { ReporterFactory } from '../../src/junit/factory'
-import { Result, Case } from '../../src/junit/reporter'
+import { JUnitReport } from '../../src/junit/xml'
+import { GolangCILintReport } from '../../src/junit/golangcilint'
+import { Result } from '../../src/junit/reporter'
 
 describe('golangcilint', () => {
   const testCases = [
     {
       name: 'should parse the junit report with no failure',
-      input: `
-        <testsuites></testsuites>
-        `,
+      input: {
+        testsuites: {}
+      } as JUnitReport,
       expected: {
         result: Result.Passed,
         tests: 0,
@@ -23,26 +22,62 @@ describe('golangcilint', () => {
     },
     {
       name: 'should parse the junit report with testsuites',
-      input: `<testsuites>
-<testsuite name="go/app/foo_test.go" tests="3" errors="0" failures="3">
-  <testcase name="errcheck" classname="go/app/foo_test.go:12:34">
-    <failure message="go/app/foo_test.go:39:21: Error" type=""><![CDATA[: Error
-Category: errcheck
-File: go/app/foo_test.go
-Line: 12
-Details: Foo]]></failure>
-  </testcase>
-</testsuite>
-<testsuite name="go/app/bar_test.go" tests="2" errors="0" failures="2">
-  <testcase name="errcheck" classname="go/app/bar_test.go:56:78">
-    <failure message="go/app/bar_test.go:56:78: Error" type=""><![CDATA[: Error
-Category: errcheck
-File: go/app/bar_test.go
-Line: 56
-Details: Bar]]></failure>
-    </testcase>
-  </testsuite>
-</testsuites>`,
+      input: {
+        testsuites: {
+          testsuite: [
+            {
+              $: {
+                name: 'go/app/foo_test.go',
+                tests: '3',
+                errors: '0',
+                failures: '3'
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'go/app/foo_test.go:12:34',
+                    name: 'errcheck'
+                  },
+                  failure: [
+                    {
+                      $: {
+                        message: 'go/app/foo_test.go:39:21: Error',
+                        type: ''
+                      },
+                      _: ': Error\nCategory: errcheck\nFile: go/app/foo_test.go\nLine: 12\nDetails: Foo'
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              $: {
+                name: 'go/app/bar_test.go',
+                tests: '2',
+                errors: '0',
+                failures: '2'
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'go/app/bar_test.go:56:78',
+                    name: 'errcheck'
+                  },
+                  failure: [
+                    {
+                      $: {
+                        message: 'go/app/bar_test.go:56:78: Error',
+                        type: ''
+                      },
+                      _: ': Error\nCategory: errcheck\nFile: go/app/bar_test.go\nLine: 56\nDetails: Bar'
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      } as JUnitReport,
       expected: {
         result: Result.Failed,
         tests: 5,
@@ -66,16 +101,13 @@ Details: Bar]]></failure>
             test: 'errcheck',
             message: 'Error'
           }
-        ] as Case[]
+        ]
       }
     }
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const readFileMock = jest
-      .spyOn(fs.promises, 'readFile')
-      .mockResolvedValue(input)
-    const report = await ReporterFactory.fromXml('lint', 'path/to/junit.xml')
+    const report = new GolangCILintReport(input)
     expect(report.result).toBe(expected.result)
     expect(report.tests).toBe(expected.tests)
     expect(report.passed).toBe(expected.passed)
@@ -84,8 +116,5 @@ Details: Bar]]></failure>
     expect(report.time).toBe(expected.time)
     expect(report.version).toBe(expected.version)
     expect(report.failures).toEqual(expected.failures)
-    expect(readFileMock).toHaveBeenNthCalledWith(1, 'path/to/junit.xml', {
-      encoding: 'utf8'
-    })
   })
 })
