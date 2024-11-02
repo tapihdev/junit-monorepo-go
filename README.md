@@ -1,5 +1,6 @@
 ![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4fe2f49c3ab144b0bbe4effc85a061a0)](https://app.codacy.com/gh/tapihdev/junit-monorepo-go/dashboard?utm_source=gh\&utm_medium=referral\&utm_content=\&utm_campaign=Badge_grade)
+![Coverage](./badges/coverage.svg)
+[![Codacy](https://app.codacy.com/project/badge/Grade/4fe2f49c3ab144b0bbe4effc85a061a0)](https://app.codacy.com/gh/tapihdev/junit-monorepo-go/dashboard?utm_source=gh\&utm_medium=referral\&utm_content=\&utm_campaign=Badge_grade)
 [![CI](https://github.com/tapihdev/junit-monorepo-go/actions/workflows/ci.yml/badge.svg)](https://github.com/tj-actions/changed-files/actions/workflows/ci.yml)
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tapihdev/junit-monorepo-go?sort=semver)
 
