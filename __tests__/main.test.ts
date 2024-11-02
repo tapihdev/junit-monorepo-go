@@ -11,7 +11,8 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { Repository, RepositoryFactory } from '../src/repository'
+import { GoRepository } from '../src/repository'
+import { GoRepositoryFactory } from '../src/factory'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -26,12 +27,14 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let repositoryFactoryFromDirectoriesMock: jest.SpiedFunction<
-  typeof RepositoryFactory.fromDirectories
+let repositoryFactoryFromXmlMock: jest.SpiedFunction<
+  GoRepositoryFactory['fromXml']
 >
-let makeMarkdownReportMock: jest.SpiedFunction<Repository['makeMarkdownReport']>
+let makeMarkdownReportMock: jest.SpiedFunction<
+  GoRepository['makeMarkdownReport']
+>
 let makeAnnotationMessagesMock: jest.SpiedFunction<
-  Repository['makeAnnotationMessages']
+  GoRepository['makeAnnotationMessages']
 >
 
 describe('action', () => {
@@ -58,15 +61,14 @@ describe('action', () => {
     upsertCommentMock = jest
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
-
-    repositoryFactoryFromDirectoriesMock = jest
-      .spyOn(RepositoryFactory, 'fromDirectories')
-      .mockResolvedValue(new Repository([]))
+    repositoryFactoryFromXmlMock = jest
+      .spyOn(GoRepositoryFactory.prototype, 'fromXml')
+      .mockResolvedValue(new GoRepository([]))
     makeMarkdownReportMock = jest
-      .spyOn(Repository.prototype, 'makeMarkdownReport')
+      .spyOn(GoRepository.prototype, 'makeMarkdownReport')
       .mockReturnValue('markdown report')
     makeAnnotationMessagesMock = jest
-      .spyOn(Repository.prototype, 'makeAnnotationMessages')
+      .spyOn(GoRepository.prototype, 'makeAnnotationMessages')
       .mockReturnValue(['annotation'])
   })
 
@@ -117,7 +119,7 @@ describe('action', () => {
     expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
     expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
     expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
-    expect(repositoryFactoryFromDirectoriesMock).toHaveBeenNthCalledWith(
+    expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
       1,
       ['go/app1', 'go/app2'],
       ['go/app1', 'go/app3'],

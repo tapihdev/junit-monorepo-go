@@ -1,46 +1,10 @@
-import { GoModule, ModuleFactory } from '../src/module'
+import { GoModule } from '../src/module'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from '../src/type'
-import { ReporterFactory } from '../src/junit/factory'
 import { Reporter, Result, Case } from '../src/junit/reporter'
-
-describe('ModuleFactory', () => {
-  it('should construct a module', async () => {
-    const fromXMLMock = jest
-      .spyOn(ReporterFactory, 'fromXml')
-      .mockResolvedValue({
-        result: Result.Passed,
-        tests: 4,
-        passed: 3,
-        failed: 1,
-        skipped: 0,
-        time: 1.1,
-        version: '1.22.1',
-        failures: []
-      } as Reporter)
-    const module = await ModuleFactory.fromXml(
-      'path/to',
-      'test.xml',
-      'lint.xml'
-    )
-    expect(fromXMLMock).toHaveBeenCalledWith('test', 'path/to/test.xml')
-    expect(fromXMLMock).toHaveBeenCalledWith('lint', 'path/to/lint.xml')
-    expect(module.directory).toBe('path/to')
-    expect(module.hasTestReport).toBe(true)
-    expect(module.hasLintReport).toBe(true)
-  })
-})
-
-describe('Module#fromXml', () => {
-  it('should throw an error if both test and lint paths are not specified', async () => {
-    await expect(ModuleFactory.fromXml('path/to')).rejects.toThrow(
-      'Either testPath or lintPath must be specified'
-    )
-  })
-})
 
 describe('Module#makeModuleTableRecord', () => {
   const testCases = [

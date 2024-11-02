@@ -1,5 +1,5 @@
-import { Repository, RepositoryFactory } from '../src/repository'
-import { Module, ModuleFactory } from '../src/module'
+import { GoRepository } from '../src/repository'
+import { Module } from '../src/module'
 import { Result } from '../src/junit/reporter'
 
 const context = {
@@ -10,45 +10,6 @@ const context = {
   runId: 456,
   actor: 'actor'
 }
-
-describe('RepositoryFactory', () => {
-  it('should construct a repository from directories', async () => {
-    const fromXMLMock = jest.spyOn(ModuleFactory, 'fromXml').mockResolvedValue({
-      directory: 'go/app1',
-      hasTestReport: true,
-      hasLintReport: false,
-      result: Result.Passed,
-
-      makeModuleTableRecord: jest.fn().mockReturnValue({
-        name: '[go/app1](https://github.com/owner/repo/blob/abcdef123456/go/app1)',
-        version: '1.22.2',
-        testResult: '✅Passed',
-        testPassed: '1',
-        testFailed: '0',
-        testElapsed: '0.1s',
-        lintResult: '-'
-      }),
-
-      makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
-      makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
-      makeAnnotationMessages: jest.fn().mockReturnValue([])
-    } as Module)
-    const repository = await RepositoryFactory.fromDirectories(
-      ['go/app1'],
-      [],
-      'test.xml',
-      'lint.xml'
-    )
-
-    expect(fromXMLMock).toHaveBeenNthCalledWith(
-      1,
-      'go/app1',
-      'test.xml',
-      undefined
-    )
-    expect(repository.numModules).toBe(1)
-  })
-})
 
 describe('Repository#Markdown', () => {
   // table drien tests
@@ -502,7 +463,7 @@ No test results found.
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const repository = new Repository(input.modules)
+    const repository = new GoRepository(input.modules)
     const markdown = repository.makeMarkdownReport(
       context,
       input.failedTestLimit,
@@ -544,7 +505,7 @@ describe('Repository#Annotations', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const repository = new Repository(input)
+    const repository = new GoRepository(input)
     const annotations = repository.makeAnnotationMessages()
 
     expect(annotations).toEqual(expected)

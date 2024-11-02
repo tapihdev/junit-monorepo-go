@@ -1,4 +1,4 @@
-import { Module, ModuleFactory } from './module'
+import { Module } from './module'
 import { Result } from './junit/reporter'
 import {
   AnyRecord,
@@ -16,34 +16,7 @@ export type MarkdownContext = {
   actor: string
 }
 
-export class RepositoryFactory {
-  static async fromDirectories(
-    testDirectories: string[],
-    lintDirectories: string[],
-    testReportXml: string,
-    lintReportXml: string
-  ): Promise<Repository> {
-    const map = new Map<string, [boolean, boolean]>()
-    testDirectories.forEach(d => map.set(d, [true, false]))
-    lintDirectories.forEach(d => {
-      if (map.has(d)) {
-        map.set(d, [true, true])
-      } else {
-        map.set(d, [false, true])
-      }
-    })
-    const modules = await Promise.all(
-      Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
-        const testPath = test ? testReportXml : undefined
-        const lintPath = lint ? lintReportXml : undefined
-        return ModuleFactory.fromXml(directory, testPath, lintPath)
-      })
-    )
-    return new Repository(modules)
-  }
-}
-
-export class Repository {
+export class GoRepository {
   constructor(private readonly _modules: Module[]) {}
 
   get numModules(): number {

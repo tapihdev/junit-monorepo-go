@@ -35813,6 +35813,76 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 9035:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GoRepositoryFactory = void 0;
+const path = __importStar(__nccwpck_require__(1017));
+const repository_1 = __nccwpck_require__(259);
+const gotestsum_1 = __nccwpck_require__(6755);
+const golangcilint_1 = __nccwpck_require__(2599);
+const module_1 = __nccwpck_require__(6611);
+class GoRepositoryFactory {
+    _parser;
+    constructor(_parser) {
+        this._parser = _parser;
+    }
+    async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const map = new Map();
+        testDirectories.forEach(d => map.set(d, [testReportXml, undefined]));
+        lintDirectories.forEach(d => {
+            if (map.has(d)) {
+                map.set(d, [testReportXml, lintReportXml]);
+            }
+            else {
+                map.set(d, [undefined, lintReportXml]);
+            }
+        });
+        const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [testPath, lintPath]]) => {
+            const [test, lint] = await Promise.all([
+                testPath
+                    ? new gotestsum_1.GotestsumReport(await this._parser(path.join(directory, testPath)))
+                    : undefined,
+                lintPath
+                    ? new golangcilint_1.GolangCILintReport(await this._parser(path.join(directory, lintPath)))
+                    : undefined
+            ]);
+            return new module_1.GoModule(directory, test, lint);
+        }));
+        return new repository_1.GoRepository(modules);
+    }
+}
+exports.GoRepositoryFactory = GoRepositoryFactory;
+
+
+/***/ }),
+
 /***/ 978:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -35959,31 +36029,6 @@ function getFailedLintLimit() {
     }
     return value;
 }
-
-
-/***/ }),
-
-/***/ 1275:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReporterFactory = void 0;
-const gotestsum_1 = __nccwpck_require__(6755);
-const golangcilint_1 = __nccwpck_require__(2599);
-const xml_1 = __nccwpck_require__(7822);
-class ReporterFactory {
-    static async fromXml(type, path) {
-        switch (type) {
-            case 'test':
-                return new gotestsum_1.GotestsumReport(await (0, xml_1.parseJUnitReport)(path));
-            case 'lint':
-                return new golangcilint_1.GolangCILintReport(await (0, xml_1.parseJUnitReport)(path));
-        }
-    }
-}
-exports.ReporterFactory = ReporterFactory;
 
 
 /***/ }),
@@ -36299,7 +36344,8 @@ const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const input_1 = __nccwpck_require__(6747);
 const github_1 = __nccwpck_require__(978);
-const repository_1 = __nccwpck_require__(259);
+const factory_1 = __nccwpck_require__(9035);
+const xml_1 = __nccwpck_require__(7822);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -36317,7 +36363,8 @@ async function run() {
         const failedTestLimit = (0, input_1.getFailedTestLimit)();
         const failedLintLimit = (0, input_1.getFailedLintLimit)();
         core.info(`* search and read junit reports`);
-        const repository = await repository_1.RepositoryFactory.fromDirectories(testDirs, lintDirs, testReportXml, lintReportXml);
+        const factory = new factory_1.GoRepositoryFactory(xml_1.parseJUnitReport);
+        const repository = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
@@ -36392,28 +36439,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModule = exports.ModuleFactory = void 0;
+exports.GoModule = void 0;
 const path = __importStar(__nccwpck_require__(1017));
 const reporter_1 = __nccwpck_require__(5690);
-const factory_1 = __nccwpck_require__(1275);
-class ModuleFactory {
-    // Only GoModule is supported for now
-    static async fromXml(directory, testPath, lintPath) {
-        if (testPath === undefined && lintPath === undefined) {
-            throw new Error('Either testPath or lintPath must be specified');
-        }
-        const [test, lint] = await Promise.all([
-            testPath
-                ? factory_1.ReporterFactory.fromXml('test', path.join(directory, testPath))
-                : undefined,
-            lintPath
-                ? factory_1.ReporterFactory.fromXml('lint', path.join(directory, lintPath))
-                : undefined
-        ]);
-        return new GoModule(directory, test, lint);
-    }
-}
-exports.ModuleFactory = ModuleFactory;
 class GoModule {
     _directory;
     _testReport;
@@ -36499,31 +36527,9 @@ exports.GoModule = GoModule;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Repository = exports.RepositoryFactory = void 0;
-const module_1 = __nccwpck_require__(6611);
+exports.GoRepository = void 0;
 const reporter_1 = __nccwpck_require__(5690);
-class RepositoryFactory {
-    static async fromDirectories(testDirectories, lintDirectories, testReportXml, lintReportXml) {
-        const map = new Map();
-        testDirectories.forEach(d => map.set(d, [true, false]));
-        lintDirectories.forEach(d => {
-            if (map.has(d)) {
-                map.set(d, [true, true]);
-            }
-            else {
-                map.set(d, [false, true]);
-            }
-        });
-        const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
-            const testPath = test ? testReportXml : undefined;
-            const lintPath = lint ? lintReportXml : undefined;
-            return module_1.ModuleFactory.fromXml(directory, testPath, lintPath);
-        }));
-        return new Repository(modules);
-    }
-}
-exports.RepositoryFactory = RepositoryFactory;
-class Repository {
+class GoRepository {
     _modules;
     constructor(_modules) {
         this._modules = _modules;
@@ -36626,7 +36632,7 @@ ${failedLintTable}
         return this._modules.map(m => m.makeAnnotationMessages()).flat();
     }
 }
-exports.Repository = Repository;
+exports.GoRepository = GoRepository;
 
 
 /***/ }),

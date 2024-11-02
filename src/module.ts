@@ -1,7 +1,6 @@
 import * as path from 'path'
 
 import { Reporter, Result } from './junit/reporter'
-import { ReporterFactory } from './junit/factory'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
@@ -30,28 +29,6 @@ export interface Module {
     sha: string
   ): FailedLintTableRecord[]
   makeAnnotationMessages(): string[]
-}
-
-export class ModuleFactory {
-  // Only GoModule is supported for now
-  static async fromXml(
-    directory: string,
-    testPath?: string,
-    lintPath?: string
-  ): Promise<Module> {
-    if (testPath === undefined && lintPath === undefined) {
-      throw new Error('Either testPath or lintPath must be specified')
-    }
-    const [test, lint] = await Promise.all([
-      testPath
-        ? ReporterFactory.fromXml('test', path.join(directory, testPath))
-        : undefined,
-      lintPath
-        ? ReporterFactory.fromXml('lint', path.join(directory, lintPath))
-        : undefined
-    ])
-    return new GoModule(directory, test, lint)
-  }
 }
 
 export class GoModule implements Module {

@@ -1,6 +1,8 @@
 import * as fs from 'fs'
 import { parseStringPromise } from 'xml2js'
 
+export type XmlParser = (path: string) => Promise<JUnitReport>
+
 export async function parseJUnitReport(path: string): Promise<JUnitReport> {
   const content = await fs.promises.readFile(path, { encoding: 'utf8' })
   return (await parseStringPromise(content)) as JUnitReport
