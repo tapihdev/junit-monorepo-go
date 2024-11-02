@@ -1,39 +1,42 @@
 import * as path from 'path'
 
-import { GotestsumReport } from './junit/reporter/gotestsum'
-import { JUnitReport, TestResult } from './junit/type'
+import { Reporter, Result } from './junit/reporter'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
-import { GolangCILintReport } from './junit/reporter/golangcilint'
 
-export class Module {
+export interface Module {
+  directory: string
+  hasTestReport: boolean
+  hasLintReport: boolean
+  result: Result
+
+  makeModuleTableRecord(
+    owner: string,
+    repo: string,
+    sha: string
+  ): ModuleTableRecord
+  makeFailedTestTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): FailedTestTableRecord[]
+  makeFailedLintTableRecords(
+    owner: string,
+    repo: string,
+    sha: string
+  ): FailedLintTableRecord[]
+  makeAnnotationMessages(): string[]
+}
+
+export class GoModule implements Module {
   constructor(
     private readonly _directory: string,
-    private readonly _testReport?: JUnitReport,
-    private readonly _lintReport?: JUnitReport
+    private readonly _testReport?: Reporter,
+    private readonly _lintReport?: Reporter
   ) {}
-
-  static async fromXml(
-    directory: string,
-    testPath?: string,
-    lintPath?: string
-  ): Promise<Module> {
-    if (testPath === undefined && lintPath === undefined) {
-      throw new Error('Either testPath or lintPath must be specified')
-    }
-    const [test, lint] = await Promise.all([
-      testPath
-        ? GotestsumReport.fromXml(path.join(directory, testPath))
-        : undefined,
-      lintPath
-        ? GolangCILintReport.fromXml(path.join(directory, lintPath))
-        : undefined
-    ])
-    return new Module(directory, test, lint)
-  }
 
   get directory(): string {
     return this._directory
@@ -47,11 +50,11 @@ export class Module {
     return this._testReport !== undefined
   }
 
-  get result(): TestResult {
-    return this._testReport?.result === TestResult.Failed ||
-      this._lintReport?.result === TestResult.Failed
-      ? TestResult.Failed
-      : TestResult.Passed
+  get result(): Result {
+    return this._testReport?.result === Result.Failed ||
+      this._lintReport?.result === Result.Failed
+      ? Result.Failed
+      : Result.Passed
   }
 
   makeModuleTableRecord(
@@ -65,7 +68,7 @@ export class Module {
       testResult:
         this._testReport === undefined
           ? '-'
-          : this._testReport.result === TestResult.Failed
+          : this._testReport.result === Result.Failed
             ? '❌Failed'
             : '✅Passed',
       testPassed: this._testReport?.passed.toString() ?? '-',
@@ -74,7 +77,7 @@ export class Module {
       lintResult:
         this._lintReport === undefined
           ? '-'
-          : this._lintReport.result === TestResult.Failed
+          : this._lintReport.result === Result.Failed
             ? '❌Failed'
             : '✅Passed'
     }

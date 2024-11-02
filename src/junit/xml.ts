@@ -1,8 +1,7 @@
-/**
- * Types to parse JUnit XML reports
- */
 import * as fs from 'fs'
 import { parseStringPromise } from 'xml2js'
+
+export type XmlParser = (path: string) => Promise<JUnitReport>
 
 export async function parseJUnitReport(path: string): Promise<JUnitReport> {
   const content = await fs.promises.readFile(path, { encoding: 'utf8' })
@@ -28,23 +27,25 @@ type TestSuite = {
   $: {
     name: string
     tests: string
-    errors: string
+    errors?: string
     failures: string
     skipped?: string
     time?: string
-    timestamp?: Date
+    timestamp?: string
   }
   testcase?: TestCase[]
   properties?: Property[]
 }
 
 type Property = {
-  property: {
-    $: {
-      name: string
-      value: string
-    }[]
-  }
+  property: [
+    {
+      $: {
+        name: string
+        value: string
+      }
+    }
+  ]
 }
 
 type TestCase = {

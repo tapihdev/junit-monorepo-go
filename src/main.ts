@@ -13,7 +13,8 @@ import {
   getLintDirs
 } from './input'
 import { Client as GitHubClient } from './github'
-import { Repository } from './repository'
+import { GoRepositoryFactory } from './factory'
+import { parseJUnitReport } from './junit/xml'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -34,7 +35,8 @@ export async function run(): Promise<void> {
     const failedLintLimit = getFailedLintLimit()
 
     core.info(`* search and read junit reports`)
-    const repository = await Repository.fromDirectories(
+    const factory = new GoRepositoryFactory(parseJUnitReport)
+    const repository = await factory.fromXml(
       testDirs,
       lintDirs,
       testReportXml,

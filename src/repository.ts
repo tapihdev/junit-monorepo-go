@@ -1,5 +1,5 @@
 import { Module } from './module'
-import { TestResult } from './junit/type'
+import { Result } from './junit/reporter'
 import {
   AnyRecord,
   FailedTestTableRecord,
@@ -16,36 +16,25 @@ export type MarkdownContext = {
   actor: string
 }
 
-export class Repository {
+export class GoRepository {
   constructor(private readonly _modules: Module[]) {}
 
-  static async fromDirectories(
-    testDirectories: string[],
-    lintDirectories: string[],
-    testReportXml: string,
-    lintReportXml: string
-  ): Promise<Repository> {
-    const map = new Map<string, [boolean, boolean]>()
-    testDirectories.forEach(d => map.set(d, [true, false]))
-    lintDirectories.forEach(d => {
-      if (map.has(d)) {
-        map.set(d, [true, true])
-      } else {
-        map.set(d, [false, true])
-      }
-    })
-    const modules = await Promise.all(
-      Array.from(map.entries()).map(async ([directory, [test, lint]]) => {
-        const testPath = test ? testReportXml : undefined
-        const lintPath = lint ? lintReportXml : undefined
-        return Module.fromXml(directory, testPath, lintPath)
-      })
-    )
-    return new Repository(modules)
+  numModules(): number {
+    return this._modules.length
   }
 
-  get numModules(): number {
-    return this._modules.length
+  // This is for testing purposes and not optimal for production
+  hasTestReport(directory: string): boolean {
+    return (
+      this._modules.find(m => m.directory === directory)?.hasTestReport ?? false
+    )
+  }
+
+  // This is for testing purposes and not optimal for production
+  hasLintReport(directory: string): boolean {
+    return (
+      this._modules.find(m => m.directory === directory)?.hasLintReport ?? false
+    )
   }
 
   private renderTable<T extends AnyRecord>(
@@ -73,7 +62,7 @@ export class Repository {
     const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
-    const result = this._modules.every(m => m.result === TestResult.Passed)
+    const result = this._modules.every(m => m.result === Result.Passed)
       ? '`Passed`🙆‍♀️'
       : '`Failed`🙅‍♂️'
 
