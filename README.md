@@ -1,7 +1,9 @@
 # junit-monorepo-go
 
-This action comments CI results of Go multi-module monorepo to a PR and a Actons
-summary page.
+This action comments CI results of Go multi-module monorepo to PRs and Actons
+summary pages.
+
+![image](https://github.com/user-attachments/assets/44e56cbc-ab59-4f7d-8196-6f2e6887daf4)
 
 ## Usage
 
