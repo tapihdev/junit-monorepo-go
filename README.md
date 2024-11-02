@@ -1,9 +1,10 @@
 # junit-monorepo-go
 
-This action comments CI results of Go multi-module monorepo to PRs and Actons
-summary pages.
+This action clearly displays the results of multi-module monorepos in Go by commenting CI results
+to PRs and Actons summary pages.
 
-![image](https://github.com/user-attachments/assets/44e56cbc-ab59-4f7d-8196-6f2e6887daf4)
+|<img src="https://github.com/user-attachments/assets/e3638734-63df-48a7-8910-ab1fb37ae600"/>|
+|:--:|
 
 ## Usage
 
@@ -33,7 +34,7 @@ go
     └── test.xml
 ```
 
-### Configure the workflow
+### Workflow
 
 ```yaml
 name: Test
