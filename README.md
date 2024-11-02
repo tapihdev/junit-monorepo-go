@@ -142,5 +142,4 @@ A full set list of possible output values for this action.
 
 ### PR run permissions
 
-This action requires the `issues: write` and `actions: write` permission to push
-tags.
+This action requires the `issues: write` and `actions: write` permissions.
