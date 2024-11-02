@@ -1,7 +1,16 @@
+![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg?maxAge=43200)
+![Coverage](./badges/coverage.svg)
+[![Codacy](https://app.codacy.com/project/badge/Grade/4fe2f49c3ab144b0bbe4effc85a061a0)](https://app.codacy.com/gh/tapihdev/junit-monorepo-go/dashboard?utm_source=gh\&utm_medium=referral\&utm_content=\&utm_campaign=Badge_grade)
+[![CI](https://github.com/tapihdev/junit-monorepo-go/actions/workflows/ci.yml/badge.svg)](https://github.com/tj-actions/changed-files/actions/workflows/ci.yml)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tapihdev/junit-monorepo-go?sort=semver)
+
 # junit-monorepo-go
 
-This action comments CI results of Go multi-module monorepo to a PR and a Actons
-summary page.
+This action clearly displays the results of multi-module monorepos in Go by commenting CI results
+to PRs and Actons summary pages.
+
+|<img src="https://github.com/user-attachments/assets/e3638734-63df-48a7-8910-ab1fb37ae600"/>|
+|:--:|
 
 ## Usage
 
@@ -31,7 +40,7 @@ go
     └── test.xml
 ```
 
-### Configure the workflow
+### Workflow
 
 ```yaml
 name: Test
