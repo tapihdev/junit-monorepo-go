@@ -19,8 +19,22 @@ export type MarkdownContext = {
 export class GoRepository {
   constructor(private readonly _modules: Module[]) {}
 
-  get numModules(): number {
+  numModules(): number {
     return this._modules.length
+  }
+
+  // This is for testing purposes and not optimal for production
+  hasTestReport(directory: string): boolean {
+    return (
+      this._modules.find(m => m.directory === directory)?.hasTestReport ?? false
+    )
+  }
+
+  // This is for testing purposes and not optimal for production
+  hasLintReport(directory: string): boolean {
+    return (
+      this._modules.find(m => m.directory === directory)?.hasLintReport ?? false
+    )
   }
 
   private renderTable<T extends AnyRecord>(

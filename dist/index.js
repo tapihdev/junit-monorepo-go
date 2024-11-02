@@ -35856,7 +35856,8 @@ class GoRepositoryFactory {
     async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
         const map = new Map();
         testDirectories.forEach(d => map.set(d, [testReportXml, undefined]));
-        lintDirectories.forEach(d => {
+        // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
+        new Set(lintDirectories).forEach(d => {
             if (map.has(d)) {
                 map.set(d, [testReportXml, lintReportXml]);
             }
@@ -36534,8 +36535,16 @@ class GoRepository {
     constructor(_modules) {
         this._modules = _modules;
     }
-    get numModules() {
+    numModules() {
         return this._modules.length;
+    }
+    // This is for testing purposes and not optimal for production
+    hasTestReport(directory) {
+        return (this._modules.find(m => m.directory === directory)?.hasTestReport ?? false);
+    }
+    // This is for testing purposes and not optimal for production
+    hasLintReport(directory) {
+        return (this._modules.find(m => m.directory === directory)?.hasLintReport ?? false);
     }
     renderTable(header, separator, records) {
         if (records.length === 0) {

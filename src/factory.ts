@@ -17,7 +17,8 @@ export class GoRepositoryFactory {
   ): Promise<GoRepository> {
     const map = new Map<string, [string?, string?]>()
     testDirectories.forEach(d => map.set(d, [testReportXml, undefined]))
-    lintDirectories.forEach(d => {
+    // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
+    new Set(lintDirectories).forEach(d => {
       if (map.has(d)) {
         map.set(d, [testReportXml, lintReportXml])
       } else {
