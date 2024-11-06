@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.7...v0.1.0) - 2024-11-06
+- refactor: all by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/42
+- doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/44
+- fix: lint by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/45
+- doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/46
+
 ## [v0.0.7](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.6...v0.0.7) - 2024-10-31
 - fix: accept empty dirs by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/40
 
