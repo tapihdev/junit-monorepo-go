@@ -18,8 +18,9 @@ commenting CI results to PRs and Actons summary pages.
 
 This action assumes that there are multiple Go modules in the monorepo with a
 go.mod file for each module. JUnit test reports are generated with
-[gotestsum](https://github.com/gotestyourself/gotestsum) and [golangci-lint](https://github.com/golangci/golangci-lint)
-and stored in the root of each module.
+[gotestsum](https://github.com/gotestyourself/gotestsum) and
+[golangci-lint](https://github.com/golangci/golangci-lint) and stored in the
+root of each module.
 
 ```
 go
