@@ -65,6 +65,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup go
         uses: actions/setup-go@5
+      - name: Install golangci-lint
+        run: go install github.com/golangci/golangci-lint
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
       - name: Test
