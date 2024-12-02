@@ -1,0 +1,61 @@
+name: Transpile JavaScript
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  codegen:
+    name: Generate
+    if: github.actor != vars.BOT_USERNAME
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Fetch GitHub App Token
+        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1
+        id: token
+        with:
+          app-id: ${{ vars.APP_ID_TAGPR }}
+          private-key: ${{ secrets.PRIVATE_KEY_TAGPR }}
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          token: ${{ steps.token.outputs.token }}
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+
+      - name: Build dist/ Directory
+        id: build
+        run: npm run bundle
+
+      - name: Check diff
+        id: diff
+        continue-on-error: true
+        run: git diff --exit-code
+
+      - name: Push
+        env:
+          BOT_EMAIL: ${{ vars.BOT_EMAIL }}
+          BOT_USERNAME: ${{ vars.BOT_USERNAME }}
+        if: steps.diff.outcome == 'failure'
+        run: |
+          git config --global user.email "${BOT_EMAIL}"
+          git config --global user.name "${BOT_USERNAME}"
+          git commit -am "chore: generate code"
+          git push
