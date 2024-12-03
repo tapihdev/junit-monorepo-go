@@ -134,6 +134,7 @@ jobs:
 | `sha`                 | yes          | The commit SHA of the pull request                                                              |
 | `failed-test-limit`   | no           | The number of failed tests to display (default: 30)                                             |
 | `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)                                             |
+| `skip-comment`        | no           | Skip commenting on the pull request if true (default: false)                                    |
 
 ### Outputs
 

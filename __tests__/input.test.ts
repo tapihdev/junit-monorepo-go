@@ -157,4 +157,23 @@ describe('input', () => {
       expect(() => inputFunc.getFailedLintLimit()).toThrow()
     }
   })
+
+  it('should handle skip-comment', () => {
+    const testCases = [
+      { input: 'true', expected: true },
+      { input: 'false', expected: false }
+    ]
+    for (const { input, expected } of testCases) {
+      getInputMock.mockReturnValue(input)
+      expect(inputFunc.getSkipComment()).toEqual(expected)
+    }
+  })
+
+  it('should throw error when an invalid skip-comment is given', () => {
+    const testCases = [{ input: 'abc' }, { input: '' }]
+    for (const { input } of testCases) {
+      getInputMock.mockReturnValue(input)
+      expect(() => inputFunc.getSkipComment()).toThrow()
+    }
+  })
 })

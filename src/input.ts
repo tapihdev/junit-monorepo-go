@@ -76,3 +76,14 @@ export function getFailedLintLimit(): number {
   }
   return value
 }
+
+export function getSkipComment(): boolean {
+  const raw = core.getInput('skip-comment')
+  if (raw === 'true') {
+    return true
+  }
+  if (raw === 'false') {
+    return false
+  }
+  throw new Error('`skip-comment` must be either true or false')
+}
