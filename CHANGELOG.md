@@ -1,5 +1,29 @@
 # Changelog
 
+## [v0.1.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.1...v0.1.1) - 2024-12-03
+- doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/47
+- chore: fix fmt by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/49
+- Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/50
+- chore(deps): update pnpm to v8.15.9 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/55
+- chore(deps): update dependency eslint to v8.57.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/54
+- chore(deps): update dependency @types/jest to v29.5.14 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/52
+- chore(deps): pin dependencies by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/51
+- chore(deps): update dependency eslint-plugin-jest to v28.9.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/56
+- chore(deps): update dependency eslint-plugin-jsonc to v2.18.2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/57
+- chore(deps): update typescript-eslint monorepo to v8.16.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/60
+- chore(deps): update node.js to v21.7.3 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/59
+- chore(deps): update dependency @types/node to v22.10.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/63
+- chore(deps): update mcr.microsoft.com/devcontainers/typescript-node docker tag to v22 - autoclosed by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/62
+- chore(deps): update node.js to v22 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/66
+- chore: remove devcontainer by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/67
+- ci: generate dist/ on push by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/64
+- chore: do not use .eslintignore any more by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/68
+- fix: set branch to push generated code by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/69
+- fix(deps): update dependency @actions/core to v1.11.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/61
+- chore(deps): update dependency typescript to v5.7.2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/58
+- chore(deps): update pnpm to v9 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/70
+- chore(deps): update dependency @vercel/ncc to v0.38.3 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/53
+
 ## [v0.1.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.0.7...v0.1.0) - 2024-11-06
 - refactor: all by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/42
 - doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/44
