@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.2.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.1.1...v0.2.0) - 2024-12-03
+- feat: skip comment by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/71
+
 ## [v0.1.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.1...v0.1.1) - 2024-12-03
 - doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/47
 - chore: fix fmt by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/49
