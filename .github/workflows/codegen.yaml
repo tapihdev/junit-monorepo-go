@@ -27,6 +27,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          ref:
+            ${{ github.event == 'pull_request' && github.head_ref || github.sha
+            }}
           token: ${{ steps.token.outputs.token }}
 
       - name: Setup Node.js
@@ -53,7 +56,7 @@ jobs:
         env:
           BOT_EMAIL: ${{ vars.BOT_EMAIL }}
           BOT_USERNAME: ${{ vars.BOT_USERNAME }}
-        if: steps.diff.outcome == 'failure'
+        if: github.event == 'pull_request' && steps.diff.outcome == 'failure'
         run: |
           git config --global user.email "${BOT_EMAIL}"
           git config --global user.name "${BOT_USERNAME}"
