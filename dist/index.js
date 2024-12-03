@@ -35966,6 +35966,7 @@ exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
 exports.getFailedTestLimit = getFailedTestLimit;
 exports.getFailedLintLimit = getFailedLintLimit;
+exports.getSkipComment = getSkipComment;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
@@ -36029,6 +36030,16 @@ function getFailedLintLimit() {
         throw new Error('`failed-lint-limit` must be greater than 0');
     }
     return value;
+}
+function getSkipComment() {
+    const raw = core.getInput('skip-comment');
+    if (raw === 'true') {
+        return true;
+    }
+    if (raw === 'false') {
+        return false;
+    }
+    throw new Error('`skip-comment` must be either true or false');
 }
 
 
@@ -36363,6 +36374,7 @@ async function run() {
         const sha = (0, input_1.getSha)();
         const failedTestLimit = (0, input_1.getFailedTestLimit)();
         const failedLintLimit = (0, input_1.getFailedLintLimit)();
+        const skipComment = (0, input_1.getSkipComment)();
         core.info(`* search and read junit reports`);
         const factory = new factory_1.GoRepositoryFactory(xml_1.parseJUnitReport);
         const repository = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
@@ -36377,20 +36389,22 @@ async function run() {
             runId,
             actor
         }, failedTestLimit, failedLintLimit);
-        core.info(`* upsert comment matching ${mark}`);
-        const client = new github_1.Client(github.getOctokit(token));
-        const result = await client.upsertComment({
-            owner,
-            repo,
-            pullNumber,
-            mark,
-            body
-        });
-        if (result.updated) {
-            core.info(`updated comment: ${result.id}`);
-        }
-        else {
-            core.info(`created comment: ${result.id}`);
+        if (!skipComment) {
+            core.info(`* upsert comment matching ${mark}`);
+            const client = new github_1.Client(github.getOctokit(token));
+            const result = await client.upsertComment({
+                owner,
+                repo,
+                pullNumber,
+                mark,
+                body
+            });
+            if (result.updated) {
+                core.info(`updated comment: ${result.id}`);
+            }
+            else {
+                core.info(`created comment: ${result.id}`);
+            }
         }
         core.info('* post summary to summary page');
         await core.summary.addRaw(body).write();

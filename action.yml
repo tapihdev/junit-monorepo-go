@@ -45,6 +45,10 @@ inputs:
     description: 'The maximum number of failed lints to display'
     required: true
     default: '30'
+  skip-comment:
+    description: 'Skip commenting on the pull request if true'
+    required: false
+    default: 'false'
 
 outputs:
   body:

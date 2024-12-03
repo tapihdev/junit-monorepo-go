@@ -72,7 +72,7 @@ describe('action', () => {
       .mockReturnValue(['annotation'])
   })
 
-  it('should set the body output', async () => {
+  it('should post comment and summary', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
@@ -93,6 +93,8 @@ describe('action', () => {
           return '10'
         case 'failed-lint-limit':
           return '5'
+        case 'skip-comment':
+          return 'false'
         default:
           return ''
       }
@@ -153,6 +155,77 @@ describe('action', () => {
     expect(errorMock).not.toHaveBeenCalled()
   })
 
+  it('should post summary', async () => {
+    getInputMock.mockImplementation(name => {
+      switch (name) {
+        case 'github-token':
+          return 'xxx'
+        case 'test-dirs':
+          return 'go/app1,go/app2'
+        case 'lint-dirs':
+          return 'go/app1,go/app3'
+        case 'test-report-xml':
+          return 'test.xml'
+        case 'lint-report-xml':
+          return 'lint.xml'
+        case 'pull-request-number':
+          return '123'
+        case 'sha':
+          return 'sha'
+        case 'failed-test-limit':
+          return '10'
+        case 'failed-lint-limit':
+          return '5'
+        case 'skip-comment':
+          return 'true'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+    expect(runMock).toHaveReturned()
+
+    // Verify that all of the core library functions were called correctly
+    expect(infoMock).toHaveBeenNthCalledWith(
+      1,
+      '* search and read junit reports'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
+    expect(infoMock).toHaveBeenNthCalledWith(
+      3,
+      '* post summary to summary page'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(4, '* annotate failed tests')
+    expect(infoMock).toHaveBeenNthCalledWith(5, 'annotation')
+    expect(infoMock).toHaveBeenNthCalledWith(6, '* set output')
+    expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
+      1,
+      ['go/app1', 'go/app2'],
+      ['go/app1', 'go/app3'],
+      'test.xml',
+      'lint.xml'
+    )
+    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        pullNumber: 123,
+        sha: 'sha',
+        runId: 123,
+        actor: 'actor'
+      },
+      10,
+      5
+    )
+    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
+    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
+    expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
+    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
+    expect(errorMock).not.toHaveBeenCalled()
+  })
+
   it('should set a failed status', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
@@ -174,6 +247,8 @@ describe('action', () => {
           return '10'
         case 'failed-lint-limit':
           return '5'
+        case 'skip-comment':
+          return 'false'
         default:
           return ''
       }
