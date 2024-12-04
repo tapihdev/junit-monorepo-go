@@ -56,7 +56,7 @@ export class GoRepository {
   makeMarkdownReport(
     context: MarkdownContext,
     failedTestLimit: number,
-    failedLintLimit = 10
+    failedLintLimit: number
   ): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
     const commitUrl =
