@@ -31,15 +31,10 @@ export function getLintReportXml(): string {
   return core.getInput('lint-report-xml', { required: true })
 }
 
-export function getPullRequestNumber(): number {
+export function getPullRequestNumber(): number | undefined {
   const raw = core.getInput('pull-request-number', { required: false })
   if (raw === '') {
-    if (github.context.payload.pull_request === undefined) {
-      throw new Error(
-        '`pull-request-number` is required when not running from a pull request'
-      )
-    }
-    return github.context.payload.pull_request.number
+    return github.context.payload.pull_request?.number
   }
 
   if (raw.match(/^\d+$/) === null) {
@@ -75,15 +70,4 @@ export function getFailedLintLimit(): number {
     throw new Error('`failed-lint-limit` must be greater than 0')
   }
   return value
-}
-
-export function getSkipComment(): boolean {
-  const raw = core.getInput('skip-comment')
-  if (raw === 'true') {
-    return true
-  }
-  if (raw === 'false') {
-    return false
-  }
-  throw new Error('`skip-comment` must be either true or false')
 }

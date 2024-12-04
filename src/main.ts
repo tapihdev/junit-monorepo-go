@@ -10,8 +10,7 @@ import {
   getFailedTestLimit,
   getFailedLintLimit,
   getTestDirs,
-  getLintDirs,
-  getSkipComment
+  getLintDirs
 } from './input'
 import { Client as GitHubClient } from './github'
 import { GoRepositoryFactory } from './factory'
@@ -34,7 +33,6 @@ export async function run(): Promise<void> {
     const sha = getSha()
     const failedTestLimit = getFailedTestLimit()
     const failedLintLimit = getFailedLintLimit()
-    const skipComment = getSkipComment()
 
     core.info(`* search and read junit reports`)
     const factory = new GoRepositoryFactory(parseJUnitReport)
@@ -61,7 +59,7 @@ export async function run(): Promise<void> {
       failedLintLimit
     )
 
-    if (!skipComment) {
+    if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
       const client = new GitHubClient(github.getOctokit(token))
       const result = await client.upsertComment({

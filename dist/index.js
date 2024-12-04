@@ -35966,7 +35966,6 @@ exports.getPullRequestNumber = getPullRequestNumber;
 exports.getSha = getSha;
 exports.getFailedTestLimit = getFailedTestLimit;
 exports.getFailedLintLimit = getFailedLintLimit;
-exports.getSkipComment = getSkipComment;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function getGitHubToken() {
@@ -35996,10 +35995,7 @@ function getLintReportXml() {
 function getPullRequestNumber() {
     const raw = core.getInput('pull-request-number', { required: false });
     if (raw === '') {
-        if (github.context.payload.pull_request === undefined) {
-            throw new Error('`pull-request-number` is required when not running from a pull request');
-        }
-        return github.context.payload.pull_request.number;
+        return github.context.payload.pull_request?.number;
     }
     if (raw.match(/^\d+$/) === null) {
         throw new Error('`pull-request-number` must be a number');
@@ -36030,16 +36026,6 @@ function getFailedLintLimit() {
         throw new Error('`failed-lint-limit` must be greater than 0');
     }
     return value;
-}
-function getSkipComment() {
-    const raw = core.getInput('skip-comment');
-    if (raw === 'true') {
-        return true;
-    }
-    if (raw === 'false') {
-        return false;
-    }
-    throw new Error('`skip-comment` must be either true or false');
 }
 
 
@@ -36374,7 +36360,6 @@ async function run() {
         const sha = (0, input_1.getSha)();
         const failedTestLimit = (0, input_1.getFailedTestLimit)();
         const failedLintLimit = (0, input_1.getFailedLintLimit)();
-        const skipComment = (0, input_1.getSkipComment)();
         core.info(`* search and read junit reports`);
         const factory = new factory_1.GoRepositoryFactory(xml_1.parseJUnitReport);
         const repository = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
@@ -36389,7 +36374,7 @@ async function run() {
             runId,
             actor
         }, failedTestLimit, failedLintLimit);
-        if (!skipComment) {
+        if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
             const result = await client.upsertComment({
@@ -36572,7 +36557,9 @@ class GoRepository {
     }
     makeMarkdownReport(context, failedTestLimit, failedLintLimit = 10) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
-        const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
+        const commitUrl = pullNumber === undefined
+            ? `https://github.com/${owner}/${repo}/commit/${sha}`
+            : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
         const result = this._modules.every(m => m.result === reporter_1.Result.Passed)
             ? '`Passed`🙆‍♀️'

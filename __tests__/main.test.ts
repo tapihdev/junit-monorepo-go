@@ -41,13 +41,6 @@ describe('action', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    // Mock the GitHub context
-    Object.defineProperties(github.context, {
-      repo: { value: { owner: 'owner', repo: 'repo' }, writable: true },
-      runId: { value: 123, writable: true },
-      actor: { value: 'actor', writable: true }
-    })
-
     // Mock the GitHub core library functions
     infoMock = jest.spyOn(core, 'info').mockImplementation()
     errorMock = jest.spyOn(core, 'error').mockImplementation()
@@ -86,7 +79,7 @@ describe('action', () => {
         case 'lint-report-xml':
           return 'lint.xml'
         case 'pull-request-number':
-          return '123'
+          return ''
         case 'sha':
           return 'sha'
         case 'failed-test-limit':
@@ -98,6 +91,13 @@ describe('action', () => {
         default:
           return ''
       }
+    })
+
+    Object.defineProperties(github.context, {
+      repo: { value: { owner: 'owner', repo: 'repo' }, writable: true },
+      payload: { value: { pull_request: { number: 123 } }, writable: true },
+      runId: { value: 123, writable: true },
+      actor: { value: 'actor', writable: true }
     })
 
     await main.run()
@@ -169,18 +169,23 @@ describe('action', () => {
         case 'lint-report-xml':
           return 'lint.xml'
         case 'pull-request-number':
-          return '123'
+          return ''
         case 'sha':
           return 'sha'
         case 'failed-test-limit':
           return '10'
         case 'failed-lint-limit':
           return '5'
-        case 'skip-comment':
-          return 'true'
         default:
           return ''
       }
+    })
+
+    Object.defineProperties(github.context, {
+      repo: { value: { owner: 'owner', repo: 'repo' }, writable: true },
+      payload: { value: { pull_request: undefined }, writable: true },
+      runId: { value: 123, writable: true },
+      actor: { value: 'actor', writable: true }
     })
 
     await main.run()
@@ -211,7 +216,7 @@ describe('action', () => {
       {
         owner: 'owner',
         repo: 'repo',
-        pullNumber: 123,
+        pullNumber: undefined,
         sha: 'sha',
         runId: 123,
         actor: 'actor'
@@ -247,8 +252,6 @@ describe('action', () => {
           return '10'
         case 'failed-lint-limit':
           return '5'
-        case 'skip-comment':
-          return 'false'
         default:
           return ''
       }

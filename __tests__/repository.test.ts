@@ -2,15 +2,6 @@ import { GoRepository } from '../src/repository'
 import { Module } from '../src/module'
 import { Result } from '../src/junit/reporter'
 
-const context = {
-  owner: 'owner',
-  repo: 'repo',
-  sha: 'abcdef123456',
-  pullNumber: 123,
-  runId: 456,
-  actor: 'actor'
-}
-
 describe('Repository#Markdown', () => {
   // table drien tests
   const testCases = [
@@ -18,6 +9,14 @@ describe('Repository#Markdown', () => {
       name: 'should make a markdown report for empty CI',
       input: {
         modules: [],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -30,6 +29,32 @@ No test results found.
 
 ---
 *This comment is created for the commit [abcdef1](https://github.com/owner/repo/pull/123/commits/abcdef123456) pushed by @actor.*
+`.slice(1, -1)
+    },
+    {
+      name: 'should make a markdown report for empty CI without pull request number',
+      input: {
+        modules: [],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: undefined,
+          runId: 456,
+          actor: 'actor'
+        },
+        failedTestLimit: 10,
+        failedLintLimit: 10
+      },
+      expected: `
+## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/456)</sup>
+
+#### Result: \`Passed\`🙆‍♀️
+
+No test results found.
+
+---
+*This comment is created for the commit [abcdef1](https://github.com/owner/repo/commit/abcdef123456) pushed by @actor.*
 `.slice(1, -1)
     },
     {
@@ -77,6 +102,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -119,6 +152,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -167,6 +208,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -231,6 +280,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 1,
         failedLintLimit: 10
       },
@@ -291,6 +348,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -355,6 +420,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 1
       },
@@ -422,6 +495,14 @@ No test results found.
             makeAnnotationMessages: jest.fn().mockReturnValue([])
           }
         ],
+        context: {
+          owner: 'owner',
+          repo: 'repo',
+          sha: 'abcdef123456',
+          pullNumber: 123,
+          runId: 456,
+          actor: 'actor'
+        },
         failedTestLimit: 10,
         failedLintLimit: 10
       },
@@ -465,7 +546,7 @@ No test results found.
   it.each(testCases)('%s', async ({ input, expected }) => {
     const repository = new GoRepository(input.modules)
     const markdown = repository.makeMarkdownReport(
-      context,
+      input.context,
       input.failedTestLimit,
       input.failedLintLimit
     )
