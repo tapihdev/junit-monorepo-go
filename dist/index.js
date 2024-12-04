@@ -36555,7 +36555,7 @@ class GoRepository {
             ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
         ].join('\n');
     }
-    makeMarkdownReport(context, failedTestLimit, failedLintLimit = 10) {
+    makeMarkdownReport(context, failedTestLimit, failedLintLimit) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = pullNumber === undefined
             ? `https://github.com/${owner}/${repo}/commit/${sha}`
