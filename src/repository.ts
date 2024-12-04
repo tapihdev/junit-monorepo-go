@@ -11,7 +11,7 @@ export type MarkdownContext = {
   owner: string
   repo: string
   sha: string
-  pullNumber: number
+  pullNumber: number | undefined
   runId: number
   actor: string
 }
@@ -59,7 +59,10 @@ export class GoRepository {
     failedLintLimit = 10
   ): string {
     const { owner, repo, sha, pullNumber, runId, actor } = context
-    const commitUrl = `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
+    const commitUrl =
+      pullNumber === undefined
+        ? `https://github.com/${owner}/${repo}/commit/${sha}`
+        : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
     const result = this._modules.every(m => m.result === Result.Passed)

@@ -130,11 +130,10 @@ jobs:
 | `lint-dirs`           | no           | The directories that contain the golangci-lint reports (seperated by commas/spaces/line breaks) |
 | `test-report-xml`     | no           | The name of the JUnit report XML file (either this or `lint-report-xml` is required)            |
 | `lint-report-xml`     | no           | The name of the lint report XML file (either this or `test-report-xml` is required)             |
-| `pull-request-number` | yes          | The pull request number to comment on                                                           |
+| `pull-request-number` | no           | The pull request number to comment on                                                           |
 | `sha`                 | yes          | The commit SHA of the pull request                                                              |
 | `failed-test-limit`   | no           | The number of failed tests to display (default: 30)                                             |
 | `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)                                             |
-| `skip-comment`        | no           | Skip commenting on the pull request if true (default: false)                                    |
 
 ### Outputs
 
