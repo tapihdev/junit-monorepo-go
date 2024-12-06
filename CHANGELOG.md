@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.3.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.0...v0.3.1) - 2024-12-06
+- fix: return 0 if tests is 0 because test fails at build by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/76
+
 ## [v0.3.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.2.0...v0.3.0) - 2024-12-04
 - feat: skip comment if pull_number is empty on push events by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/73
 - chore: remove default value by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/75
