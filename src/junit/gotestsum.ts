@@ -35,7 +35,7 @@ export class GotestsumReport implements Reporter {
   }
 
   get passed(): number {
-    return this.tests - this.failed
+    return this.tests === 0 ? 0 : this.tests - this.failed
   }
 
   get failed(): number {

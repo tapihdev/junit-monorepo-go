@@ -51,7 +51,7 @@ describe('gotestsum', () => {
       }
     },
     {
-      name: 'should parse the junit report with testsuite',
+      name: 'should parse the failed junit report with testsuite',
       input: {
         testsuites: {
           $: {
@@ -135,6 +135,61 @@ describe('gotestsum', () => {
             message: '=== RUN   Test2\n    baz_test.go:1: error;'
           }
         ]
+      }
+    },
+    {
+      name: 'should parse the failed junit report with no testsuite',
+      input: {
+        testsuites: {
+          $: {
+            tests: '0',
+            failures: '2',
+            errors: '3',
+            time: '0.001000'
+          },
+          testsuite: [
+            {
+              $: {
+                name: 'foo',
+                tests: '0',
+                failures: '0',
+                time: '0.000000',
+                timestamp: '2024-09-17T21:07:31+09:00'
+              },
+              testcase: [
+                {
+                  $: {
+                    classname: 'foo/bar',
+                    name: 'Test1',
+                    time: '0.000000'
+                  }
+                }
+              ],
+              properties: [
+                {
+                  property: [
+                    {
+                      $: {
+                        name: 'go.version',
+                        value: 'go1.22.1 linux/amd64'
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      } as JUnitReport,
+      expected: {
+        result: Result.Failed,
+        tests: 0,
+        passed: 0,
+        failed: 2,
+        skipped: 0,
+        time: 0.001,
+        version: '1.22.1',
+        failures: []
       }
     }
   ]
