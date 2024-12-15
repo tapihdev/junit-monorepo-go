@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.3.2](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.1...v0.3.2) - 2024-12-15
+- chore: use renovate-config repository by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/78
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/80
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/81
+
 ## [v0.3.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.0...v0.3.1) - 2024-12-06
 - fix: return 0 if tests is 0 because test fails at build by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/76
 
