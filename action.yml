@@ -36,11 +36,15 @@ inputs:
       The pull request number to comment on
 
       On `pull_request` events, this input is automatically filled with `github.event.pull_request.number`.
-      On `push` events, this action does not make any comment if this input is not provided.
+      On `push` events, this action does not make any comment if this input is not provided exciplicitly.
     required: false
   sha:
-    description: 'The commit SHA to comment on'
-    required: true
+    description: |
+      The commit SHA to comment on
+
+      On `pull_request` events, this input is automatically filled with `github.event.pull_request.head.sha`.
+      On `push` events, this input is automatically filled with `github.sha`.
+    required: false
   failed-test-limit:
     description: 'The maximum number of failed tests to display'
     required: true
