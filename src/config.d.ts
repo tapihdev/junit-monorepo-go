@@ -11,24 +11,20 @@ export interface ConfigSchema {
    */
   items: {
     /**
-     * The name of the column
+     * The title of the column
      */
-    title: string
-    /**
-     * Arbitrary URL attached to the column title
-     */
-    link?: string
+    title: string;
     /**
      * The name of the provider
      */
-    provider: 'gotestsum' | 'golangci-lint'
+    provider: "gotestsum" | "golangci-lint";
     /**
      * The name of the report file
      */
-    report: string
+    report: string;
     /**
      * Comma-separated list of paths that may contain a file of which name is equal to "report"
      */
-    targets: string
-  }[]
+    targets: string;
+  }[];
 }

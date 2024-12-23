@@ -115,11 +115,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           config: |
             test:
-              title: 'Test'
+              title: 'Test)'
               report: test.xml
               targets: 'go/app1,go/app2'
             lint:
-              title: 'Lint'
+              title: '[Lint](./.golangci.toml)'
               report: lint.xml
               targets: 'go/app1,go/app2'
 ```

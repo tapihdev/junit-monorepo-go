@@ -20,11 +20,7 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "The name of the column"
-          },
-          "link": {
-            "type": "string",
-            "description": "Arbitrary URL attached to the column title"
+            "description": "The title of the column"
           },
           "provider": {
             "$ref": "#/definitions/provider",
