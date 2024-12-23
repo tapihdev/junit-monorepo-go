@@ -101,8 +101,18 @@ describe('input', () => {
   })
 
   it('should handle sha', () => {
-    const testCases = [{ input: 'abcdef123456', expected: 'abcdef123456' }]
-    for (const { input, expected } of testCases) {
+    const testCases = [
+      { input: 'abc123', context: undefined, expected: 'abc123' },
+      { input: '', context: { sha: 'xyz123' }, expected: 'xyz123' }
+    ]
+    for (const { input, context, expected } of testCases) {
+      Object.defineProperties(github, {
+        context: {
+          value: context,
+          writable: true
+        }
+      })
+
       getInputMock.mockReturnValue(input)
       expect(inputFunc.getSha()).toEqual(expected)
     }

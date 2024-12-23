@@ -44,7 +44,8 @@ export function getPullRequestNumber(): number | undefined {
 }
 
 export function getSha(): string {
-  return core.getInput('sha', { required: true })
+  const raw = core.getInput('sha', { required: false })
+  return raw === '' ? github.context.sha : raw
 }
 
 export function getFailedTestLimit(): number {
