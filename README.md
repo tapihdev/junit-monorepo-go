@@ -113,25 +113,27 @@ jobs:
         uses: tapihdev/junit-monorepo-go@v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-dirs: 'go/app1,go/app2'
-          lint-dirs: 'go/app1,go/app2'
-          test-report-xml: test.xml
-          lint-report-xml: lint.xml
+          config: |
+            test:
+              title: 'Test'
+              report: test.xml
+              targets: 'go/app1,go/app2'
+            lint:
+              title: 'Lint'
+              report: lint.xml
+              targets: 'go/app1,go/app2'
 ```
 
 ### Inputs
 
-| **Input**             | **Required** | **Description**                                                                                 |
-| --------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
-| `github-token`        | yes          | The GitHub token to use for authentication                                                      |
-| `pull-request-number` | no           | The pull request number to comment on                                                           |
-| `sha`                 | no           | The commit SHA of the pull request                                                              |
-| `test-dirs`           | no           | The directories that contain the gotestsum reports (seperated by commas/spaces/line breaks)     |
-| `lint-dirs`           | no           | The directories that contain the golangci-lint reports (seperated by commas/spaces/line breaks) |
-| `test-report-xml`     | no           | The name of the JUnit report XML file (either this or `lint-report-xml` is required)            |
-| `lint-report-xml`     | no           | The name of the lint report XML file (either this or `test-report-xml` is required)             |
-| `failed-test-limit`   | no           | The number of failed tests to display (default: 30)                                             |
-| `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)                                             |
+| **Input**             | **Required** | **Description**                                                |
+| --------------------- | ------------ | -------------------------------------------------------------- |
+| `github-token`        | yes          | The GitHub token to use for authentication                     |
+| `pull-request-number` | no           | The pull request number to comment on                          |
+| `sha`                 | no           | The commit SHA of the pull request                             |
+| `failed-test-limit`   | no           | The number of failed tests to display (default: 30)            |
+| `failed-lint-limit`   | no           | The number of failed lints to display (default: 30)            |
+| `config`              | yes          | YAML-style configuration with the [this](./schema.json) schema |
 
 ### Outputs
 
