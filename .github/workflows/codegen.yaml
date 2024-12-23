@@ -47,6 +47,11 @@ jobs:
         id: build
         run: npm run bundle
 
+      - name: Generate Code
+        id: generate
+        run: |
+          npm run generate
+
       - name: Check diff
         id: diff
         continue-on-error: true
