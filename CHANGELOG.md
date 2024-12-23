@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.3.3](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.2...v0.3.3) - 2024-12-23
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/82
+- feat: make sha optional by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/84
+
 ## [v0.3.2](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.1...v0.3.2) - 2024-12-15
 - chore: use renovate-config repository by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/78
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/80
