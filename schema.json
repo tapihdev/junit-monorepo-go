@@ -1,0 +1,45 @@
+{
+  "title": "ConfigSchema",
+  "type": "object",
+  "required": ["items"],
+  "additionalProperties": false,
+  "definitions": {
+    "provider": {
+      "enum": ["gotestsum", "golangci-lint"],
+      "type": "string"
+    }
+  },
+  "properties": {
+    "items": {
+      "type": "array",
+      "description": "List of columns",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "provider", "report", "targets"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The name of the column"
+          },
+          "link": {
+            "type": "string",
+            "description": "Arbitrary URL attached to the column title"
+          },
+          "provider": {
+            "$ref": "#/definitions/provider",
+            "description": "The name of the provider"
+          },
+          "report": {
+            "type": "string",
+            "description": "The name of the report file"
+          },
+          "targets": {
+            "type": "string",
+            "description": "Comma-separated list of paths that may contain a file of which name is equal to \"report\""
+          }
+        }
+      }
+    }
+  }
+}
