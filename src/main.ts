@@ -24,12 +24,15 @@ export async function run(): Promise<void> {
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
 
-    // TODO: this is a temporary logic just to make modification easier
-    if (config.length !== 2) {
-      throw new Error('config must have 2 elements')
+    // TODO: this is a temporal logic just to make modification easier
+    const test = config['test']
+    if (test === undefined) {
+      throw new Error('`test` is required')
     }
-    const test = config[0]
-    const lint = config[1]
+    const lint = config['lint']
+    if (lint === undefined) {
+      throw new Error('`lint` is required')
+    }
     const testDirs = test.directories
     const lintDirs = lint.directories
     const testReportXml = test.fileName

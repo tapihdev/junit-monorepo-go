@@ -10,7 +10,7 @@ export function getGitHubToken(): string {
 
 export function getConfig(): Config {
   const raw = core.getInput('config', { required: true })
-  return YAML.parse(raw)
+  return YAML.parse(raw) as Config
 }
 
 export function getPullRequestNumber(): number | undefined {

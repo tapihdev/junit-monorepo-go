@@ -1,4 +1,4 @@
-export type Config = ConfigItem[]
+export type Config = Record<string, ConfigItem>
 
 export type ConfigItem = {
   /**
@@ -37,4 +37,7 @@ export type ConfigItem = {
   annotationLimit?: number
 }
 
-export type ConfigItemType = 'gotestsum' | 'golangci-lint'
+export enum ConfigItemType {
+  gotestsum = 'gotestsum',
+  golangcilint = 'golangci-lint'
+}

@@ -3,10 +3,10 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "Config": {
-      "items": {
+      "additionalProperties": {
         "$ref": "#/definitions/ConfigItem"
       },
-      "type": "array"
+      "type": "object"
     },
     "ConfigItem": {
       "additionalProperties": false,
