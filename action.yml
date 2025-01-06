@@ -13,24 +13,10 @@ inputs:
   github-token:
     description: 'The GitHub token to use for authentication'
     required: true
-  test-dirs:
-    description:
-      The directories that contain the gotestsum reports (seperated by
-      commas/spaces/line breaks)
-    required: false
-  test-report-xml:
-    description: The filename of the gotestsum report
+  config:
+    description: |
+      YAML-style configuration to define how to parse the test and lint reports (See [JSON schema](./schema.json) for details)
     required: true
-    default: 'test.xml'
-  lint-dirs:
-    description:
-      The comma-seperated directories that contain the golangci-lint reports
-      (seperated by commas/spaces/line breaks)
-    required: false
-  lint-report-xml:
-    description: The filename of the golangci-lint report
-    required: true
-    default: 'lint.xml'
   pull-request-number:
     description: |
       The pull request number to comment on
@@ -45,14 +31,6 @@ inputs:
       On `pull_request` events, this input is automatically filled with `github.event.pull_request.head.sha`.
       On `push` events, this input is automatically filled with `github.sha`.
     required: false
-  failed-test-limit:
-    description: 'The maximum number of failed tests to display'
-    required: true
-    default: '30'
-  failed-lint-limit:
-    description: 'The maximum number of failed lints to display'
-    required: true
-    default: '30'
 
 outputs:
   body:
