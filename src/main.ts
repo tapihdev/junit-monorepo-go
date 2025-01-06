@@ -2,15 +2,10 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 import {
-  getTestReportXml,
-  getLintReportXml,
   getGitHubToken,
+  getConfig,
   getPullRequestNumber,
   getSha,
-  getFailedTestLimit,
-  getFailedLintLimit,
-  getTestDirs,
-  getLintDirs
 } from './input'
 import { Client as GitHubClient } from './github'
 import { GoRepositoryFactory } from './factory'
@@ -24,15 +19,23 @@ const mark = '<!-- commented by junit-monorepo-go -->'
  */
 export async function run(): Promise<void> {
   try {
-    const testDirs = getTestDirs()
-    const lintDirs = getLintDirs()
-    const testReportXml = getTestReportXml()
-    const lintReportXml = getLintReportXml()
     const token = getGitHubToken()
+    const config = getConfig()
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
-    const failedTestLimit = getFailedTestLimit()
-    const failedLintLimit = getFailedLintLimit()
+
+    // TODO: this is a temporary logic just to make modification easier
+    if (config.length !== 2) {
+      throw new Error('config must have 2 elements')
+    }
+    const test = config[0]
+    const lint = config[1]
+    const testDirs = test.directories
+    const lintDirs = lint.directories
+    const testReportXml = test.fileName
+    const lintReportXml = lint.fileName
+    const failedTestLimit = test.annotationLimit || 10
+    const failedLintLimit = lint.annotationLimit || 10
 
     core.info(`* search and read junit reports`)
     const factory = new GoRepositoryFactory(parseJUnitReport)
