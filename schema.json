@@ -1,0 +1,50 @@
+{
+  "$ref": "#/definitions/Config",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "Config": {
+      "items": {
+        "$ref": "#/definitions/ConfigItem"
+      },
+      "type": "array"
+    },
+    "ConfigItem": {
+      "additionalProperties": false,
+      "properties": {
+        "directories": {
+          "description": "The directories to search for the reports.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "fileName": {
+          "description": "The file name of the JUnit report.",
+          "type": "string"
+        },
+        "title": {
+          "description": "The title of the column.",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/ConfigItemType",
+          "description": "The type of the column."
+        }
+      },
+      "required": [
+        "title",
+        "type",
+        "directories",
+        "fileName"
+      ],
+      "type": "object"
+    },
+    "ConfigItemType": {
+      "enum": [
+        "gotestsum",
+        "golangci-lint"
+      ],
+      "type": "string"
+    }
+  }
+}
