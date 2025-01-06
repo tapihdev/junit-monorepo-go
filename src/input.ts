@@ -5,32 +5,6 @@ export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
 }
 
-function getDirs(name: string): string[] {
-  const raw = core.getInput(name, { required: false })
-  return raw === ''
-    ? []
-    : raw
-        .replace(/(,| |\n)+/g, ' ')
-        .split(' ')
-        .map(d => d.trim())
-}
-
-export function getTestDirs(): string[] {
-  return getDirs('test-dirs')
-}
-
-export function getLintDirs(): string[] {
-  return getDirs('lint-dirs')
-}
-
-export function getTestReportXml(): string {
-  return core.getInput('test-report-xml', { required: true })
-}
-
-export function getLintReportXml(): string {
-  return core.getInput('lint-report-xml', { required: true })
-}
-
 export function getPullRequestNumber(): number | undefined {
   const raw = core.getInput('pull-request-number', { required: false })
   if (raw === '') {

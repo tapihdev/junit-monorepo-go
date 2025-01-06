@@ -11,6 +11,10 @@
     "ConfigItem": {
       "additionalProperties": false,
       "properties": {
+        "annotationLimit": {
+          "description": "The limit number of annotations for failed tests.",
+          "type": "number"
+        },
         "directories": {
           "description": "The directories to search for the reports.",
           "items": {
