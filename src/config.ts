@@ -1,3 +1,7 @@
+import fs from 'fs'
+
+import YAML from 'yaml'
+
 export type Config = ConfigItem[]
 
 export type ConfigItem = {
@@ -31,3 +35,11 @@ export type ConfigItem = {
 }
 
 export type ConfigItemType = 'gotestsum' | 'golangci-lint'
+
+export type ConfigParser = (path: string) => Promise<Config>
+
+export async function parseConfig(path: string): Promise<Config> {
+  const content = await fs.promises.readFile(path, { encoding: 'utf8' })
+  return YAML.parse(content) as Config
+}
+
