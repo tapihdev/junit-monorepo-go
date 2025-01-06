@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import YAML from 'yaml'
 
-import { Config } from './config'
+import { Config, ConfigItemType } from './config'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
@@ -10,7 +10,13 @@ export function getGitHubToken(): string {
 
 export function getConfig(): Config {
   const raw = core.getInput('config', { required: true })
-  return YAML.parse(raw) as Config
+  const config = YAML.parse(raw) as Config
+
+  const entries = Object.entries(config)
+  if (entries.some(([_, value]) => value.annotationLimit !== undefined && value.annotationLimit < 0)) {
+    throw new Error('`annotationLimit` must be a positive number')
+  }
+  return config
 }
 
 export function getPullRequestNumber(): number | undefined {
