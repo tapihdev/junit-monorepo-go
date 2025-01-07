@@ -1,43 +1,22 @@
-export type Config = Record<string, ConfigItem>
+import { z } from 'zod'
 
-export type ConfigItem = {
-  /**
-   * The title of the column.
-   *
-   * @TJS-type string
-   */
-  title: string
-
-  /**
-   * The type of the column.
-   *
-   * @TJS-type string
-   */
-  type: ConfigItemType
-
-  /**
-   * The directories to search for the reports.
-   *
-   * @TJS-type string[]
-   */
-  directories: string[]
-
-  /**
-   * The file name of the JUnit report.
-   *
-   * @TJS-type string
-   */
-  fileName: string
-
-  /**
-   * The limit number of annotations for failed tests.
-   *
-   * @TJS-type integer
-   */
-  annotationLimit?: number
-}
-
-export enum ConfigItemType {
-  gotestsum = 'gotestsum',
-  golangcilint = 'golangci-lint'
-}
+export const ConfigSchema = z.record(
+  z
+    .object({
+      annotationLimit: z
+        .number()
+        .gte(0)
+        .describe('Limit number of annotations of failed tests.')
+        .optional(),
+      directories: z
+        .array(z.string())
+        .describe('Directories to search for JUnit reports.'),
+      fileName: z.string().describe('File name of JUnit report.'),
+      title: z.string().describe('Title of column.'),
+      type: z
+        .enum(['gotestsum', 'golangci-lint'])
+        .describe('Type of JUnit reporter.')
+    })
+    .strict()
+)
+export type Config = z.infer<typeof ConfigSchema>

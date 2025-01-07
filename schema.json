@@ -1,54 +1,43 @@
 {
-  "$ref": "#/definitions/Config",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "Config": {
-      "additionalProperties": {
-        "$ref": "#/definitions/ConfigItem"
+  "additionalProperties": {
+    "additionalProperties": false,
+    "properties": {
+      "annotationLimit": {
+        "description": "Limit number of annotations of failed tests.",
+        "type": "number",
+        "minimum": 0
       },
-      "type": "object"
-    },
-    "ConfigItem": {
-      "additionalProperties": false,
-      "properties": {
-        "annotationLimit": {
-          "description": "The limit number of annotations for failed tests.",
-          "type": "number"
-        },
-        "directories": {
-          "description": "The directories to search for the reports.",
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "fileName": {
-          "description": "The file name of the JUnit report.",
+      "directories": {
+        "description": "Directories to search for JUnit reports.",
+        "items": {
           "type": "string"
         },
-        "title": {
-          "description": "The title of the column.",
-          "type": "string"
-        },
-        "type": {
-          "$ref": "#/definitions/ConfigItemType",
-          "description": "The type of the column."
-        }
+        "type": "array"
       },
-      "required": [
-        "title",
-        "type",
-        "directories",
-        "fileName"
-      ],
-      "type": "object"
+      "fileName": {
+        "description": "File name of JUnit report.",
+        "type": "string"
+      },
+      "title": {
+        "description": "Title of column.",
+        "type": "string"
+      },
+      "type": {
+        "description": "Type of JUnit reporter.",
+        "enum": [
+          "gotestsum",
+          "golangci-lint"
+        ],
+        "type": "string"
+      }
     },
-    "ConfigItemType": {
-      "enum": [
-        "gotestsum",
-        "golangci-lint"
-      ],
-      "type": "string"
-    }
-  }
+    "required": [
+      "title",
+      "type",
+      "directories",
+      "fileName"
+    ],
+    "type": "object"
+  },
+  "type": "object"
 }
