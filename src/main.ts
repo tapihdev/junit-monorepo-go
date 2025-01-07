@@ -5,7 +5,7 @@ import {
   getGitHubToken,
   getConfig,
   getPullRequestNumber,
-  getSha,
+  getSha
 } from './input'
 import { Client as GitHubClient } from './github'
 import { GoRepositoryFactory } from './factory'

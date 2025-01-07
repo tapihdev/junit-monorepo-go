@@ -248,8 +248,8 @@ lint:
       switch (name) {
         case 'github-token':
           return 'xxx'
-          case 'config':
-            return `
+        case 'config':
+          return `
 test:
   title: Test
   type: gotestsum

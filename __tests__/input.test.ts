@@ -22,17 +22,44 @@ describe('input', () => {
   it('should handle config', () => {
     const testCases = [
       {
-        input: 'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": 10 }',
-        expected: { test: { title: "Test", type: "gotestsum", directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: 10 } },
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": 10 }',
+        expected: {
+          test: {
+            title: 'Test',
+            type: 'gotestsum',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'test.xml',
+            annotationLimit: 10
+          }
+        }
       },
       {
-        input: 'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
-        expected: { test: { title: "Test", type: "gotestsum", directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: undefined } },
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
+        expected: {
+          test: {
+            title: 'Test',
+            type: 'gotestsum',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'test.xml',
+            annotationLimit: undefined
+          }
+        }
       },
       {
-        input: 'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
-        expected: { test: { title: "Lint", type: "golangci-lint", directories: ['go/app1', 'go/app2'], fileName: 'lint.xml', annotationLimit: undefined } },
-      },
+        input:
+          'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
+        expected: {
+          test: {
+            title: 'Lint',
+            type: 'golangci-lint',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'lint.xml',
+            annotationLimit: undefined
+          }
+        }
+      }
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
@@ -42,10 +69,22 @@ describe('input', () => {
 
   it('should throw error when an invalid config is given', () => {
     const testCases = [
-      { input: 'test: { "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }' },
-      { input: 'test: { "title": "Test", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }' },
-      { input: 'test: { "title": "Test", "type": "invalid type", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }' },
-      { input: 'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": -1 }' },
+      {
+        input:
+          'test: { "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "type": "invalid type", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": -1 }'
+      }
     ]
     for (const { input } of testCases) {
       getInputMock.mockReturnValue(input)

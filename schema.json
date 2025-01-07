@@ -24,19 +24,11 @@
       },
       "type": {
         "description": "Type of JUnit reporter.",
-        "enum": [
-          "gotestsum",
-          "golangci-lint"
-        ],
+        "enum": ["gotestsum", "golangci-lint"],
         "type": "string"
       }
     },
-    "required": [
-      "title",
-      "type",
-      "directories",
-      "fileName"
-    ],
+    "required": ["title", "type", "directories", "fileName"],
     "type": "object"
   },
   "type": "object"
