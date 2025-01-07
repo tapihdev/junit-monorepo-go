@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import YAML from 'yaml'
 
-import { Config, ConfigSchema } from './config'
+import { Config, ConfigSchema } from './config.generated'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
