@@ -30,15 +30,13 @@ export async function run(): Promise<void> {
       throw new Error('`test` is required')
     }
     const lint = config['lint']
-    if (lint === undefined) {
-      throw new Error('`lint` is required')
-    }
+
     const testDirs = test.directories
-    const lintDirs = lint.directories
+    const lintDirs = lint?.directories ?? []
     const testReportXml = test.fileName
-    const lintReportXml = lint.fileName
-    const failedTestLimit = test.annotationLimit || 10
-    const failedLintLimit = lint.annotationLimit || 10
+    const lintReportXml = lint?.fileName ?? ''
+    const failedTestLimit = test?.annotationLimit || 10
+    const failedLintLimit = lint?.annotationLimit || 10
 
     core.info(`* search and read junit reports`)
     const factory = new GoRepositoryFactory(parseJUnitReport)
