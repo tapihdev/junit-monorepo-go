@@ -122,7 +122,7 @@ jobs:
               - go/app1
               - go/app2
             lint:
-              title: [Lint](./golangci.toml)
+              title: '[Lint](./golangci.toml)'
               type: golangci-lint
               fileName: lint.xml
               directories:
