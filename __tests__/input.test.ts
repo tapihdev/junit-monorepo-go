@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 import * as inputFunc from '../src/input'
-import { ConfigItemType } from '../src/config'
+import { ConfigSchema } from '../src/config'
 
 let getInputMock: jest.SpiedFunction<typeof core.getInput>
 
@@ -23,15 +23,15 @@ describe('input', () => {
     const testCases = [
       {
         input: 'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": 10 }',
-        expected: { test: { title: "Test", type: ConfigItemType.gotestsum, directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: 10 } },
+        expected: { test: { title: "Test", type: "gotestsum", directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: 10 } },
       },
       {
         input: 'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
-        expected: { test: { title: "Test", type: ConfigItemType.gotestsum, directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: undefined } },
+        expected: { test: { title: "Test", type: "gotestsum", directories: ['go/app1', 'go/app2'], fileName: 'test.xml', annotationLimit: undefined } },
       },
       {
         input: 'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
-        expected: { test: { title: "Lint", type: ConfigItemType.golangcilint, directories: ['go/app1', 'go/app2'], fileName: 'lint.xml', annotationLimit: undefined } },
+        expected: { test: { title: "Lint", type: "golangci-lint", directories: ['go/app1', 'go/app2'], fileName: 'lint.xml', annotationLimit: undefined } },
       },
     ]
     for (const { input, expected } of testCases) {

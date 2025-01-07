@@ -75,6 +75,16 @@ jobs:
           lint-report-xml: 'lint.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
+          config: |
+            test:
+              title: '[Test](./README.md)'
+              type: gotestsum
+              fileName: test.xml
+              directories:
+              - .github/testdata/go/does-not-exist
+              - .github/testdata/go/app1
+              - .github/testdata/go/app2
+              - .github/testdata/go/app3
 
       - name: The previous step should fail
         id: check-error
@@ -91,36 +101,34 @@ jobs:
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-dirs: |
-            .github/testdata/go/app1
-            .github/testdata/go/app2
-            .github/testdata/go/app3
-          lint-dirs: |
-            .github/testdata/go/app1
-            .github/testdata/go/app2
-            .github/testdata/go/app3
-          test-report-xml: 'test.xml'
-          lint-report-xml: 'lint.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
+          config: |
+            test:
+              title: '[Test](./README.md)'
+              type: gotestsum
+              fileName: test.xml
+              directories:
+              - .github/testdata/go/app1
+              - .github/testdata/go/app2
+              - .github/testdata/go/app3
 
       - name: Update Comment
         id: update
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-dirs: |
-            .github/testdata/go/app1
-            .github/testdata/go/app2
-            .github/testdata/go/app3
-          lint-dirs: |
-            .github/testdata/go/app1
-            .github/testdata/go/app2
-            .github/testdata/go/app3
-          test-report-xml: 'test.xml'
-          lint-report-xml: 'lint.xml'
           pull-request-number: ${{ github.event.pull_request.number }}
           sha: ${{ github.event.pull_request.head.sha }}
+          config: |
+            test:
+              title: '[Test](./README.md)'
+              type: gotestsum
+              fileName: test.xml
+              directories:
+              - .github/testdata/go/app1
+              - .github/testdata/go/app2
+              - .github/testdata/go/app3
 
       - name: Print Output
         id: output

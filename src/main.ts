@@ -24,7 +24,7 @@ export async function run(): Promise<void> {
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
 
-    // TODO: this is a temporal logic just to make modification easier
+    // TODO: this is a temporary logic just to make modification easier
     const test = config['test']
     if (test === undefined) {
       throw new Error('`test` is required')
