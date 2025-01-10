@@ -70,24 +70,29 @@ describe('action', () => {
       switch (name) {
         case 'github-token':
           return 'xxx'
-        case 'test-dirs':
-          return 'go/app1,go/app2'
-        case 'lint-dirs':
-          return 'go/app1,go/app3'
-        case 'test-report-xml':
-          return 'test.xml'
-        case 'lint-report-xml':
-          return 'lint.xml'
+        case 'config':
+          return `
+test:
+  title: Test
+  type: gotestsum
+  fileName: test.xml
+  directories:
+  - go/app1
+  - go/app2
+  annotationLimit: 10
+lint:
+  title: '[Lint](./golangci.toml)'
+  type: golangci-lint
+  fileName: lint.xml
+  directories:
+  - go/app1
+  - go/app3
+  annotationLimit: 5
+`.slice(1, -1)
         case 'pull-request-number':
           return ''
         case 'sha':
           return 'sha'
-        case 'failed-test-limit':
-          return '10'
-        case 'failed-lint-limit':
-          return '5'
-        case 'skip-comment':
-          return 'false'
         default:
           return ''
       }
@@ -160,22 +165,29 @@ describe('action', () => {
       switch (name) {
         case 'github-token':
           return 'xxx'
-        case 'test-dirs':
-          return 'go/app1,go/app2'
-        case 'lint-dirs':
-          return 'go/app1,go/app3'
-        case 'test-report-xml':
-          return 'test.xml'
-        case 'lint-report-xml':
-          return 'lint.xml'
+        case 'config':
+          return `
+test:
+  title: Test
+  type: gotestsum
+  fileName: test.xml
+  directories:
+  - go/app1
+  - go/app2
+  annotationLimit: 10
+lint:
+  title: '[Lint](./golangci.toml)'
+  type: golangci-lint
+  fileName: lint.xml
+  directories:
+  - go/app1
+  - go/app3
+  annotationLimit: 5
+`.slice(1, -1)
         case 'pull-request-number':
           return ''
         case 'sha':
           return 'sha'
-        case 'failed-test-limit':
-          return '10'
-        case 'failed-lint-limit':
-          return '5'
         default:
           return ''
       }
@@ -236,22 +248,27 @@ describe('action', () => {
       switch (name) {
         case 'github-token':
           return 'xxx'
-        case 'test-dirs':
-          return 'go/app'
-        case 'lint-dirs':
-          return ''
-        case 'test-report-xml':
-          return 'test.xml'
-        case 'lint-report-xml':
-          return 'lint.xml'
+        case 'config':
+          return `
+test:
+  title: Test
+  type: gotestsum
+  fileName: test.xml
+  directories:
+  - go/app1
+  - go/app2
+lint:
+  title: '[Lint](./golangci.toml)'
+  type: golangci-lint
+  fileName: lint.xml
+  directories:
+  - go/app1
+  - go/app3
+`.slice(1, -1)
         case 'pull-request-number':
           return 'xxx'
         case 'sha':
           return 'sha'
-        case 'failed-test-limit':
-          return '10'
-        case 'failed-lint-limit':
-          return '5'
         default:
           return ''
       }

@@ -18,51 +18,76 @@ describe('input', () => {
     }
   })
 
-  it('should handle test-report-xml', () => {
+  it('should handle config', () => {
     const testCases = [
-      { input: 'path/to/test.xml', expected: 'path/to/test.xml' }
+      {
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": 10 }',
+        expected: {
+          test: {
+            title: 'Test',
+            type: 'gotestsum',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'test.xml',
+            annotationLimit: 10
+          }
+        }
+      },
+      {
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
+        expected: {
+          test: {
+            title: 'Test',
+            type: 'gotestsum',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'test.xml',
+            annotationLimit: undefined
+          }
+        }
+      },
+      {
+        input:
+          'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
+        expected: {
+          test: {
+            title: 'Lint',
+            type: 'golangci-lint',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'lint.xml',
+            annotationLimit: undefined
+          }
+        }
+      }
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(inputFunc.getTestReportXml()).toEqual(expected)
+      expect(inputFunc.getConfig()).toEqual(expected)
     }
   })
 
-  it('should handle test directories', () => {
+  it('should throw error when an invalid config is given', () => {
     const testCases = [
-      { input: '', expected: [] },
-      { input: 'go/app1,go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1\n go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1, go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1 go/app2', expected: ['go/app1', 'go/app2'] }
+      {
+        input:
+          'test: { "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "type": "invalid type", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
+      },
+      {
+        input:
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": -1 }'
+      }
     ]
-    for (const { input, expected } of testCases) {
+    for (const { input } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(inputFunc.getTestDirs()).toEqual(expected)
-    }
-  })
-
-  it('should handle lint directories', () => {
-    const testCases = [
-      { input: '', expected: [] },
-      { input: 'go/app1,go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1\n go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1, go/app2', expected: ['go/app1', 'go/app2'] },
-      { input: 'go/app1 go/app2', expected: ['go/app1', 'go/app2'] }
-    ]
-    for (const { input, expected } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(inputFunc.getLintDirs()).toEqual(expected)
-    }
-  })
-
-  it('should handle lint-report-xml', () => {
-    const testCases = [
-      { input: 'path/to/lint.xml', expected: 'path/to/lint.xml' }
-    ]
-    for (const { input, expected } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(inputFunc.getLintReportXml()).toEqual(expected)
+      expect(() => inputFunc.getConfig()).toThrow()
     }
   })
 
@@ -115,54 +140,6 @@ describe('input', () => {
 
       getInputMock.mockReturnValue(input)
       expect(inputFunc.getSha()).toEqual(expected)
-    }
-  })
-
-  it('should handle failed-test-limit', () => {
-    const testCases = [
-      { input: '5', expected: 5 },
-      { input: '10', expected: 10 }
-    ]
-    for (const { input, expected } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(inputFunc.getFailedTestLimit()).toEqual(expected)
-    }
-  })
-
-  it('should throw error when an invalid failed-test-limit is given', () => {
-    const testCases = [
-      { input: '-1' },
-      { input: '0' },
-      { input: '' },
-      { input: 'abc' }
-    ]
-    for (const { input } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(() => inputFunc.getFailedTestLimit()).toThrow()
-    }
-  })
-
-  it('should handle failed-lint-limit', () => {
-    const testCases = [
-      { input: '5', expected: 5 },
-      { input: '10', expected: 10 }
-    ]
-    for (const { input, expected } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(inputFunc.getFailedLintLimit()).toEqual(expected)
-    }
-  })
-
-  it('should throw error when an invalid failed-lint-limit is given', () => {
-    const testCases = [
-      { input: '-1' },
-      { input: '0' },
-      { input: '' },
-      { input: 'abc' }
-    ]
-    for (const { input } of testCases) {
-      getInputMock.mockReturnValue(input)
-      expect(() => inputFunc.getFailedLintLimit()).toThrow()
     }
   })
 })

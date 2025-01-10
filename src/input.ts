@@ -1,34 +1,20 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import YAML from 'yaml'
+
+import { Config, ConfigSchema } from './config.generated'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
 }
 
-function getDirs(name: string): string[] {
-  const raw = core.getInput(name, { required: false })
-  return raw === ''
-    ? []
-    : raw
-        .replace(/(,| |\n)+/g, ' ')
-        .split(' ')
-        .map(d => d.trim())
-}
-
-export function getTestDirs(): string[] {
-  return getDirs('test-dirs')
-}
-
-export function getLintDirs(): string[] {
-  return getDirs('lint-dirs')
-}
-
-export function getTestReportXml(): string {
-  return core.getInput('test-report-xml', { required: true })
-}
-
-export function getLintReportXml(): string {
-  return core.getInput('lint-report-xml', { required: true })
+export function getConfig(): Config {
+  const raw = core.getInput('config', { required: true })
+  try {
+    return ConfigSchema.parse(YAML.parse(raw))
+  } catch (error) {
+    throw new Error(`Invalid config: ${error}`)
+  }
 }
 
 export function getPullRequestNumber(): number | undefined {
@@ -46,29 +32,4 @@ export function getPullRequestNumber(): number | undefined {
 export function getSha(): string {
   const raw = core.getInput('sha', { required: false })
   return raw === '' ? github.context.sha : raw
-}
-
-export function getFailedTestLimit(): number {
-  const raw = core.getInput('failed-test-limit', { required: true })
-  if (raw.match(/^\d+$/) === null) {
-    throw new Error('`failed-test-limit` must be a number')
-  }
-  const value = Number(raw)
-  if (value <= 0) {
-    throw new Error('`failed-test-limit` must be greater than 0')
-  }
-  return value
-}
-
-export function getFailedLintLimit(): number {
-  const raw = core.getInput('failed-lint-limit', { required: true })
-  if (raw.match(/^\d+$/) === null) {
-    throw new Error('`failed-lint-limit` must be a number')
-  }
-
-  const value = Number(raw)
-  if (value <= 0) {
-    throw new Error('`failed-lint-limit` must be greater than 0')
-  }
-  return value
 }

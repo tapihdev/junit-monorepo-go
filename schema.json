@@ -1,0 +1,35 @@
+{
+  "additionalProperties": {
+    "additionalProperties": false,
+    "properties": {
+      "annotationLimit": {
+        "description": "Limit number of annotations of failed tests.",
+        "type": "number",
+        "minimum": 0
+      },
+      "directories": {
+        "description": "Directories to search for JUnit reports.",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "fileName": {
+        "description": "File name of JUnit report.",
+        "type": "string"
+      },
+      "title": {
+        "description": "Title of column.",
+        "type": "string"
+      },
+      "type": {
+        "description": "Type of JUnit reporter.",
+        "enum": ["gotestsum", "golangci-lint"],
+        "type": "string"
+      }
+    },
+    "required": ["title", "type", "directories", "fileName"],
+    "type": "object"
+  },
+  "type": "object"
+}
