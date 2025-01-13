@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.4.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.4.0...v0.4.1) - 2025-01-13
+- feat: use YAML for config by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/88
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/90
+
 ## [v0.4.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.2...v0.4.0) - 2025-01-05
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/82
 - feat: make sha optional by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/84
