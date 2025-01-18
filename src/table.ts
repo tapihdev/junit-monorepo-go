@@ -44,7 +44,7 @@ export function createModuleTable(modules: ModuleTableRecord[]) {
       testElapsed: '---:',
       lintResult: ':---'
     },
-    modules,
+    modules
   )
 }
 

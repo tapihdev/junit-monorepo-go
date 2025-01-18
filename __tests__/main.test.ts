@@ -13,6 +13,7 @@ import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
 import { GoRepository } from '../src/repository'
 import { GoRepositoryFactory } from '../src/factory'
+import { Result } from '../src/junit/reporter'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -150,8 +151,10 @@ lint:
         runId: 123,
         actor: 'actor'
       },
-      10,
-      5
+      Result.Passed,
+      '',
+      '',
+      ''
     )
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
@@ -233,8 +236,10 @@ lint:
         runId: 123,
         actor: 'actor'
       },
-      10,
-      5
+      Result.Passed,
+      '',
+      '',
+      ''
     )
     expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')

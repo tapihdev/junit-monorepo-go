@@ -38,6 +38,7 @@ export class GoRepository {
 
   makeMarkdownReport(
     context: MarkdownContext,
+    result: Result,
     moduleTable: string,
     failedTestTable: string,
     failedLintTable: string
@@ -49,14 +50,10 @@ export class GoRepository {
         : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
     const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
-    const result = this._modules.every(m => m.result === Result.Passed)
-      ? '`Passed`🙆‍♀️'
-      : '`Failed`🙅‍♂️'
-
     return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: ${result}
+#### Result: ${result === Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${

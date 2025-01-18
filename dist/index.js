@@ -41631,6 +41631,7 @@ const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
 const factory_1 = __nccwpck_require__(6373);
 const xml_1 = __nccwpck_require__(6385);
+const reporter_1 = __nccwpck_require__(5695);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41660,11 +41661,9 @@ async function run() {
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
-        const moduleTable = (0, table_1.createModuleTable)({
-            owner,
-            repo,
-            sha
-        }, repository.modules());
+        const moduleTable = (0, table_1.createModuleTable)(repository
+            .modules()
+            .map(module => module.makeModuleTableRecord(owner, repo, sha)));
         const failedTestTable = (0, table_1.createFailedCaseTable)(repository
             .modules()
             .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
@@ -41673,6 +41672,9 @@ async function run() {
             .modules()
             .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
             .flat(), failedLintLimit);
+        const result = repository.modules().every(m => m.result === reporter_1.Result.Passed)
+            ? reporter_1.Result.Passed
+            : reporter_1.Result.Failed;
         const body = repository.makeMarkdownReport({
             owner,
             repo,
@@ -41680,7 +41682,7 @@ async function run() {
             sha,
             runId,
             actor
-        }, moduleTable, failedTestTable, failedLintTable);
+        }, result, moduleTable, failedTestTable, failedLintTable);
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41865,19 +41867,16 @@ class GoRepository {
     hasLintReport(directory) {
         return (this._modules.find(m => m.directory === directory)?.hasLintReport ?? false);
     }
-    makeMarkdownReport(context, moduleTable, failedTestTable, failedLintTable) {
+    makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = pullNumber === undefined
             ? `https://github.com/${owner}/${repo}/commit/${sha}`
             : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
         const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-        const result = this._modules.every(m => m.result === reporter_1.Result.Passed)
-            ? '`Passed`🙆‍♀️'
-            : '`Failed`🙅‍♂️';
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: ${result}
+#### Result: ${result === reporter_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${failedTestTable === ''
@@ -41934,7 +41933,7 @@ function renderTable(header, separator, records) {
         ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
     ].join('\n');
 }
-function createModuleTable(context, modules) {
+function createModuleTable(modules) {
     return renderTable({
         name: 'Module',
         version: 'Version',
@@ -41951,7 +41950,7 @@ function createModuleTable(context, modules) {
         testFailed: '-----:',
         testElapsed: '---:',
         lintResult: ':---'
-    }, modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
+    }, modules);
 }
 function createFailedCaseTable(failed, limit) {
     const failedLimited = failed.slice(0, limit);
@@ -41962,7 +41961,7 @@ function createFailedCaseTable(failed, limit) {
             message: '-'
         });
     }
-    return renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLimited);
+    return renderTable({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLimited);
 }
 
 
