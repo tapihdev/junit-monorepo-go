@@ -8,8 +8,10 @@ import {
   getSha
 } from './input'
 import { Client as GitHubClient } from './github'
+import { createFailedCaseTable, createModuleTable } from './table'
 import { GoRepositoryFactory } from './factory'
 import { parseJUnitReport } from './junit/xml'
+import { Result } from './junit/reporter'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -50,6 +52,29 @@ export async function run(): Promise<void> {
     core.info('* make markdown report')
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
+    const moduleTable = createModuleTable(
+      repository
+        .modules()
+        .map(module => module.makeModuleTableRecord(owner, repo, sha))
+    )
+    const failedTestTable = createFailedCaseTable(
+      repository
+        .modules()
+        .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
+        .flat(),
+      failedTestLimit
+    )
+    const failedLintTable = createFailedCaseTable(
+      repository
+        .modules()
+        .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+        .flat(),
+      failedLintLimit
+    )
+    const result = repository.modules().every(m => m.result === Result.Passed)
+      ? Result.Passed
+      : Result.Failed
+
     const body = repository.makeMarkdownReport(
       {
         owner,
@@ -59,8 +84,10 @@ export async function run(): Promise<void> {
         runId,
         actor
       },
-      failedTestLimit,
-      failedLintLimit
+      result,
+      moduleTable,
+      failedTestTable,
+      failedLintTable
     )
 
     if (pullNumber !== undefined) {

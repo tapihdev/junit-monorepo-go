@@ -13,6 +13,12 @@ export type ModuleTableRecord = {
   lintResult: string
 }
 
+export type FailedCaseTableRecord = {
+  file: string
+  test: string
+  message: string
+}
+
 export type FailedTestTableRecord = {
   file: string
   test: string
