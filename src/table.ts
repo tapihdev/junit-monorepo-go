@@ -1,5 +1,3 @@
-import { Module } from './module'
-
 import { AnyRecord, ModuleTableRecord, FailedCaseTableRecord } from './type'
 
 export type MarkdownContext = {
@@ -24,7 +22,7 @@ function renderTable<T extends AnyRecord>(
   ].join('\n')
 }
 
-export function createModuleTable(modules: ModuleTableRecord[]) {
+export function createModuleTable(modules: ModuleTableRecord[]): string {
   return renderTable(
     {
       name: 'Module',
@@ -51,7 +49,7 @@ export function createModuleTable(modules: ModuleTableRecord[]) {
 export function createFailedCaseTable(
   failed: FailedCaseTableRecord[],
   limit: number
-) {
+): string {
   const failedLimited = failed.slice(0, limit)
   if (failed.length > limit) {
     failedLimited.push({
