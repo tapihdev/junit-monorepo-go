@@ -41628,6 +41628,7 @@ const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
+const table_1 = __nccwpck_require__(8719);
 const factory_1 = __nccwpck_require__(6373);
 const xml_1 = __nccwpck_require__(6385);
 const mark = '<!-- commented by junit-monorepo-go -->';
@@ -41659,6 +41660,19 @@ async function run() {
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
+        const moduleTable = (0, table_1.createModuleTable)({
+            owner,
+            repo,
+            sha
+        }, repository.modules());
+        const failedTestTable = (0, table_1.createFailedCaseTable)(repository
+            .modules()
+            .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
+            .flat(), failedTestLimit);
+        const failedLintTable = (0, table_1.createFailedCaseTable)(repository
+            .modules()
+            .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
+            .flat(), failedLintLimit);
         const body = repository.makeMarkdownReport({
             owner,
             repo,
@@ -41666,7 +41680,7 @@ async function run() {
             sha,
             runId,
             actor
-        }, failedTestLimit, failedLintLimit);
+        }, moduleTable, failedTestTable, failedLintTable);
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41837,6 +41851,9 @@ class GoRepository {
     constructor(_modules) {
         this._modules = _modules;
     }
+    modules() {
+        return this._modules;
+    }
     numModules() {
         return this._modules.length;
     }
@@ -41848,17 +41865,7 @@ class GoRepository {
     hasLintReport(directory) {
         return (this._modules.find(m => m.directory === directory)?.hasLintReport ?? false);
     }
-    renderTable(header, separator, records) {
-        if (records.length === 0) {
-            return '';
-        }
-        return [
-            `| ${Object.values(header).join(' | ')} |`,
-            `| ${Object.values(separator).join(' | ')} |`,
-            ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
-        ].join('\n');
-    }
-    makeMarkdownReport(context, failedTestLimit, failedLintLimit) {
+    makeMarkdownReport(context, moduleTable, failedTestTable, failedLintTable) {
         const { owner, repo, sha, pullNumber, runId, actor } = context;
         const commitUrl = pullNumber === undefined
             ? `https://github.com/${owner}/${repo}/commit/${sha}`
@@ -41867,47 +41874,6 @@ class GoRepository {
         const result = this._modules.every(m => m.result === reporter_1.Result.Passed)
             ? '`Passed`🙆‍♀️'
             : '`Failed`🙅‍♂️';
-        const moduleTable = this.renderTable({
-            name: 'Module',
-            version: 'Version',
-            testResult: 'Test',
-            testPassed: 'Passed',
-            testFailed: 'Failed',
-            testElapsed: 'Time',
-            lintResult: 'Lint'
-        }, {
-            name: ':-----',
-            version: '------:',
-            testResult: ':---',
-            testPassed: '-----:',
-            testFailed: '-----:',
-            testElapsed: '---:',
-            lintResult: ':---'
-        }, this._modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
-        const failedTests = this._modules
-            .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
-            .flat();
-        const faileTestsLimited = failedTests.slice(0, failedTestLimit);
-        if (failedTests.length > failedTestLimit) {
-            faileTestsLimited.push({
-                file: `:warning: and ${failedTests.length - failedTestLimit} more...`,
-                test: '-',
-                message: '-'
-            });
-        }
-        const failedTestTable = this.renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, faileTestsLimited);
-        const failedLints = this._modules
-            .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
-            .flat();
-        const failedLintsLimited = failedLints.slice(0, failedLintLimit);
-        if (failedLints.length > failedLintLimit) {
-            failedLintsLimited.push({
-                file: `:warning: and ${failedLints.length - failedLintLimit} more...`,
-                test: '-',
-                message: '-'
-            });
-        }
-        const failedLintTable = this.renderTable({ file: 'File', test: 'Lint', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLintsLimited);
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
@@ -41946,6 +41912,58 @@ ${failedLintTable}
     }
 }
 exports.GoRepository = GoRepository;
+
+
+/***/ }),
+
+/***/ 8719:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createModuleTable = createModuleTable;
+exports.createFailedCaseTable = createFailedCaseTable;
+function renderTable(header, separator, records) {
+    if (records.length === 0) {
+        return '';
+    }
+    return [
+        `| ${Object.values(header).join(' | ')} |`,
+        `| ${Object.values(separator).join(' | ')} |`,
+        ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
+    ].join('\n');
+}
+function createModuleTable(context, modules) {
+    return renderTable({
+        name: 'Module',
+        version: 'Version',
+        testResult: 'Test',
+        testPassed: 'Passed',
+        testFailed: 'Failed',
+        testElapsed: 'Time',
+        lintResult: 'Lint'
+    }, {
+        name: ':-----',
+        version: '------:',
+        testResult: ':---',
+        testPassed: '-----:',
+        testFailed: '-----:',
+        testElapsed: '---:',
+        lintResult: ':---'
+    }, modules.map(module => module.makeModuleTableRecord(context.owner, context.repo, context.sha)));
+}
+function createFailedCaseTable(failed, limit) {
+    const failedLimited = failed.slice(0, limit);
+    if (failed.length > limit) {
+        failedLimited.push({
+            file: `:warning: and ${failed.length - limit} more...`,
+            test: '-',
+            message: '-'
+        });
+    }
+    return renderTable({ file: 'File', test: 'Test', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLimited);
+}
 
 
 /***/ }),
