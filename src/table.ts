@@ -61,7 +61,7 @@ export function createFailedCaseTable(
     })
   }
   return renderTable(
-    { file: 'File', test: 'Test', message: 'Message' },
+    { file: 'File', test: 'Case', message: 'Message' },
     { file: ':---', test: ':---', message: ':------' },
     failedLimited
   )
