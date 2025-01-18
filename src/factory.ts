@@ -15,35 +15,46 @@ export class GoRepositoryFactory {
     testReportXml: string,
     lintReportXml: string
   ): Promise<GoRepository> {
-    const map = new Map<string, [string?, string?]>()
-    testDirectories.forEach(d => map.set(d, [testReportXml, undefined]))
+    const all = await Promise.all([
+      await Promise.all(
+        testDirectories.map(
+          async d =>
+            new GotestsumReport(
+              d,
+              await this._parser(path.join(d, testReportXml))
+            )
+        )
+      ),
+      await Promise.all(
+        lintDirectories.map(
+          async d =>
+            new GolangCILintReport(
+              d,
+              await this._parser(path.join(d, lintReportXml))
+            )
+        )
+      )
+    ])
+
+    const test = all[0]
+    const lint = all[1]
+
+    const map = new Map<string, [GotestsumReport?, GolangCILintReport?]>()
+    test.forEach(d => map.set(d.path, [d, undefined]))
     // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-    new Set(lintDirectories).forEach(d => {
-      if (map.has(d)) {
-        map.set(d, [testReportXml, lintReportXml])
+    new Set(lint).forEach(d => {
+      const v = map.get(d.path)
+      if (v !== undefined) {
+        map.set(d.path, [v[0], d])
       } else {
-        map.set(d, [undefined, lintReportXml])
+        map.set(d.path, [undefined, d])
       }
     })
-    const modules = await Promise.all(
-      Array.from(map.entries()).map(
-        async ([directory, [testPath, lintPath]]) => {
-          const [test, lint] = await Promise.all([
-            testPath
-              ? new GotestsumReport(
-                  await this._parser(path.join(directory, testPath))
-                )
-              : undefined,
-            lintPath
-              ? new GolangCILintReport(
-                  await this._parser(path.join(directory, lintPath))
-                )
-              : undefined
-          ])
-          return new GoModule(directory, test, lint)
-        }
-      )
+
+    const modules = Array.from(map).map(
+      ([path, [test, lint]]) => new GoModule(path, test, lint)
     )
+
     return new GoRepository(modules)
   }
 }

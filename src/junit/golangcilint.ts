@@ -4,7 +4,14 @@ import { JUnitReport } from './xml'
 import { Reporter, Result, Case } from './reporter'
 
 export class GolangCILintReport implements Reporter {
-  constructor(private readonly _junit: JUnitReport) {}
+  constructor(
+    private readonly _path: string,
+    private readonly _junit: JUnitReport
+  ) {}
+
+  get path(): string {
+    return this._path
+  }
 
   get result(): Result {
     // Passed if there are no test suites, because golangci-lint reports only failures
