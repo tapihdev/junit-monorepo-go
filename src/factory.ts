@@ -15,12 +15,26 @@ export class GoRepositoryFactory {
     testReportXml: string,
     lintReportXml: string
   ): Promise<GoRepository> {
-    const all = await Promise.all(
-      [
-        await Promise.all(testDirectories.map(async d => new GotestsumReport(d, await this._parser(path.join(d, testReportXml))))),
-        await Promise.all(lintDirectories.map(async d => new GolangCILintReport(d, await this._parser(path.join(d, lintReportXml))))),
-      ]
-    )
+    const all = await Promise.all([
+      await Promise.all(
+        testDirectories.map(
+          async d =>
+            new GotestsumReport(
+              d,
+              await this._parser(path.join(d, testReportXml))
+            )
+        )
+      ),
+      await Promise.all(
+        lintDirectories.map(
+          async d =>
+            new GolangCILintReport(
+              d,
+              await this._parser(path.join(d, lintReportXml))
+            )
+        )
+      )
+    ])
 
     const test = all[0]
     const lint = all[1]
@@ -37,7 +51,9 @@ export class GoRepositoryFactory {
       }
     })
 
-    const modules = Array.from(map).map(([path, [test, lint]]) => new GoModule(path, test, lint))
+    const modules = Array.from(map).map(
+      ([path, [test, lint]]) => new GoModule(path, test, lint)
+    )
 
     return new GoRepository(modules)
   }

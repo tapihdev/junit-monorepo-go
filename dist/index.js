@@ -41046,7 +41046,7 @@ exports.NEVER = parseUtil_1.INVALID;
 
 /***/ }),
 
-/***/ 2973:
+/***/ 4846:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -41126,28 +41126,25 @@ class GoRepositoryFactory {
         this._parser = _parser;
     }
     async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const all = await Promise.all([
+            await Promise.all(testDirectories.map(async (d) => new gotestsum_1.GotestsumReport(d, await this._parser(path.join(d, testReportXml))))),
+            await Promise.all(lintDirectories.map(async (d) => new golangcilint_1.GolangCILintReport(d, await this._parser(path.join(d, lintReportXml)))))
+        ]);
+        const test = all[0];
+        const lint = all[1];
         const map = new Map();
-        testDirectories.forEach(d => map.set(d, [testReportXml, undefined]));
+        test.forEach(d => map.set(d.path, [d, undefined]));
         // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-        new Set(lintDirectories).forEach(d => {
-            if (map.has(d)) {
-                map.set(d, [testReportXml, lintReportXml]);
+        new Set(lint).forEach(d => {
+            const v = map.get(d.path);
+            if (v !== undefined) {
+                map.set(d.path, [v[0], d]);
             }
             else {
-                map.set(d, [undefined, lintReportXml]);
+                map.set(d.path, [undefined, d]);
             }
         });
-        const modules = await Promise.all(Array.from(map.entries()).map(async ([directory, [testPath, lintPath]]) => {
-            const [test, lint] = await Promise.all([
-                testPath
-                    ? new gotestsum_1.GotestsumReport(await this._parser(path.join(directory, testPath)))
-                    : undefined,
-                lintPath
-                    ? new golangcilint_1.GolangCILintReport(await this._parser(path.join(directory, lintPath)))
-                    : undefined
-            ]);
-            return new module_1.GoModule(directory, test, lint);
-        }));
+        const modules = Array.from(map).map(([path, [test, lint]]) => new module_1.GoModule(path, test, lint));
         return new repository_1.GoRepository(modules);
     }
 }
@@ -41249,14 +41246,14 @@ exports.getSha = getSha;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const yaml_1 = __importDefault(__nccwpck_require__(8815));
-const config_1 = __nccwpck_require__(2973);
+const config_generated_1 = __nccwpck_require__(4846);
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
 function getConfig() {
     const raw = core.getInput('config', { required: true });
     try {
-        return config_1.ConfigSchema.parse(yaml_1.default.parse(raw));
+        return config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
     }
     catch (error) {
         throw new Error(`Invalid config: ${error}`);
@@ -41323,9 +41320,14 @@ exports.GolangCILintReport = void 0;
 const path = __importStar(__nccwpck_require__(6928));
 const reporter_1 = __nccwpck_require__(5695);
 class GolangCILintReport {
+    _path;
     _junit;
-    constructor(_junit) {
+    constructor(_path, _junit) {
+        this._path = _path;
         this._junit = _junit;
+    }
+    get path() {
+        return this._path;
     }
     get result() {
         // Passed if there are no test suites, because golangci-lint reports only failures
@@ -41409,6 +41411,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GotestsumReport = void 0;
 const reporter_1 = __nccwpck_require__(5695);
 class GotestsumReport {
+    _path;
     _junit;
     // gotestsum reports failures in the following format:
     // 1. === RUN   Test&#xA;    baz_test.go:1: error;
@@ -41416,8 +41419,12 @@ class GotestsumReport {
     // This line filters out the second format.
     static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/;
     static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(_junit) {
+    constructor(_path, _junit) {
+        this._path = _path;
         this._junit = _junit;
+    }
+    get path() {
+        return this._path;
     }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
