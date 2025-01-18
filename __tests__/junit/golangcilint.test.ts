@@ -107,7 +107,7 @@ describe('golangcilint', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const report = new GolangCILintReport(input)
+    const report = new GolangCILintReport('path', input)
     expect(report.result).toBe(expected.result)
     expect(report.tests).toBe(expected.tests)
     expect(report.passed).toBe(expected.passed)

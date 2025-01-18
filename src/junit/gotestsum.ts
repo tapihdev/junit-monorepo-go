@@ -9,7 +9,11 @@ export class GotestsumReport implements Reporter {
   private static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
-  constructor(private readonly _junit: JUnitReport) {}
+  constructor(private readonly _path: string, private readonly _junit: JUnitReport) {}
+
+  get path(): string {
+    return this._path
+  }
 
   get result(): Result {
     if (this._junit.testsuites.$ === undefined) {
