@@ -15,26 +15,29 @@ export class GoRepositoryFactory {
     testReportXml: string,
     lintReportXml: string
   ): Promise<GoRepository> {
-    const modules = await Promise.all(
+    const all = await Promise.all(
       [
         await Promise.all(testDirectories.map(async d => new GotestsumReport(d, await this._parser(path.join(d, testReportXml))))),
         await Promise.all(lintDirectories.map(async d => new GolangCILintReport(d, await this._parser(path.join(d, lintReportXml))))),
       ]
     )
 
-    const test = modules[0]
-    const lint = modules[1]
+    const test = all[0]
+    const lint = all[1]
 
-    const map = new Map<string, [string?, string?]>()
-    test.forEach(d => map.set(d.path, [testReportXml, undefined]))
+    const map = new Map<string, [GotestsumReport?, GolangCILintReport?]>()
+    test.forEach(d => map.set(d.path, [d, undefined]))
     // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
     new Set(lint).forEach(d => {
-      if (map.has(d.path)) {
-        map.set(d.path, [testReportXml, lintReportXml])
+      const v = map.get(d.path)
+      if (v !== undefined) {
+        map.set(d.path, [v[0], d])
       } else {
-        map.set(d.path, [undefined, lintReportXml])
+        map.set(d.path, [undefined, d])
       }
     })
+
+    const modules = Array.from(map).map(([path, [test, lint]]) => new GoModule(path, test, lint))
 
     return new GoRepository(modules)
   }
