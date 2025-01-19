@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { Reporter, Result } from './junit/reporter'
+import { Reporter, Result } from './junit/type'
 import {
   ModuleTableRecord,
   FailedTestTableRecord,

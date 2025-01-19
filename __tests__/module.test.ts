@@ -4,7 +4,7 @@ import {
   FailedTestTableRecord,
   FailedLintTableRecord
 } from '../src/type'
-import { Reporter, Result, Case } from '../src/junit/reporter'
+import { Reporter, Result, Case } from '../src/junit/type'
 
 describe('Module#makeModuleTableRecord', () => {
   const testCases = [
@@ -12,6 +12,7 @@ describe('Module#makeModuleTableRecord', () => {
       name: `should make a module table record with test`,
       input: {
         test: {
+          path: 'path/to',
           result: Result.Passed,
           tests: 4,
           passed: 3,
@@ -43,6 +44,7 @@ describe('Module#makeModuleTableRecord', () => {
       input: {
         test: undefined,
         lint: {
+          path: 'path/to',
           result: Result.Passed,
           tests: 0,
           passed: 0,
@@ -71,6 +73,7 @@ describe('Module#makeModuleTableRecord', () => {
       name: `should make a module table record with test and lint`,
       input: {
         test: {
+          path: 'path/to',
           result: Result.Passed,
           tests: 4,
           passed: 3,
@@ -183,6 +186,7 @@ describe('Module#makeFailedLintTableRecords', () => {
     const module = new GoModule(
       'path/to',
       {
+        path: 'path/to',
         result: Result.Failed,
         tests: 4,
         passed: 3,

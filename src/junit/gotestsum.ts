@@ -1,5 +1,4 @@
-import { JUnitReport } from './xml'
-import { Reporter, Result, Case } from './reporter'
+import { JUnitReport, Reporter, Result, Case } from './type'
 
 export class GotestsumReport implements Reporter {
   // gotestsum reports failures in the following format:
@@ -59,6 +58,13 @@ export class GotestsumReport implements Reporter {
   }
 
   get version(): string | undefined {
+    if (
+      this._junit.testsuites.testsuite === undefined ||
+      this._junit.testsuites.testsuite.length === 0
+    ) {
+      return undefined
+    }
+
     const filtered =
       this._junit.testsuites.testsuite
         ?.map(testsuite => testsuite.properties ?? [])

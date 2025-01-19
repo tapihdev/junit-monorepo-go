@@ -1,44 +1,52 @@
-import { XmlParser, JUnitReport } from '../src/junit/xml'
+import { JUnitReporterFactory } from '../src/junit/factory'
 import { GoRepositoryFactory } from '../src/factory'
+import { Reporter, ReporterType } from '../src/junit/type'
+import { GotestsumReport } from '../src/junit/gotestsum'
+import { GolangCILintReport } from '../src/junit/golangcilint'
 
 describe('GoRepositoryFactory', () => {
   let factory: GoRepositoryFactory
-  let xmlParserMock: XmlParser
+  let reporterFactoryMock: JUnitReporterFactory
   beforeEach(() => {
     jest.clearAllMocks()
-    xmlParserMock = jest
-      .fn()
-      .mockImplementation(async (path: string): Promise<JUnitReport> => {
-        if (path === 'lint.xml') {
-          return {
-            testsuites: {
-              testsuite: [
-                {
-                  $: {
-                    name: 'Lint',
-                    tests: '0',
-                    failures: '0'
-                  }
+    reporterFactoryMock = {
+      fromJSON: jest
+        .fn()
+        .mockImplementation(
+          async (type: ReporterType, path: string): Promise<Reporter> => {
+            if (type === ReporterType.GolangCILint) {
+              return new GolangCILintReport(path, {
+                testsuites: {
+                  testsuite: [
+                    {
+                      $: {
+                        name: 'Lint',
+                        tests: '0',
+                        failures: '0'
+                      }
+                    }
+                  ]
                 }
-              ]
+              })
             }
-          }
-        }
-        return {
-          testsuites: {
-            testsuite: [
-              {
-                $: {
-                  name: 'Test',
-                  tests: '0',
-                  failures: '0'
-                }
+
+            return new GotestsumReport(path, {
+              testsuites: {
+                testsuite: [
+                  {
+                    $: {
+                      name: 'Test',
+                      tests: '0',
+                      failures: '0'
+                    }
+                  }
+                ]
               }
-            ]
+            })
           }
-        }
-      })
-    factory = new GoRepositoryFactory(xmlParserMock)
+        )
+    }
+    factory = new GoRepositoryFactory(reporterFactoryMock)
   })
 
   const testCases = [

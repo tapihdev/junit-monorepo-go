@@ -1,5 +1,5 @@
 import { GoRepository } from '../src/repository'
-import { Result } from '../src/junit/reporter'
+import { Result } from '../src/junit/type'
 
 describe('Repository#Markdown', () => {
   const testCases = [
