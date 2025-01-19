@@ -1,6 +1,6 @@
-import { JUnitReport } from '../../src/junit/xml'
+import { JUnitReport } from '../../src/junit/type'
 import { GotestsumReport } from '../../src/junit/gotestsum'
-import { Result } from '../../src/junit/reporter'
+import { Result } from '../../src/junit/type'
 
 describe('gotestsum', () => {
   const testCases = [
@@ -47,6 +47,53 @@ describe('gotestsum', () => {
         skipped: 0,
         time: 0,
         version: '1.23.2',
+        failures: []
+      }
+    },
+    {
+      name: 'should parse the junit report with undefined testsuite',
+      input: {
+        testsuites: {
+          $: {
+            tests: '0',
+            failures: '0',
+            errors: '0',
+            time: '0.000000'
+          }
+        }
+      } as JUnitReport,
+      expected: {
+        result: Result.Passed,
+        tests: 0,
+        passed: 0,
+        failed: 0,
+        skipped: 0,
+        time: 0,
+        version: undefined,
+        failures: []
+      }
+    },
+    {
+      name: 'should parse the junit report with empty testsuite',
+      input: {
+        testsuites: {
+          $: {
+            tests: '0',
+            failures: '0',
+            errors: '0',
+            time: '0.000000'
+          },
+          testsuite: []
+        }
+      } as JUnitReport,
+      expected: {
+        result: Result.Passed,
+        tests: 0,
+        passed: 0,
+        failed: 0,
+        skipped: 0,
+        time: 0,
+        version: undefined,
         failures: []
       }
     },

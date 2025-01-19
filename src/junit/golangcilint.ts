@@ -1,7 +1,6 @@
 import * as path from 'path'
 
-import { JUnitReport } from './xml'
-import { Reporter, Result, Case } from './reporter'
+import { JUnitReport, Reporter, Result, Case } from './type'
 
 export class GolangCILintReport implements Reporter {
   constructor(

@@ -1,13 +1,10 @@
-import * as path from 'path'
-
-import { XmlParser } from './junit/xml'
+import { Reporter, ReporterType } from './junit/type'
+import { JUnitReporterFactory } from './junit/factory'
 import { GoRepository } from './repository'
-import { GotestsumReport } from './junit/gotestsum'
-import { GolangCILintReport } from './junit/golangcilint'
 import { GoModule } from './module'
 
 export class GoRepositoryFactory {
-  constructor(private _parser: XmlParser) {}
+  constructor(private _parser: JUnitReporterFactory) {}
 
   async fromXml(
     testDirectories: string[],
@@ -17,29 +14,22 @@ export class GoRepositoryFactory {
   ): Promise<GoRepository> {
     const all = await Promise.all([
       await Promise.all(
-        testDirectories.map(
-          async d =>
-            new GotestsumReport(
-              d,
-              await this._parser(path.join(d, testReportXml))
-            )
+        testDirectories.map(async d =>
+          this._parser.fromJSON(ReporterType.Gotestsum, d, testReportXml)
         )
       ),
       await Promise.all(
-        lintDirectories.map(
-          async d =>
-            new GolangCILintReport(
-              d,
-              await this._parser(path.join(d, lintReportXml))
-            )
+        lintDirectories.map(async d =>
+          this._parser.fromJSON(ReporterType.GolangCILint, d, lintReportXml)
         )
       )
     ])
 
+    // TODO: Remove this after refactoring is done
     const test = all[0]
     const lint = all[1]
 
-    const map = new Map<string, [GotestsumReport?, GolangCILintReport?]>()
+    const map = new Map<string, [Reporter?, Reporter?]>()
     test.forEach(d => map.set(d.path, [d, undefined]))
     // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
     new Set(lint).forEach(d => {

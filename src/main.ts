@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import fs from 'fs'
 
 import {
   getGitHubToken,
@@ -10,8 +11,8 @@ import {
 import { Client as GitHubClient } from './github'
 import { createFailedCaseTable, createModuleTable } from './table'
 import { GoRepositoryFactory } from './factory'
-import { parseJUnitReport } from './junit/xml'
-import { Result } from './junit/reporter'
+import { JUnitReporterFactoryImpl } from './junit/factory'
+import { Result } from './junit/type'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -41,7 +42,8 @@ export async function run(): Promise<void> {
     const failedLintLimit = lint?.annotationLimit || 10
 
     core.info(`* search and read junit reports`)
-    const factory = new GoRepositoryFactory(parseJUnitReport)
+    const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
+    const factory = new GoRepositoryFactory(repoterFactory)
     const repository = await factory.fromXml(
       testDirs,
       lintDirs,

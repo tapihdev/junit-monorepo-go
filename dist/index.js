@@ -41076,49 +41076,14 @@ exports.ConfigSchema = zod_1.z.record(zod_1.z
 /***/ }),
 
 /***/ 6373:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoRepositoryFactory = void 0;
-const path = __importStar(__nccwpck_require__(6928));
+const type_1 = __nccwpck_require__(4874);
 const repository_1 = __nccwpck_require__(3627);
-const gotestsum_1 = __nccwpck_require__(5765);
-const golangcilint_1 = __nccwpck_require__(549);
 const module_1 = __nccwpck_require__(6471);
 class GoRepositoryFactory {
     _parser;
@@ -41127,9 +41092,10 @@ class GoRepositoryFactory {
     }
     async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
         const all = await Promise.all([
-            await Promise.all(testDirectories.map(async (d) => new gotestsum_1.GotestsumReport(d, await this._parser(path.join(d, testReportXml))))),
-            await Promise.all(lintDirectories.map(async (d) => new golangcilint_1.GolangCILintReport(d, await this._parser(path.join(d, lintReportXml)))))
+            await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.Gotestsum, d, testReportXml))),
+            await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.GolangCILint, d, lintReportXml)))
         ]);
+        // TODO: Remove this after refactoring is done
         const test = all[0];
         const lint = all[1];
         const map = new Map();
@@ -41277,6 +41243,51 @@ function getSha() {
 
 /***/ }),
 
+/***/ 7534:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JUnitReporterFactoryImpl = void 0;
+const path_1 = __importDefault(__nccwpck_require__(6928));
+const xml2js_1 = __nccwpck_require__(758);
+const type_1 = __nccwpck_require__(4874);
+const golangcilint_1 = __nccwpck_require__(549);
+const gotestsum_1 = __nccwpck_require__(5765);
+class JUnitReporterFactoryImpl {
+    reader;
+    constructor(reader) {
+        this.reader = reader;
+    }
+    async fromJSON(type, directory, fileName) {
+        const content = await this.reader(path_1.default.join(directory, fileName), {
+            encoding: 'utf8'
+        });
+        const parsed = await this.safeParse(content);
+        switch (type) {
+            case type_1.ReporterType.GolangCILint:
+                return new golangcilint_1.GolangCILintReport(directory, parsed);
+            case type_1.ReporterType.Gotestsum:
+                return new gotestsum_1.GotestsumReport(directory, parsed);
+        }
+    }
+    async safeParse(content) {
+        const parsedUnsafe = (await (0, xml2js_1.parseStringPromise)(content));
+        if (parsedUnsafe.testsuites === '') {
+            parsedUnsafe.testsuites = {};
+        }
+        return parsedUnsafe;
+    }
+}
+exports.JUnitReporterFactoryImpl = JUnitReporterFactoryImpl;
+
+
+/***/ }),
+
 /***/ 549:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -41318,7 +41329,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GolangCILintReport = void 0;
 const path = __importStar(__nccwpck_require__(6928));
-const reporter_1 = __nccwpck_require__(5695);
+const type_1 = __nccwpck_require__(4874);
 class GolangCILintReport {
     _path;
     _junit;
@@ -41332,8 +41343,8 @@ class GolangCILintReport {
     get result() {
         // Passed if there are no test suites, because golangci-lint reports only failures
         return this._junit.testsuites.testsuite === undefined
-            ? reporter_1.Result.Passed
-            : reporter_1.Result.Failed;
+            ? type_1.Result.Passed
+            : type_1.Result.Failed;
     }
     get tests() {
         return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
@@ -41409,7 +41420,7 @@ exports.GolangCILintReport = GolangCILintReport;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GotestsumReport = void 0;
-const reporter_1 = __nccwpck_require__(5695);
+const type_1 = __nccwpck_require__(4874);
 class GotestsumReport {
     _path;
     _junit;
@@ -41428,16 +41439,16 @@ class GotestsumReport {
     }
     get result() {
         if (this._junit.testsuites.$ === undefined) {
-            return reporter_1.Result.Unknown;
+            return type_1.Result.Unknown;
         }
         if (this._junit.testsuites.$.failures !== '0') {
-            return reporter_1.Result.Failed;
+            return type_1.Result.Failed;
         }
         if (this._junit.testsuites.$.skipped !== undefined &&
             this._junit.testsuites.$.skipped !== '0') {
-            return reporter_1.Result.Skipped;
+            return type_1.Result.Skipped;
         }
-        return reporter_1.Result.Passed;
+        return type_1.Result.Passed;
     }
     get tests() {
         return parseInt(this._junit.testsuites.$?.tests ?? '0');
@@ -41456,6 +41467,10 @@ class GotestsumReport {
         return time === undefined ? undefined : parseFloat(time);
     }
     get version() {
+        if (this._junit.testsuites.testsuite === undefined ||
+            this._junit.testsuites.testsuite.length === 0) {
+            return undefined;
+        }
         const filtered = this._junit.testsuites.testsuite
             ?.map(testsuite => testsuite.properties ?? [])
             .flat()
@@ -41516,13 +41531,18 @@ exports.GotestsumReport = GotestsumReport;
 
 /***/ }),
 
-/***/ 5695:
+/***/ 4874:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Result = void 0;
+exports.Result = exports.ReporterType = void 0;
+var ReporterType;
+(function (ReporterType) {
+    ReporterType["GolangCILint"] = "golangci-lint";
+    ReporterType["Gotestsum"] = "gotestsum";
+})(ReporterType || (exports.ReporterType = ReporterType = {}));
 var Result;
 (function (Result) {
     Result["Passed"] = "passed";
@@ -41530,56 +41550,6 @@ var Result;
     Result["Skipped"] = "skipped";
     Result["Unknown"] = "unknown";
 })(Result || (exports.Result = Result = {}));
-
-
-/***/ }),
-
-/***/ 6385:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseJUnitReport = parseJUnitReport;
-const fs = __importStar(__nccwpck_require__(9896));
-const xml2js_1 = __nccwpck_require__(758);
-async function parseJUnitReport(path) {
-    const content = await fs.promises.readFile(path, { encoding: 'utf8' });
-    return (await (0, xml2js_1.parseStringPromise)(content));
-}
 
 
 /***/ }),
@@ -41622,16 +41592,20 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
+const fs_1 = __importDefault(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
 const factory_1 = __nccwpck_require__(6373);
-const xml_1 = __nccwpck_require__(6385);
-const reporter_1 = __nccwpck_require__(5695);
+const factory_2 = __nccwpck_require__(7534);
+const type_1 = __nccwpck_require__(4874);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41656,7 +41630,8 @@ async function run() {
         const failedTestLimit = test?.annotationLimit || 10;
         const failedLintLimit = lint?.annotationLimit || 10;
         core.info(`* search and read junit reports`);
-        const factory = new factory_1.GoRepositoryFactory(xml_1.parseJUnitReport);
+        const repoterFactory = new factory_2.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
+        const factory = new factory_1.GoRepositoryFactory(repoterFactory);
         const repository = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const { owner, repo } = github.context.repo;
@@ -41672,9 +41647,9 @@ async function run() {
             .modules()
             .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
             .flat(), failedLintLimit);
-        const result = repository.modules().every(m => m.result === reporter_1.Result.Passed)
-            ? reporter_1.Result.Passed
-            : reporter_1.Result.Failed;
+        const result = repository.modules().every(m => m.result === type_1.Result.Passed)
+            ? type_1.Result.Passed
+            : type_1.Result.Failed;
         const body = repository.makeMarkdownReport({
             owner,
             repo,
@@ -41760,7 +41735,7 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoModule = void 0;
 const path = __importStar(__nccwpck_require__(6928));
-const reporter_1 = __nccwpck_require__(5695);
+const type_1 = __nccwpck_require__(4874);
 class GoModule {
     _directory;
     _testReport;
@@ -41780,10 +41755,10 @@ class GoModule {
         return this._testReport !== undefined;
     }
     get result() {
-        return this._testReport?.result === reporter_1.Result.Failed ||
-            this._lintReport?.result === reporter_1.Result.Failed
-            ? reporter_1.Result.Failed
-            : reporter_1.Result.Passed;
+        return this._testReport?.result === type_1.Result.Failed ||
+            this._lintReport?.result === type_1.Result.Failed
+            ? type_1.Result.Failed
+            : type_1.Result.Passed;
     }
     makeModuleTableRecord(owner, repo, sha) {
         return {
@@ -41791,7 +41766,7 @@ class GoModule {
             version: this._testReport?.version ?? '-',
             testResult: this._testReport === undefined
                 ? '-'
-                : this._testReport.result === reporter_1.Result.Failed
+                : this._testReport.result === type_1.Result.Failed
                     ? '❌Failed'
                     : '✅Passed',
             testPassed: this._testReport?.passed.toString() ?? '-',
@@ -41799,7 +41774,7 @@ class GoModule {
             testElapsed: this._testReport?.time?.toFixed(1).concat('s') ?? '-',
             lintResult: this._lintReport === undefined
                 ? '-'
-                : this._lintReport.result === reporter_1.Result.Failed
+                : this._lintReport.result === type_1.Result.Failed
                     ? '❌Failed'
                     : '✅Passed'
         };
@@ -41847,7 +41822,7 @@ exports.GoModule = GoModule;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoRepository = void 0;
-const reporter_1 = __nccwpck_require__(5695);
+const type_1 = __nccwpck_require__(4874);
 class GoRepository {
     _modules;
     constructor(_modules) {
@@ -41876,7 +41851,7 @@ class GoRepository {
         return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
-#### Result: ${result === reporter_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
+#### Result: ${result === type_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${failedTestTable === ''

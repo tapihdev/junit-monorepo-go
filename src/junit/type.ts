@@ -1,18 +1,41 @@
-import * as fs from 'fs'
-import { parseStringPromise } from 'xml2js'
-
-export type XmlParser = (path: string) => Promise<JUnitReport>
-
-export async function parseJUnitReport(path: string): Promise<JUnitReport> {
-  const content = await fs.promises.readFile(path, { encoding: 'utf8' })
-  return (await parseStringPromise(content)) as JUnitReport
+export enum ReporterType {
+  GolangCILint = 'golangci-lint',
+  Gotestsum = 'gotestsum'
 }
 
+export enum Result {
+  Passed = 'passed',
+  Failed = 'failed',
+  Skipped = 'skipped',
+  Unknown = 'unknown'
+}
+
+export interface Reporter {
+  readonly path: string
+  readonly result: Result
+  readonly tests: number
+  readonly passed: number
+  readonly failed: number
+  readonly skipped: number
+  readonly time?: number
+  readonly version?: string
+  readonly failures: Case[]
+}
+
+export type Case = {
+  subDir: string
+  file: string
+  line: number
+  test: string
+  message: string
+}
+
+// Low level types to parse JUnit XML reports
 export type JUnitReport = {
   testsuites: TestSuites
 }
 
-type TestSuites = {
+export type TestSuites = {
   $?: {
     tests: string
     errors: string
@@ -53,7 +76,7 @@ type TestCase = {
     classname: string
     file?: string
     name: string
-    time: string
+    time?: string
   }
   failure?: Test[]
   skipped?: Test[]
