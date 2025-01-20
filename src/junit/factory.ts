@@ -3,8 +3,8 @@ import path from 'path'
 import { parseStringPromise } from 'xml2js'
 
 import { JUnitReport, TestSuites, Reporter, ReporterType } from './type'
-import { GolangCILintReport } from './golangcilint'
-import { GotestsumReport } from './gotestsum'
+import { GolangCILintReportImpl } from './golangcilint'
+import { GotestsumReportImpl } from './gotestsum'
 
 export type FileReader = typeof fs.promises.readFile
 
@@ -31,9 +31,9 @@ export class JUnitReporterFactoryImpl implements JUnitReporterFactory {
 
     switch (type) {
       case ReporterType.GolangCILint:
-        return new GolangCILintReport(directory, parsed)
+        return new GolangCILintReportImpl(directory, parsed)
       case ReporterType.Gotestsum:
-        return new GotestsumReport(directory, parsed)
+        return new GotestsumReportImpl(directory, parsed)
     }
   }
 

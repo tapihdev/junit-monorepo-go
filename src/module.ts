@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { Reporter } from './junit/type'
+import { Reportable } from './junit/type'
 import {
   Result,
   ModuleTableRecord,
@@ -35,8 +35,8 @@ export interface Module {
 export class GoModule implements Module {
   constructor(
     private readonly _directory: string,
-    private readonly _testReport?: Reporter,
-    private readonly _lintReport?: Reporter
+    private readonly _testReport?: Reportable,
+    private readonly _lintReport?: Reportable
   ) {}
 
   get directory(): string {

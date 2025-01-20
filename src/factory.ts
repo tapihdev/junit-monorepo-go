@@ -1,4 +1,4 @@
-import { Reporter, ReporterType } from './junit/type'
+import { GolangCILintReport, GotestsumReport, ReporterType } from './junit/type'
 import { JUnitReporterFactory } from './junit/factory'
 import { GoRepository } from './repository'
 import { GoModule } from './module'
@@ -29,15 +29,15 @@ export class GoRepositoryFactory {
     const test = all[0]
     const lint = all[1]
 
-    const map = new Map<string, [Reporter?, Reporter?]>()
-    test.forEach(d => map.set(d.path, [d, undefined]))
+    const map = new Map<string, [GotestsumReport?, GolangCILintReport?]>()
+    test.forEach(d => map.set(d.path, [d as GotestsumReport, undefined]))
     // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
     new Set(lint).forEach(d => {
       const v = map.get(d.path)
       if (v !== undefined) {
-        map.set(d.path, [v[0], d])
+        map.set(d.path, [v[0], d as GolangCILintReport])
       } else {
-        map.set(d.path, [undefined, d])
+        map.set(d.path, [undefined, d as GolangCILintReport])
       }
     })
 
