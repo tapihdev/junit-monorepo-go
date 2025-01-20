@@ -1,4 +1,4 @@
-import { JUnitReport, GotestsumReport, Case, GotestsumSummary } from './type'
+import { JUnitReport, GotestsumReport, Failure, GotestsumSummary } from './type'
 import { Result } from '../type'
 
 export class GotestsumReportImpl implements GotestsumReport {
@@ -24,7 +24,7 @@ export class GotestsumReportImpl implements GotestsumReport {
     }
   }
 
-  get failures(): Case[] {
+  get failures(): Failure[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -56,7 +56,7 @@ export class GotestsumReportImpl implements GotestsumReport {
             line: parseInt(match[2]),
             test: testcase.$.name,
             message: match[0]
-          } as Case
+          } as Failure
         })
       })
       .flat()

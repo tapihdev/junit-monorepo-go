@@ -9,7 +9,7 @@ export enum ReporterType {
 export interface Reportable<T extends Summary> {
   readonly path: string
   readonly summary: T
-  readonly failures: Case[]
+  readonly failures: Failure[]
 }
 
 export type Reporter = GotestsumReport | GolangCILintReport
@@ -29,8 +29,8 @@ export type GolangCILintSummary = {
   result: Result
 }
 
-// Case represents a failed test case
-export type Case = {
+// Failure represents a failed test case
+export type Failure = {
   subDir: string
   file: string
   line: number

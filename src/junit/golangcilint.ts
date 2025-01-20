@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { JUnitReport, GolangCILintReport, GolangCILintSummary, Case } from './type'
+import { JUnitReport, GolangCILintReport, GolangCILintSummary, Failure } from './type'
 import { Result } from '../type'
 
 export class GolangCILintReportImpl implements GolangCILintReport {
@@ -15,7 +15,7 @@ export class GolangCILintReportImpl implements GolangCILintReport {
     }
   }
 
-  get failures(): Case[] {
+  get failures(): Failure[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
