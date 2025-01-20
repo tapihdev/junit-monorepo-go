@@ -1,6 +1,5 @@
 import { GolangCILintReport, GotestsumReport, ReporterType } from './junit/type'
 import { JUnitReporterFactory } from './junit/factory'
-import { GoRepository } from './repository'
 import { GoModule } from './module'
 
 export class GoRepositoryFactory {
@@ -11,7 +10,7 @@ export class GoRepositoryFactory {
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<GoRepository> {
+  ): Promise<GoModule[]> {
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(async d =>
@@ -45,6 +44,6 @@ export class GoRepositoryFactory {
       ([path, [test, lint]]) => new GoModule(path, test, lint)
     )
 
-    return new GoRepository(modules)
+    return modules
   }
 }

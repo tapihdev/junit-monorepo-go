@@ -13,6 +13,7 @@ import { createFailedCaseTable, createModuleTable } from './table'
 import { GoRepositoryFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
 import { Result } from './type'
+import { makeMarkdownReport, makeAnnotationMessages } from './table'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -44,7 +45,7 @@ export async function run(): Promise<void> {
     core.info(`* search and read junit reports`)
     const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
     const factory = new GoRepositoryFactory(repoterFactory)
-    const repository = await factory.fromXml(
+    const modules = await factory.fromXml(
       testDirs,
       lintDirs,
       testReportXml,
@@ -55,29 +56,26 @@ export async function run(): Promise<void> {
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
     const moduleTable = createModuleTable(
-      repository
-        .modules()
+        modules
         .map(module => module.makeModuleTableRecord(owner, repo, sha))
     )
     const failedTestTable = createFailedCaseTable(
-      repository
-        .modules()
+        modules
         .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
         .flat(),
       failedTestLimit
     )
     const failedLintTable = createFailedCaseTable(
-      repository
-        .modules()
+        modules
         .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
         .flat(),
       failedLintLimit
     )
-    const result = repository.modules().every(m => m.result === Result.Passed)
+    const result = modules.every(m => m.result === Result.Passed)
       ? Result.Passed
       : Result.Failed
 
-    const body = repository.makeMarkdownReport(
+    const body = makeMarkdownReport(
       {
         owner,
         repo,
@@ -113,8 +111,7 @@ export async function run(): Promise<void> {
     await core.summary.addRaw(body).write()
 
     core.info('* annotate failed tests')
-    repository
-      .makeAnnotationMessages()
+      makeAnnotationMessages(modules)
       .forEach(annotation => core.info(annotation))
 
     core.info('* set output')
