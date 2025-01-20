@@ -1,4 +1,5 @@
-import { JUnitReport, Reporter, Result, Case } from './type'
+import { JUnitReport, Reporter, Case } from './type'
+import { Result } from '../type'
 
 export class GotestsumReport implements Reporter {
   // gotestsum reports failures in the following format:

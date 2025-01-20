@@ -4,7 +4,8 @@ import {
   FailedTestTableRecord,
   FailedLintTableRecord
 } from '../src/type'
-import { Reporter, Result, Case } from '../src/junit/type'
+import { Result } from '../src/type'
+import { Reporter, Case } from '../src/junit/reporter'
 
 describe('Module#makeModuleTableRecord', () => {
   const testCases = [

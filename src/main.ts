@@ -12,7 +12,7 @@ import { Client as GitHubClient } from './github'
 import { createFailedCaseTable, createModuleTable } from './table'
 import { GoRepositoryFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
-import { Result } from './junit/type'
+import { Result } from './type'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 

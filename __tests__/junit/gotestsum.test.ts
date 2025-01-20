@@ -1,6 +1,6 @@
 import { JUnitReport } from '../../src/junit/type'
 import { GotestsumReport } from '../../src/junit/gotestsum'
-import { Result } from '../../src/junit/type'
+import { Result } from '../../src/type'
 
 describe('gotestsum', () => {
   const testCases = [

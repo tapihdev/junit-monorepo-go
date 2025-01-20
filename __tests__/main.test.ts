@@ -13,7 +13,7 @@ import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
 import { GoRepository } from '../src/repository'
 import { GoRepositoryFactory } from '../src/factory'
-import { Result } from '../src/junit/type'
+import { Result } from '../src/type'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')

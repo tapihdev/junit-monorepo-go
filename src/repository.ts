@@ -1,5 +1,5 @@
 import { Module } from './module'
-import { Result } from './junit/type'
+import { Result } from './type'
 
 export type MarkdownContext = {
   owner: string

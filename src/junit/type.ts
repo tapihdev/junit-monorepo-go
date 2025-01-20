@@ -1,13 +1,8 @@
+import { Result } from '../type'
+
 export enum ReporterType {
   GolangCILint = 'golangci-lint',
   Gotestsum = 'gotestsum'
-}
-
-export enum Result {
-  Passed = 'passed',
-  Failed = 'failed',
-  Skipped = 'skipped',
-  Unknown = 'unknown'
 }
 
 export interface Reporter {
