@@ -18,20 +18,20 @@ export type GitHubActionsContext = {
 }
 
 export function makeMarkdownReport(
-    context: GitHubActionsContext,
-    result: Result,
-    moduleTable: string,
-    failedTestTable: string,
-    failedLintTable: string
-  ): string {
-    const { owner, repo, sha, pullNumber, runId, actor } = context
-    const commitUrl =
-      pullNumber === undefined
-        ? `https://github.com/${owner}/${repo}/commit/${sha}`
-        : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
-    const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
+  context: GitHubActionsContext,
+  result: Result,
+  moduleTable: string,
+  failedTestTable: string,
+  failedLintTable: string
+): string {
+  const { owner, repo, sha, pullNumber, runId, actor } = context
+  const commitUrl =
+    pullNumber === undefined
+      ? `https://github.com/${owner}/${repo}/commit/${sha}`
+      : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
+  const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
 
-    return `
+  return `
 ## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
 
 #### Result: ${result === Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
@@ -51,9 +51,9 @@ ${failedTestTable}
 </details>
 `
 }${
-      failedLintTable === ''
-        ? ''
-        : `
+    failedLintTable === ''
+      ? ''
+      : `
 <br/>
 
 <details open>
@@ -63,11 +63,11 @@ ${failedLintTable}
 
 </details>
 `
-    }
+  }
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)
-  }
+}
 
 export function makeAnnotationMessages(modules: Module[]): string[] {
   return modules.map(m => m.makeAnnotationMessages()).flat()

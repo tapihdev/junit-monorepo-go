@@ -11,9 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { GoRepository } from '../src/repository'
-import { GoRepositoryFactory } from '../src/factory'
-import { Result } from '../src/type'
+import { GoModulesFactory } from '../src/factory'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -29,13 +27,7 @@ let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
 let repositoryFactoryFromXmlMock: jest.SpiedFunction<
-  GoRepositoryFactory['fromXml']
->
-let makeMarkdownReportMock: jest.SpiedFunction<
-  GoRepository['makeMarkdownReport']
->
-let makeAnnotationMessagesMock: jest.SpiedFunction<
-  GoRepository['makeAnnotationMessages']
+  GoModulesFactory['fromXml']
 >
 
 describe('action', () => {
@@ -56,14 +48,8 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
     repositoryFactoryFromXmlMock = jest
-      .spyOn(GoRepositoryFactory.prototype, 'fromXml')
-      .mockResolvedValue(new GoRepository([]))
-    makeMarkdownReportMock = jest
-      .spyOn(GoRepository.prototype, 'makeMarkdownReport')
-      .mockReturnValue('markdown report')
-    makeAnnotationMessagesMock = jest
-      .spyOn(GoRepository.prototype, 'makeAnnotationMessages')
-      .mockReturnValue(['annotation'])
+      .spyOn(GoModulesFactory.prototype, 'fromXml')
+      .mockResolvedValue([])
   })
 
   it('should post comment and summary', async () => {
@@ -141,22 +127,6 @@ lint:
       mark: '<!-- commented by junit-monorepo-go -->',
       body: 'markdown report'
     })
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
-      1,
-      {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: 123,
-        sha: 'sha',
-        runId: 123,
-        actor: 'actor'
-      },
-      Result.Passed,
-      '',
-      '',
-      ''
-    )
-    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
@@ -226,22 +196,6 @@ lint:
       'test.xml',
       'lint.xml'
     )
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
-      1,
-      {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: undefined,
-        sha: 'sha',
-        runId: 123,
-        actor: 'actor'
-      },
-      Result.Passed,
-      '',
-      '',
-      ''
-    )
-    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')

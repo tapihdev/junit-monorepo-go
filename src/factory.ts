@@ -2,7 +2,7 @@ import { GolangCILintReport, GotestsumReport, ReporterType } from './junit/type'
 import { JUnitReporterFactory } from './junit/factory'
 import { GoModule } from './module'
 
-export class GoRepositoryFactory {
+export class GoModulesFactory {
   constructor(private _parser: JUnitReporterFactory) {}
 
   async fromXml(

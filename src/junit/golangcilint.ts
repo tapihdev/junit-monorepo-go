@@ -1,6 +1,11 @@
 import * as path from 'path'
 
-import { JUnitReport, GolangCILintReport, GolangCILintSummary, Failure } from './type'
+import {
+  JUnitReport,
+  GolangCILintReport,
+  GolangCILintSummary,
+  Failure
+} from './type'
 import { Result } from '../type'
 
 export class GolangCILintReportImpl implements GolangCILintReport {

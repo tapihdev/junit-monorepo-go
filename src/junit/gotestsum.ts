@@ -39,7 +39,8 @@ export class GotestsumReportImpl implements GotestsumReport {
         const macthedFailures =
           testcase.failure
             ?.map(
-              failure => failure._?.match(GotestsumReportImpl.failureRegex) ?? null
+              failure =>
+                failure._?.match(GotestsumReportImpl.failureRegex) ?? null
             )
             .filter(match => match !== null) ?? []
 
@@ -61,7 +62,6 @@ export class GotestsumReportImpl implements GotestsumReport {
       })
       .flat()
   }
-
 
   private get result(): Result {
     if (this._junit.testsuites.$ === undefined) {

@@ -5,7 +5,7 @@ import {
   FailedLintTableRecord
 } from '../src/type'
 import { Result } from '../src/type'
-import { Reporter, Case } from '../src/junit/reporter'
+import { Reporter, Failure } from '../src/junit/type'
 
 describe('Module#makeModuleTableRecord', () => {
   const testCases = [

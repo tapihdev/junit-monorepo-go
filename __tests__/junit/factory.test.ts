@@ -1,6 +1,6 @@
 import { JUnitReporterFactoryImpl } from '../../src/junit/factory'
-import { GolangCILintReport } from '../../src/junit/golangcilint'
-import { GotestsumReport } from '../../src/junit/gotestsum'
+import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
+import { GotestsumReportImpl } from '../../src/junit/gotestsum'
 import { ReporterType } from '../../src/junit/type'
 
 describe('JUnitReporterFactoryImpl', () => {
@@ -14,7 +14,7 @@ describe('JUnitReporterFactoryImpl', () => {
         <testsuites></testsuites>
         `)
       },
-      expected: new GotestsumReport('path/to', {
+      expected: new GotestsumReportImpl('path/to', {
         testsuites: {}
       })
     },
@@ -27,7 +27,7 @@ describe('JUnitReporterFactoryImpl', () => {
         <testsuites></testsuites>
         `)
       },
-      expected: new GolangCILintReport('path/to', {
+      expected: new GolangCILintReportImpl('path/to', {
         testsuites: {}
       })
     },
@@ -46,7 +46,7 @@ describe('JUnitReporterFactoryImpl', () => {
         </testsuites>
         `)
       },
-      expected: new GotestsumReport('path/to', {
+      expected: new GotestsumReportImpl('path/to', {
         testsuites: {
           $: {
             tests: '0',
@@ -108,7 +108,7 @@ describe('JUnitReporterFactoryImpl', () => {
         </testsuites>
         `)
       },
-      expected: new GotestsumReport('path/to', {
+      expected: new GotestsumReportImpl('path/to', {
         testsuites: {
           $: {
             tests: '4',
@@ -241,7 +241,7 @@ Details: Bar]]></failure>
         </testsuites>
         `)
       },
-      expected: new GolangCILintReport('path/to', {
+      expected: new GolangCILintReportImpl('path/to', {
         testsuites: {
           testsuite: [
             {

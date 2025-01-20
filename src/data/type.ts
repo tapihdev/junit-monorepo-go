@@ -32,4 +32,3 @@ export type FailureRecord = {
 export type AnnotationRecord = {
   body: string
 }
-

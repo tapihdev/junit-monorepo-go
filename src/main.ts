@@ -10,7 +10,7 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { createFailedCaseTable, createModuleTable } from './table'
-import { GoRepositoryFactory } from './factory'
+import { GoModulesFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
 import { Result } from './type'
 import { makeMarkdownReport, makeAnnotationMessages } from './table'
@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
 
     core.info(`* search and read junit reports`)
     const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
-    const factory = new GoRepositoryFactory(repoterFactory)
+    const factory = new GoModulesFactory(repoterFactory)
     const modules = await factory.fromXml(
       testDirs,
       lintDirs,
@@ -56,19 +56,14 @@ export async function run(): Promise<void> {
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
     const moduleTable = createModuleTable(
-        modules
-        .map(module => module.makeModuleTableRecord(owner, repo, sha))
+      modules.map(module => module.makeModuleTableRecord(owner, repo, sha))
     )
     const failedTestTable = createFailedCaseTable(
-        modules
-        .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
-        .flat(),
+      modules.map(m => m.makeFailedTestTableRecords(owner, repo, sha)).flat(),
       failedTestLimit
     )
     const failedLintTable = createFailedCaseTable(
-        modules
-        .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
-        .flat(),
+      modules.map(m => m.makeFailedLintTableRecords(owner, repo, sha)).flat(),
       failedLintLimit
     )
     const result = modules.every(m => m.result === Result.Passed)
@@ -111,8 +106,7 @@ export async function run(): Promise<void> {
     await core.summary.addRaw(body).write()
 
     core.info('* annotate failed tests')
-      makeAnnotationMessages(modules)
-      .forEach(annotation => core.info(annotation))
+    makeAnnotationMessages(modules).forEach(annotation => core.info(annotation))
 
     core.info('* set output')
     core.setOutput('body', body)

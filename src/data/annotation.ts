@@ -10,7 +10,13 @@ export class Annotation implements AnnotationView {
   ) {}
 
   render() {
-      const fullPath = path.join(this.path, this._failure.subDir, this._failure.file)
-      return { body: `::error file=${fullPath},line=${this._failure.line}::${this._failure.message}` }
+    const fullPath = path.join(
+      this.path,
+      this._failure.subDir,
+      this._failure.file
+    )
+    return {
+      body: `::error file=${fullPath},line=${this._failure.line}::${this._failure.message}`
+    }
   }
 }
