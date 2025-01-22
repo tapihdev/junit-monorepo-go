@@ -11,7 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { GoModulesFactory } from '../src/factory'
+import { GoModulesFactory } from '../src/table'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')

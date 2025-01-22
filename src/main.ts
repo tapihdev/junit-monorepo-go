@@ -10,10 +10,9 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { createFailedCaseTable, createModuleTable } from './table'
-import { GoModulesFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
 import { Result } from './type'
-import { makeMarkdownReport } from './table'
+import { makeMarkdownReport, GoModulesFactory } from './table'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
