@@ -37,3 +37,5 @@ export enum Result {
   Skipped = 'skipped',
   Unknown = 'unknown'
 }
+
+export type AnnotationRecord = string

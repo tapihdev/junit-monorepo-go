@@ -13,7 +13,7 @@ import { createFailedCaseTable, createModuleTable } from './table'
 import { GoModulesFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
 import { Result } from './type'
-import { makeMarkdownReport, makeAnnotationMessages } from './table'
+import { makeMarkdownReport } from './table'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -109,7 +109,9 @@ export async function run(): Promise<void> {
     await core.summary.addRaw(body).write()
 
     core.info('* annotate failed tests')
-    makeAnnotationMessages(modules).forEach(annotation => core.info(annotation))
+    modules.forEach(m =>
+      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
+    )
 
     core.info('* set output')
     core.setOutput('body', body)

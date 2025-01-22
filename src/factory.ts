@@ -1,8 +1,4 @@
-import {
-  GolangCILintSummary,
-  GotestsumSummary,
-  ReporterType
-} from './junit/type'
+import { GotestsumSummary, ReporterType } from './junit/type'
 import { JUnitReporterFactory } from './junit/factory'
 import { GoModule } from './module'
 import {

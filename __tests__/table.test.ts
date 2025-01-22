@@ -1,7 +1,7 @@
 import { createFailedCaseTable, createModuleTable } from '../src/table'
 import { FailedCaseTableRecord, ModuleTableRecord } from '../src/type'
 import { Result } from '../src/type'
-import { makeMarkdownReport, makeAnnotationMessages } from '../src/table'
+import { makeMarkdownReport } from '../src/table'
 
 describe('Repository#Markdown', () => {
   const testCases = [
@@ -215,41 +215,6 @@ FAILED_LINT_TABLE
     )
 
     expect(markdown).toEqual(expected)
-  })
-})
-
-describe('Repository#Annotations', () => {
-  const testCases = [
-    {
-      name: 'should make annotation messages for an empty run',
-      input: [],
-      expected: []
-    },
-    {
-      name: 'should make annotation messages',
-      input: [
-        {
-          directory: 'go/app1',
-          result: Result.Failed,
-
-          makeModuleTableRecord: jest.fn().mockReturnValue({}),
-          makeFailedTestTableRecords: jest.fn().mockReturnValue([]),
-          makeFailedLintTableRecords: jest.fn().mockReturnValue([]),
-          makeAnnotationMessages: jest
-            .fn()
-            .mockReturnValue([
-              '::error file=go/app1/foo_test.go,line=1::failed'
-            ])
-        }
-      ],
-      expected: ['::error file=go/app1/foo_test.go,line=1::failed']
-    }
-  ]
-
-  it.each(testCases)('%s', async ({ input, expected }) => {
-    const annotations = makeAnnotationMessages(input)
-
-    expect(annotations).toEqual(expected)
   })
 })
 

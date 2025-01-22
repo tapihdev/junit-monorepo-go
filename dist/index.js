@@ -41869,7 +41869,7 @@ async function run() {
         core.info('* post summary to summary page');
         await core.summary.addRaw(body).write();
         core.info('* annotate failed tests');
-        (0, table_2.makeAnnotationMessages)(modules).forEach(annotation => core.info(annotation));
+        modules.forEach(m => m.makeAnnotationMessages().forEach(annotation => core.info(annotation)));
         core.info('* set output');
         core.setOutput('body', body);
     }
@@ -41953,7 +41953,6 @@ exports.GoModule = GoModule;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.makeMarkdownReport = makeMarkdownReport;
-exports.makeAnnotationMessages = makeAnnotationMessages;
 exports.createModuleTable = createModuleTable;
 exports.createFailedCaseTable = createFailedCaseTable;
 const type_1 = __nccwpck_require__(4619);
@@ -41995,9 +41994,6 @@ ${failedLintTable}
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1);
-}
-function makeAnnotationMessages(modules) {
-    return modules.map(m => m.makeAnnotationMessages()).flat();
 }
 function renderTable(header, separator, records) {
     if (records.length === 0) {

@@ -1,4 +1,3 @@
-import { Module } from './module'
 import { Result } from './type'
 import { AnyRecord, ModuleTableRecord, FailedCaseTableRecord } from './type'
 
@@ -67,10 +66,6 @@ ${failedLintTable}
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)
-}
-
-export function makeAnnotationMessages(modules: Module[]): string[] {
-  return modules.map(m => m.makeAnnotationMessages()).flat()
 }
 
 function renderTable<T extends AnyRecord>(

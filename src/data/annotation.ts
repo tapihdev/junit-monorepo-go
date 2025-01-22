@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { Failure } from '../junit/type'
-import { AnnotationView } from './type'
+import { AnnotationView, AnnotationRecord } from './type'
 
 export class AnnotationViewImpl implements AnnotationView {
   constructor(
@@ -9,7 +9,7 @@ export class AnnotationViewImpl implements AnnotationView {
     private readonly _failure: Failure
   ) {}
 
-  render() {
+  render(): AnnotationRecord {
     const fullPath = path.join(
       this.path,
       this._failure.subDir,

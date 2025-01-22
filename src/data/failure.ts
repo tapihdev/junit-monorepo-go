@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { Failure } from '../junit/type'
-import { FailureSummaryView } from './type'
+import { FailureRecord, FailureSummaryView } from './type'
 
 export class FailureSummaryViewImpl implements FailureSummaryView {
   constructor(
@@ -9,7 +9,7 @@ export class FailureSummaryViewImpl implements FailureSummaryView {
     private readonly _failure: Failure
   ) {}
 
-  render(owner: string, repo: string, sha: string) {
+  render(owner: string, repo: string, sha: string): FailureRecord {
     const fullPath = path.join(
       this.path,
       this._failure.subDir,
