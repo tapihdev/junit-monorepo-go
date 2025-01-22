@@ -41247,75 +41247,6 @@ exports.GolangCILintSummaryViewImpl = GolangCILintSummaryViewImpl;
 
 /***/ }),
 
-/***/ 6373:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModulesFactory = void 0;
-const type_1 = __nccwpck_require__(4874);
-const module_1 = __nccwpck_require__(6471);
-const summary_1 = __nccwpck_require__(200);
-const failure_1 = __nccwpck_require__(5382);
-const annotation_1 = __nccwpck_require__(6855);
-class GoModulesFactory {
-    _parser;
-    constructor(_parser) {
-        this._parser = _parser;
-    }
-    async fromXml(owner, repo, sha, testDirectories, lintDirectories, testReportXml, lintReportXml) {
-        const all = await Promise.all([
-            await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.Gotestsum, d, testReportXml))),
-            await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.GolangCILint, d, lintReportXml)))
-        ]);
-        // TODO: Remove this after refactoring is done
-        const test = all[0];
-        const lint = all[1];
-        const map = new Map();
-        test.forEach(d => {
-            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            return map.set(d.path, [{ summary, failures, annotations }, undefined]);
-        });
-        // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-        new Set(lint).forEach(d => {
-            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            const lint = { summary, failures, annotations };
-            const v = map.get(d.path);
-            if (v !== undefined) {
-                map.set(d.path, [v[0], lint]);
-            }
-            else {
-                map.set(d.path, [undefined, lint]);
-            }
-        });
-        const modules = Array.from(map).map(([path, [test, lint]]) => new module_1.GoModule(path, test?.summary, lint?.summary, test?.failures, lint?.failures, test?.annotations, lint?.annotations));
-        return modules;
-    }
-}
-exports.GoModulesFactory = GoModulesFactory;
-
-
-/***/ }),
-
 /***/ 9248:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -41801,8 +41732,7 @@ const fs_1 = __importDefault(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
-const factory_1 = __nccwpck_require__(6373);
-const factory_2 = __nccwpck_require__(7534);
+const factory_1 = __nccwpck_require__(7534);
 const type_1 = __nccwpck_require__(4619);
 const table_2 = __nccwpck_require__(8719);
 const mark = '<!-- commented by junit-monorepo-go -->';
@@ -41831,8 +41761,8 @@ async function run() {
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* search and read junit reports`);
-        const repoterFactory = new factory_2.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
-        const factory = new factory_1.GoModulesFactory(repoterFactory);
+        const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
+        const factory = new table_2.GoModulesFactory(repoterFactory);
         const modules = await factory.fromXml(owner, repo, sha, testDirs, lintDirs, testReportXml, lintReportXml);
         core.info('* make markdown report');
         const moduleTable = (0, table_1.createModuleTable)(modules.map(module => module.makeModuleTableRecord()));
@@ -41883,14 +41813,21 @@ async function run() {
 
 /***/ }),
 
-/***/ 6471:
+/***/ 8719:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModule = void 0;
+exports.GoModulesFactory = exports.GoModule = void 0;
+exports.makeMarkdownReport = makeMarkdownReport;
+exports.createModuleTable = createModuleTable;
+exports.createFailedCaseTable = createFailedCaseTable;
 const type_1 = __nccwpck_require__(4619);
+const type_2 = __nccwpck_require__(4874);
+const summary_1 = __nccwpck_require__(200);
+const failure_1 = __nccwpck_require__(5382);
+const annotation_1 = __nccwpck_require__(6855);
 class GoModule {
     _directory;
     _testRecord;
@@ -41942,20 +41879,59 @@ class GoModule {
     }
 }
 exports.GoModule = GoModule;
-
-
-/***/ }),
-
-/***/ 8719:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.makeMarkdownReport = makeMarkdownReport;
-exports.createModuleTable = createModuleTable;
-exports.createFailedCaseTable = createFailedCaseTable;
-const type_1 = __nccwpck_require__(4619);
+class GoModulesFactory {
+    _parser;
+    constructor(_parser) {
+        this._parser = _parser;
+    }
+    async fromXml(owner, repo, sha, testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const all = await Promise.all([
+            await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.Gotestsum, d, testReportXml))),
+            await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.GolangCILint, d, lintReportXml)))
+        ]);
+        // TODO: Remove this after refactoring is done
+        const test = all[0];
+        const lint = all[1];
+        const map = new Map();
+        test.forEach(d => {
+            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
+            const summary = summaryView.render(owner, repo, sha);
+            const failures = d.failures.map(f => {
+                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+                return view.render(owner, repo, sha);
+            });
+            const annotations = d.failures.map(f => {
+                const view = new annotation_1.AnnotationViewImpl(d.path, f);
+                return view.render();
+            });
+            return map.set(d.path, [{ summary, failures, annotations }, undefined]);
+        });
+        // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
+        new Set(lint).forEach(d => {
+            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
+            const summary = summaryView.render(owner, repo, sha);
+            const failures = d.failures.map(f => {
+                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+                return view.render(owner, repo, sha);
+            });
+            const annotations = d.failures.map(f => {
+                const view = new annotation_1.AnnotationViewImpl(d.path, f);
+                return view.render();
+            });
+            const lint = { summary, failures, annotations };
+            const v = map.get(d.path);
+            if (v !== undefined) {
+                map.set(d.path, [v[0], lint]);
+            }
+            else {
+                map.set(d.path, [undefined, lint]);
+            }
+        });
+        const modules = Array.from(map).map(([path, [test, lint]]) => new GoModule(path, test?.summary, lint?.summary, test?.failures, lint?.failures, test?.annotations, lint?.annotations));
+        return modules;
+    }
+}
+exports.GoModulesFactory = GoModulesFactory;
 function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
     const commitUrl = pullNumber === undefined
