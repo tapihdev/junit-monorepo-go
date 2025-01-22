@@ -41764,13 +41764,13 @@ async function run() {
         const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
         const factory = new table_2.GoModulesFactory(repoterFactory);
         const modules = await factory.fromXml(owner, repo, sha, testDirs, lintDirs, testReportXml, lintReportXml);
-        core.info('* make markdown report');
         const moduleTable = (0, table_1.createModuleTable)(modules.map(module => module.makeModuleTableRecord()));
         const failedTestTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedTestTableRecords()).flat(), failedTestLimit);
         const failedLintTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedLintTableRecords()).flat(), failedLintLimit);
         const result = modules.every(m => m.result === type_1.Result.Passed)
             ? type_1.Result.Passed
             : type_1.Result.Failed;
+        modules.forEach(m => m.makeAnnotationMessages().forEach(annotation => core.info(annotation)));
         const body = (0, table_2.makeMarkdownReport)({
             owner,
             repo,
@@ -41798,8 +41798,6 @@ async function run() {
         }
         core.info('* post summary to summary page');
         await core.summary.addRaw(body).write();
-        core.info('* annotate failed tests');
-        modules.forEach(m => m.makeAnnotationMessages().forEach(annotation => core.info(annotation)));
         core.info('* set output');
         core.setOutput('body', body);
     }

@@ -56,7 +56,6 @@ export async function run(): Promise<void> {
       lintReportXml
     )
 
-    core.info('* make markdown report')
     const moduleTable = createModuleTable(
       modules.map(module => module.makeModuleTableRecord())
     )
@@ -71,6 +70,10 @@ export async function run(): Promise<void> {
     const result = modules.every(m => m.result === Result.Passed)
       ? Result.Passed
       : Result.Failed
+
+    modules.forEach(m =>
+      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
+    )
 
     const body = makeMarkdownReport(
       {
@@ -106,11 +109,6 @@ export async function run(): Promise<void> {
 
     core.info('* post summary to summary page')
     await core.summary.addRaw(body).write()
-
-    core.info('* annotate failed tests')
-    modules.forEach(m =>
-      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
-    )
 
     core.info('* set output')
     core.setOutput('body', body)

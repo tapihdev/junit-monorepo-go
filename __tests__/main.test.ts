@@ -111,18 +111,16 @@ lint:
       1,
       '* search and read junit reports'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
-      3,
+      2,
       '* upsert comment matching <!-- commented by junit-monorepo-go -->'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(4, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'created comment: 123')
     expect(infoMock).toHaveBeenNthCalledWith(
-      5,
+      4,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
     expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
       1,
       'owner',
@@ -205,13 +203,11 @@ lint:
       1,
       '* search and read junit reports'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
     expect(infoMock).toHaveBeenNthCalledWith(
-      3,
+      2,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(4, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(3, '* set output')
     expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
       1,
       'owner',
