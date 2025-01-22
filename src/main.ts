@@ -41,11 +41,16 @@ export async function run(): Promise<void> {
     const lintReportXml = lint?.fileName ?? ''
     const failedTestLimit = test?.annotationLimit || 10
     const failedLintLimit = lint?.annotationLimit || 10
+    const { owner, repo } = github.context.repo
+    const { runId, actor } = github.context
 
     core.info(`* search and read junit reports`)
     const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
     const factory = new GoModulesFactory(repoterFactory)
     const modules = await factory.fromXml(
+      owner,
+      repo,
+      sha,
       testDirs,
       lintDirs,
       testReportXml,
@@ -53,17 +58,15 @@ export async function run(): Promise<void> {
     )
 
     core.info('* make markdown report')
-    const { owner, repo } = github.context.repo
-    const { runId, actor } = github.context
     const moduleTable = createModuleTable(
-      modules.map(module => module.makeModuleTableRecord(owner, repo, sha))
+      modules.map(module => module.makeModuleTableRecord())
     )
     const failedTestTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedTestTableRecords(owner, repo, sha)).flat(),
+      modules.map(m => m.makeFailedTestTableRecords()).flat(),
       failedTestLimit
     )
     const failedLintTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedLintTableRecords(owner, repo, sha)).flat(),
+      modules.map(m => m.makeFailedLintTableRecords()).flat(),
       failedLintLimit
     )
     const result = modules.every(m => m.result === Result.Passed)

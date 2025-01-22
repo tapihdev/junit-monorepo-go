@@ -264,7 +264,7 @@ describe('gotestsum', () => {
   it.each(testCases)('%s', async ({ input, expected }) => {
     const report = new GotestsumReportImpl(input.path, input.report)
     expect(report.path).toBe(expected.path)
-    expect(report.summary).toBe(expected.summary)
+    expect(report.summary).toEqual(expected.summary)
     expect(report.failures).toEqual(expected.failures)
   })
 })

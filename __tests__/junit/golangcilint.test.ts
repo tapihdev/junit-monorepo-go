@@ -1,7 +1,6 @@
 import { JUnitReport } from '../../src/junit/type'
 import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
 import { Result } from '../../src/type'
-import { summary } from '@actions/core'
 
 describe('golangcilint', () => {
   const testCases = [
@@ -15,10 +14,9 @@ describe('golangcilint', () => {
       },
       expected: {
         path: 'path/to',
-        summay: {
+        summary: {
           result: Result.Passed
         },
-
         failures: []
       }
     },
@@ -111,7 +109,7 @@ describe('golangcilint', () => {
   it.each(testCases)('%s', async ({ input, expected }) => {
     const report = new GolangCILintReportImpl(input.path, input.report)
     expect(report.path).toBe(expected.path)
-    expect(report.summary).toBe(expected.summary)
+    expect(report.summary).toEqual(expected.summary)
     expect(report.failures).toEqual(expected.failures)
   })
 })

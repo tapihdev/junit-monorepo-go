@@ -4,7 +4,11 @@ import {
   FailedTestTableRecord,
   FailedLintTableRecord
 } from './type'
-import { AnnotationRecord, GolangCILintSummaryRecord, GotestsumSummaryRecord } from './data/type'
+import {
+  AnnotationRecord,
+  GolangCILintSummaryRecord,
+  GotestsumSummaryRecord
+} from './data/type'
 
 export interface Module {
   directory: string
@@ -74,6 +78,6 @@ export class GoModule implements Module {
     return [
       ...(this._testAnnotations ?? []),
       ...(this._lintAnnotations ?? [])
-    ].map((annotation) => annotation.body)
+    ].map(annotation => annotation.body)
   }
 }

@@ -20,7 +20,7 @@ export class GotestsumSummaryViewImpl implements GotestsumSummaryView {
   }
 }
 
-export class GolangCILintSummaryImpl implements GolangCILintSummaryView {
+export class GolangCILintSummaryViewImpl implements GolangCILintSummaryView {
   constructor(
     readonly path: string,
     private readonly _summary: GolangCILintSummary

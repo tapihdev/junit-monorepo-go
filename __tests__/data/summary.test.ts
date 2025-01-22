@@ -1,5 +1,8 @@
-import { GotestsumSummaryViewImpl, GolangCILintSummaryImpl } from '../../src/data/summary';
-import { Result } from '../../src/type';
+import {
+  GotestsumSummaryViewImpl,
+  GolangCILintSummaryViewImpl
+} from '../../src/data/summary'
+import { Result } from '../../src/type'
 
 describe('GotestsumSummaryViewImpl', () => {
   const testCases = [
@@ -85,7 +88,11 @@ describe('GotestsumSummaryViewImpl', () => {
 
   it.each(testCases)('%s', ({ input, expected }) => {
     const view = new GotestsumSummaryViewImpl(input.path, input.summary)
-    const result = view.render(input.context.owner, input.context.repo, input.context.sha)
+    const result = view.render(
+      input.context.owner,
+      input.context.repo,
+      input.context.sha
+    )
     expect(result).toEqual(expected)
   })
 })
@@ -97,7 +104,7 @@ describe('GolangCILintSummaryImpl', () => {
       input: {
         path: 'path/to',
         summary: {
-          result: Result.Passed,
+          result: Result.Passed
         },
         context: {
           owner: 'owner',
@@ -115,7 +122,7 @@ describe('GolangCILintSummaryImpl', () => {
       input: {
         path: 'path/to',
         summary: {
-          result: Result.Failed,
+          result: Result.Failed
         },
         context: {
           owner: 'owner',
@@ -125,14 +132,18 @@ describe('GolangCILintSummaryImpl', () => {
       },
       expected: {
         path: '[path/to](https://github.com/owner/repo/blob/sha/path/to)',
-        result: '❌Failed',
+        result: '❌Failed'
       }
     }
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new GolangCILintSummaryImpl(input.path, input.summary)
-    const result = view.render(input.context.owner, input.context.repo, input.context.sha)
+    const view = new GolangCILintSummaryViewImpl(input.path, input.summary)
+    const result = view.render(
+      input.context.owner,
+      input.context.repo,
+      input.context.sha
+    )
     expect(result).toEqual(expected)
   })
 })

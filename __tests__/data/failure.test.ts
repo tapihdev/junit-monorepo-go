@@ -1,4 +1,4 @@
-import { FailureSummaryViewImpl } from '../../src/data/failure';
+import { FailureSummaryViewImpl } from '../../src/data/failure'
 
 describe('Failure', () => {
   const testCases = [
@@ -29,7 +29,11 @@ describe('Failure', () => {
 
   it.each(testCases)('%s', ({ input, expected }) => {
     const view = new FailureSummaryViewImpl(input.path, input.failure)
-    const result = view.render(input.context.owner, input.context.repo, input.context.sha)
+    const result = view.render(
+      input.context.owner,
+      input.context.repo,
+      input.context.sha
+    )
     expect(result).toEqual(expected)
   })
 })
