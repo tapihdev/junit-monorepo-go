@@ -230,8 +230,6 @@ describe('Repository#Annotations', () => {
       input: [
         {
           directory: 'go/app1',
-          hasTestReport: true,
-          hasLintReport: false,
           result: Result.Failed,
 
           makeModuleTableRecord: jest.fn().mockReturnValue({}),
