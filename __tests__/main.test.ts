@@ -11,9 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { GoRepository } from '../src/repository'
-import { GoRepositoryFactory } from '../src/factory'
-import { Result } from '../src/junit/type'
+import { GoModulesFactory } from '../src/factory'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -29,13 +27,7 @@ let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
 let repositoryFactoryFromXmlMock: jest.SpiedFunction<
-  GoRepositoryFactory['fromXml']
->
-let makeMarkdownReportMock: jest.SpiedFunction<
-  GoRepository['makeMarkdownReport']
->
-let makeAnnotationMessagesMock: jest.SpiedFunction<
-  GoRepository['makeAnnotationMessages']
+  GoModulesFactory['fromXml']
 >
 
 describe('action', () => {
@@ -56,17 +48,22 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
     repositoryFactoryFromXmlMock = jest
-      .spyOn(GoRepositoryFactory.prototype, 'fromXml')
-      .mockResolvedValue(new GoRepository([]))
-    makeMarkdownReportMock = jest
-      .spyOn(GoRepository.prototype, 'makeMarkdownReport')
-      .mockReturnValue('markdown report')
-    makeAnnotationMessagesMock = jest
-      .spyOn(GoRepository.prototype, 'makeAnnotationMessages')
-      .mockReturnValue(['annotation'])
+      .spyOn(GoModulesFactory.prototype, 'fromXml')
+      .mockResolvedValue([])
   })
 
   it('should post comment and summary', async () => {
+    const body = `
+## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/123)</sup>
+
+#### Result: \`Passed\`🙆‍♀️
+
+No test results found.
+
+---
+*This comment is created for the commit [sha](https://github.com/owner/repo/pull/123/commits/sha) pushed by @actor.*
+`.slice(1, -1)
+
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
@@ -125,10 +122,12 @@ lint:
       '* post summary to summary page'
     )
     expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(7, 'annotation')
-    expect(infoMock).toHaveBeenNthCalledWith(8, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
     expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
       1,
+      'owner',
+      'repo',
+      'sha',
       ['go/app1', 'go/app2'],
       ['go/app1', 'go/app3'],
       'test.xml',
@@ -139,31 +138,26 @@ lint:
       repo: 'repo',
       pullNumber: 123,
       mark: '<!-- commented by junit-monorepo-go -->',
-      body: 'markdown report'
+      body: body
     })
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
-      1,
-      {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: 123,
-        sha: 'sha',
-        runId: 123,
-        actor: 'actor'
-      },
-      Result.Passed,
-      '',
-      '',
-      ''
-    )
-    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
-    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
+    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
-    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
+    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)
     expect(errorMock).not.toHaveBeenCalled()
   })
 
   it('should post summary', async () => {
+    const body = `
+## 🥽 Go Test Report <sup>[CI](https://github.com/owner/repo/actions/runs/123)</sup>
+
+#### Result: \`Passed\`🙆‍♀️
+
+No test results found.
+
+---
+*This comment is created for the commit [sha](https://github.com/owner/repo/commit/sha) pushed by @actor.*
+`.slice(1, -1)
+
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'github-token':
@@ -217,34 +211,20 @@ lint:
       '* post summary to summary page'
     )
     expect(infoMock).toHaveBeenNthCalledWith(4, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(5, 'annotation')
-    expect(infoMock).toHaveBeenNthCalledWith(6, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
     expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
       1,
+      'owner',
+      'repo',
+      'sha',
       ['go/app1', 'go/app2'],
       ['go/app1', 'go/app3'],
       'test.xml',
       'lint.xml'
     )
-    expect(makeMarkdownReportMock).toHaveBeenNthCalledWith(
-      1,
-      {
-        owner: 'owner',
-        repo: 'repo',
-        pullNumber: undefined,
-        sha: 'sha',
-        runId: 123,
-        actor: 'actor'
-      },
-      Result.Passed,
-      '',
-      '',
-      ''
-    )
-    expect(makeAnnotationMessagesMock).toHaveBeenNthCalledWith(1)
-    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, 'markdown report')
+    expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
-    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', 'markdown report')
+    expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)
     expect(errorMock).not.toHaveBeenCalled()
   })
 

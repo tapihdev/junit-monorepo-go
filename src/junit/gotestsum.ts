@@ -1,6 +1,7 @@
-import { JUnitReport, Reporter, Result, Case } from './type'
+import { JUnitReport, GotestsumReport, Failure, GotestsumSummary } from './type'
+import { Result } from '../type'
 
-export class GotestsumReport implements Reporter {
+export class GotestsumReportImpl implements GotestsumReport {
   // gotestsum reports failures in the following format:
   // 1. === RUN   Test&#xA;    baz_test.go:1: error;
   // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
@@ -9,15 +10,60 @@ export class GotestsumReport implements Reporter {
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
   constructor(
-    private readonly _path: string,
+    readonly path: string,
     private readonly _junit: JUnitReport
   ) {}
 
-  get path(): string {
-    return this._path
+  get summary(): GotestsumSummary {
+    return {
+      result: this.result,
+      passed: this.passed,
+      failed: this.failed,
+      time: this.time,
+      version: this.version
+    }
   }
 
-  get result(): Result {
+  get failures(): Failure[] {
+    if (this._junit.testsuites.testsuite === undefined) {
+      return []
+    }
+
+    const casesWithFailures = this._junit.testsuites.testsuite
+      .map(suite => suite.testcase ?? [])
+      .flat()
+      .filter(testcase => testcase.failure !== undefined)
+
+    return casesWithFailures
+      .map(testcase => {
+        const macthedFailures =
+          testcase.failure
+            ?.map(
+              failure =>
+                failure._?.match(GotestsumReportImpl.failureRegex) ?? null
+            )
+            .filter(match => match !== null) ?? []
+
+        return macthedFailures.map(match => {
+          if (match !== null && match.length !== 3) {
+            // This should never happen
+            throw new Error(
+              `message does match the regex but length is not 3: ${match.groups}`
+            )
+          }
+          return {
+            subDir: testcase.$.classname,
+            file: match[1],
+            line: parseInt(match[2]),
+            test: testcase.$.name,
+            message: match[0]
+          } as Failure
+        })
+      })
+      .flat()
+  }
+
+  private get result(): Result {
     if (this._junit.testsuites.$ === undefined) {
       return Result.Unknown
     }
@@ -36,28 +82,28 @@ export class GotestsumReport implements Reporter {
     return Result.Passed
   }
 
-  get tests(): number {
+  private get tests(): number {
     return parseInt(this._junit.testsuites.$?.tests ?? '0')
   }
 
-  get passed(): number {
+  private get passed(): number {
     return this.tests === 0 ? 0 : this.tests - this.failed
   }
 
-  get failed(): number {
+  private get failed(): number {
     return parseInt(this._junit.testsuites.$?.failures ?? '0')
   }
 
-  get skipped(): number {
+  private get skipped(): number {
     return parseInt(this._junit.testsuites.$?.skipped ?? '0')
   }
 
-  get time(): number | undefined {
+  private get time(): number | undefined {
     const time = this._junit.testsuites.$?.time
     return time === undefined ? undefined : parseFloat(time)
   }
 
-  get version(): string | undefined {
+  private get version(): string | undefined {
     if (
       this._junit.testsuites.testsuite === undefined ||
       this._junit.testsuites.testsuite.length === 0
@@ -85,7 +131,7 @@ export class GotestsumReport implements Reporter {
     }
 
     const property = filtered[0]
-    const match = property.value.match(GotestsumReport.goVersoinRegex)
+    const match = property.value.match(GotestsumReportImpl.goVersoinRegex)
     if (match === null) {
       throw new Error(`go.version does not match the regex: ${property.value}`)
     }
@@ -95,43 +141,5 @@ export class GotestsumReport implements Reporter {
       )
     }
     return match[1]
-  }
-
-  get failures(): Case[] {
-    if (this._junit.testsuites.testsuite === undefined) {
-      return []
-    }
-
-    const casesWithFailures = this._junit.testsuites.testsuite
-      .map(suite => suite.testcase ?? [])
-      .flat()
-      .filter(testcase => testcase.failure !== undefined)
-
-    return casesWithFailures
-      .map(testcase => {
-        const macthedFailures =
-          testcase.failure
-            ?.map(
-              failure => failure._?.match(GotestsumReport.failureRegex) ?? null
-            )
-            .filter(match => match !== null) ?? []
-
-        return macthedFailures.map(match => {
-          if (match !== null && match.length !== 3) {
-            // This should never happen
-            throw new Error(
-              `message does match the regex but length is not 3: ${match.groups}`
-            )
-          }
-          return {
-            subDir: testcase.$.classname,
-            file: match[1],
-            line: parseInt(match[2]),
-            test: testcase.$.name,
-            message: match[0]
-          } as Case
-        })
-      })
-      .flat()
   }
 }

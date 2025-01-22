@@ -10,9 +10,10 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { createFailedCaseTable, createModuleTable } from './table'
-import { GoRepositoryFactory } from './factory'
+import { GoModulesFactory } from './factory'
 import { JUnitReporterFactoryImpl } from './junit/factory'
-import { Result } from './junit/type'
+import { Result } from './type'
+import { makeMarkdownReport } from './table'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -40,11 +41,16 @@ export async function run(): Promise<void> {
     const lintReportXml = lint?.fileName ?? ''
     const failedTestLimit = test?.annotationLimit || 10
     const failedLintLimit = lint?.annotationLimit || 10
+    const { owner, repo } = github.context.repo
+    const { runId, actor } = github.context
 
     core.info(`* search and read junit reports`)
     const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
-    const factory = new GoRepositoryFactory(repoterFactory)
-    const repository = await factory.fromXml(
+    const factory = new GoModulesFactory(repoterFactory)
+    const modules = await factory.fromXml(
+      owner,
+      repo,
+      sha,
       testDirs,
       lintDirs,
       testReportXml,
@@ -52,32 +58,22 @@ export async function run(): Promise<void> {
     )
 
     core.info('* make markdown report')
-    const { owner, repo } = github.context.repo
-    const { runId, actor } = github.context
     const moduleTable = createModuleTable(
-      repository
-        .modules()
-        .map(module => module.makeModuleTableRecord(owner, repo, sha))
+      modules.map(module => module.makeModuleTableRecord())
     )
     const failedTestTable = createFailedCaseTable(
-      repository
-        .modules()
-        .map(m => m.makeFailedTestTableRecords(owner, repo, sha))
-        .flat(),
+      modules.map(m => m.makeFailedTestTableRecords()).flat(),
       failedTestLimit
     )
     const failedLintTable = createFailedCaseTable(
-      repository
-        .modules()
-        .map(m => m.makeFailedLintTableRecords(owner, repo, sha))
-        .flat(),
+      modules.map(m => m.makeFailedLintTableRecords()).flat(),
       failedLintLimit
     )
-    const result = repository.modules().every(m => m.result === Result.Passed)
+    const result = modules.every(m => m.result === Result.Passed)
       ? Result.Passed
       : Result.Failed
 
-    const body = repository.makeMarkdownReport(
+    const body = makeMarkdownReport(
       {
         owner,
         repo,
@@ -113,9 +109,9 @@ export async function run(): Promise<void> {
     await core.summary.addRaw(body).write()
 
     core.info('* annotate failed tests')
-    repository
-      .makeAnnotationMessages()
-      .forEach(annotation => core.info(annotation))
+    modules.forEach(m =>
+      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
+    )
 
     core.info('* set output')
     core.setOutput('body', body)

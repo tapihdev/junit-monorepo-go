@@ -30,3 +30,12 @@ export type FailedLintTableRecord = {
   test: string
   message: string
 }
+
+export enum Result {
+  Passed = 'passed',
+  Failed = 'failed',
+  Skipped = 'skipped',
+  Unknown = 'unknown'
+}
+
+export type AnnotationRecord = string

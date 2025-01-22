@@ -1,65 +1,26 @@
 import * as path from 'path'
 
-import { JUnitReport, Reporter, Result, Case } from './type'
+import {
+  JUnitReport,
+  GolangCILintReport,
+  GolangCILintSummary,
+  Failure
+} from './type'
+import { Result } from '../type'
 
-export class GolangCILintReport implements Reporter {
+export class GolangCILintReportImpl implements GolangCILintReport {
   constructor(
-    private readonly _path: string,
+    readonly path: string,
     private readonly _junit: JUnitReport
   ) {}
 
-  get path(): string {
-    return this._path
+  get summary(): GolangCILintSummary {
+    return {
+      result: this.result
+    }
   }
 
-  get result(): Result {
-    // Passed if there are no test suites, because golangci-lint reports only failures
-    return this._junit.testsuites.testsuite === undefined
-      ? Result.Passed
-      : Result.Failed
-  }
-
-  get tests(): number {
-    return (
-      this._junit.testsuites.testsuite?.reduce(
-        (acc, suite) => acc + parseInt(suite.$.tests),
-        0
-      ) ?? 0
-    )
-  }
-
-  // This should always be 0 because golangci-lint reports only failures
-  get passed(): number {
-    return this.tests - this.failed
-  }
-
-  get failed(): number {
-    return (
-      this._junit.testsuites.testsuite?.reduce(
-        (acc, suite) => acc + parseInt(suite.$.failures),
-        0
-      ) ?? 0
-    )
-  }
-
-  get skipped(): number {
-    return (
-      this._junit.testsuites.testsuite?.reduce(
-        (acc, suite) => acc + parseInt(suite.$.skipped ?? '0'),
-        0
-      ) ?? 0
-    )
-  }
-
-  get time(): undefined {
-    return undefined
-  }
-
-  get version(): string | undefined {
-    return undefined
-  }
-
-  get failures(): Case[] {
+  get failures(): Failure[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -105,5 +66,52 @@ export class GolangCILintReport implements Reporter {
           message
         }
       })
+  }
+
+  private get result(): Result {
+    // Passed if there are no test suites, because golangci-lint reports only failures
+    return this._junit.testsuites.testsuite === undefined
+      ? Result.Passed
+      : Result.Failed
+  }
+
+  private get tests(): number {
+    return (
+      this._junit.testsuites.testsuite?.reduce(
+        (acc, suite) => acc + parseInt(suite.$.tests),
+        0
+      ) ?? 0
+    )
+  }
+
+  // This should always be 0 because golangci-lint reports only failures
+  private get passed(): number {
+    return this.tests - this.failed
+  }
+
+  private get failed(): number {
+    return (
+      this._junit.testsuites.testsuite?.reduce(
+        (acc, suite) => acc + parseInt(suite.$.failures),
+        0
+      ) ?? 0
+    )
+  }
+
+  private get skipped(): number {
+    return (
+      this._junit.testsuites.testsuite?.reduce(
+        (acc, suite) => acc + parseInt(suite.$.skipped ?? '0'),
+        0
+      ) ?? 0
+    )
+  }
+
+  private get time(): undefined {
+    return undefined
+  }
+
+  private get version(): undefined {
+    return undefined
   }
 }

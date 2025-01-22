@@ -1,28 +1,36 @@
+import { Result } from '../type'
+
 export enum ReporterType {
   GolangCILint = 'golangci-lint',
   Gotestsum = 'gotestsum'
 }
 
-export enum Result {
-  Passed = 'passed',
-  Failed = 'failed',
-  Skipped = 'skipped',
-  Unknown = 'unknown'
-}
-
-export interface Reporter {
+// Reportable represents a JUnit report with a summary and a list of failed cases
+export interface Reportable<T extends Summary> {
   readonly path: string
-  readonly result: Result
-  readonly tests: number
-  readonly passed: number
-  readonly failed: number
-  readonly skipped: number
-  readonly time?: number
-  readonly version?: string
-  readonly failures: Case[]
+  readonly summary: T
+  readonly failures: Failure[]
 }
 
-export type Case = {
+export type Reporter = GotestsumReport | GolangCILintReport
+export type GotestsumReport = Reportable<GotestsumSummary>
+export type GolangCILintReport = Reportable<GolangCILintSummary>
+
+// Summary represents a summary of a JUnit report
+export type Summary = GotestsumSummary | GolangCILintSummary
+export type GotestsumSummary = {
+  result: Result
+  passed: number
+  failed: number
+  time?: number
+  version?: string
+}
+export type GolangCILintSummary = {
+  result: Result
+}
+
+// Failure represents a failed test case
+export type Failure = {
   subDir: string
   file: string
   line: number
@@ -30,7 +38,7 @@ export type Case = {
   message: string
 }
 
-// Low level types to parse JUnit XML reports
+// Raw schema of a JUnit report
 export type JUnitReport = {
   testsuites: TestSuites
 }
