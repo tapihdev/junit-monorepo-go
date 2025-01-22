@@ -3,7 +3,7 @@ import * as path from 'path'
 import { Failure } from '../junit/type'
 import { AnnotationView } from './type'
 
-export class Annotation implements AnnotationView {
+export class AnnotationViewImpl implements AnnotationView {
   constructor(
     readonly path: string,
     private readonly _failure: Failure

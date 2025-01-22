@@ -13,8 +13,8 @@ export class GotestsumSummaryViewImpl implements GotestsumSummaryView {
       path: `[${this.path}](https://github.com/${owner}/${repo}/blob/${sha}/${this.path})`,
       version: this._summary.version ?? '-',
       result: this._summary.result === Result.Failed ? '❌Failed' : '✅Passed',
-      passed: this._summary.passed.toString() ?? '-',
-      failed: this._summary.failed.toString() ?? '-',
+      passed: this._summary.passed.toString(),
+      failed: this._summary.failed.toString(),
       time: this._summary.time?.toFixed(1).concat('s') ?? '-'
     }
   }
