@@ -41804,7 +41804,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModulesFactory = exports.GoModule = void 0;
+exports.GoModulesFactory = void 0;
 exports.report = report;
 exports.makeMarkdownReport = makeMarkdownReport;
 exports.createModuleTable = createModuleTable;
@@ -41820,69 +41820,18 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
     const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
     const factory = new GoModulesFactory(repoterFactory);
     const modules = await factory.fromXml(context.owner, context.repo, context.sha, testDirs, lintDirs, testReportXml, lintReportXml);
-    const moduleTable = createModuleTable(modules.map(module => module.makeModuleTableRecord()));
-    const failedTestTable = createFailedCaseTable(modules.map(m => m.makeFailedTestTableRecords()).flat(), failedTestLimit);
-    const failedLintTable = createFailedCaseTable(modules.map(m => m.makeFailedLintTableRecords()).flat(), failedLintLimit);
+    const moduleTable = createModuleTable(modules.map(module => module.moduleTableRecord));
+    const failedTestTable = createFailedCaseTable(modules.map(m => m.failedTestTableRecords).flat(), failedTestLimit);
+    const failedLintTable = createFailedCaseTable(modules.map(m => m.failedLintTableRecords).flat(), failedLintLimit);
     const result = modules.every(m => m.result === type_1.Result.Passed)
         ? type_1.Result.Passed
         : type_1.Result.Failed;
     const body = makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable);
     return {
         body,
-        annotations: modules.map(m => m.makeAnnotationMessages()).flat()
+        annotations: modules.map(m => m.annotationMessages).flat()
     };
 }
-class GoModule {
-    _directory;
-    _testRecord;
-    _lintRecord;
-    _testFailures;
-    _lintFailures;
-    _testAnnotations;
-    _lintAnnotations;
-    constructor(_directory, _testRecord, _lintRecord, _testFailures, _lintFailures, _testAnnotations, _lintAnnotations) {
-        this._directory = _directory;
-        this._testRecord = _testRecord;
-        this._lintRecord = _lintRecord;
-        this._testFailures = _testFailures;
-        this._lintFailures = _lintFailures;
-        this._testAnnotations = _testAnnotations;
-        this._lintAnnotations = _lintAnnotations;
-    }
-    get directory() {
-        return this._directory;
-    }
-    get result() {
-        return this._testRecord?.result === type_1.Result.Failed ||
-            this._lintRecord?.result === type_1.Result.Failed
-            ? type_1.Result.Failed
-            : type_1.Result.Passed;
-    }
-    makeModuleTableRecord() {
-        return {
-            name: this._testRecord?.path ?? this._lintRecord?.path ?? '-',
-            version: this._testRecord?.version ?? '-',
-            testResult: this._testRecord?.result ?? '-',
-            testPassed: this._testRecord?.passed.toString() ?? '-',
-            testFailed: this._testRecord?.failed.toString() ?? '-',
-            testElapsed: this._testRecord?.time ?? '-',
-            lintResult: this._lintRecord?.result ?? '-'
-        };
-    }
-    makeFailedTestTableRecords() {
-        return this._testFailures ?? [];
-    }
-    makeFailedLintTableRecords() {
-        return this._lintFailures ?? [];
-    }
-    makeAnnotationMessages() {
-        return [
-            ...(this._testAnnotations ?? []),
-            ...(this._lintAnnotations ?? [])
-        ].map(annotation => annotation.body);
-    }
-}
-exports.GoModule = GoModule;
 class GoModulesFactory {
     _parser;
     constructor(_parser) {
@@ -41931,7 +41880,27 @@ class GoModulesFactory {
                 map.set(d.path, [undefined, lint]);
             }
         });
-        const modules = Array.from(map).map(([path, [test, lint]]) => new GoModule(path, test?.summary, lint?.summary, test?.failures, lint?.failures, test?.annotations, lint?.annotations));
+        const modules = Array.from(map).map(([path, [test, lint]]) => ({
+            result: test?.summary.result === type_1.Result.Failed ||
+                lint?.summary.result === type_1.Result.Failed
+                ? type_1.Result.Failed
+                : type_1.Result.Passed,
+            moduleTableRecord: {
+                name: test?.summary.path ?? lint?.summary.path ?? path,
+                version: test?.summary.version ?? '-',
+                testResult: test?.summary.result ?? '-',
+                testPassed: test?.summary.passed ?? '-',
+                testFailed: test?.summary.failed ?? '-',
+                testElapsed: test?.summary.time ?? '-',
+                lintResult: lint?.summary.result ?? '-'
+            },
+            failedTestTableRecords: test?.failures ?? [],
+            failedLintTableRecords: lint?.failures ?? [],
+            annotationMessages: [
+                ...(test?.annotations ?? []),
+                ...(lint?.annotations ?? [])
+            ].map(annotation => annotation.body)
+        }));
         return modules;
     }
 }

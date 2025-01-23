@@ -61,14 +61,14 @@ export async function report(
   )
 
   const moduleTable = createModuleTable(
-    modules.map(module => module.makeModuleTableRecord())
+    modules.map(module => module.moduleTableRecord)
   )
   const failedTestTable = createFailedCaseTable(
-    modules.map(m => m.makeFailedTestTableRecords()).flat(),
+    modules.map(m => m.failedTestTableRecords).flat(),
     failedTestLimit
   )
   const failedLintTable = createFailedCaseTable(
-    modules.map(m => m.makeFailedLintTableRecords()).flat(),
+    modules.map(m => m.failedLintTableRecords).flat(),
     failedLintLimit
   )
   const result = modules.every(m => m.result === Result.Passed)
@@ -85,80 +85,16 @@ export async function report(
 
   return {
     body,
-    annotations: modules.map(m => m.makeAnnotationMessages()).flat()
+    annotations: modules.map(m => m.annotationMessages).flat()
   }
 }
 
 export interface Module {
-  directory: string
   result: Result
-
-  makeModuleTableRecord(
-    owner: string,
-    repo: string,
-    sha: string
-  ): ModuleTableRecord
-  makeFailedTestTableRecords(
-    owner: string,
-    repo: string,
-    sha: string
-  ): FailedTestTableRecord[]
-  makeFailedLintTableRecords(
-    owner: string,
-    repo: string,
-    sha: string
-  ): FailedLintTableRecord[]
-  makeAnnotationMessages(): string[]
-}
-
-export class GoModule implements Module {
-  constructor(
-    private readonly _directory: string,
-    private readonly _testRecord?: GotestsumSummaryRecord,
-    private readonly _lintRecord?: GolangCILintSummaryRecord,
-    private readonly _testFailures?: FailedTestTableRecord[],
-    private readonly _lintFailures?: FailedLintTableRecord[],
-    private readonly _testAnnotations?: AnnotationRecord[],
-    private readonly _lintAnnotations?: AnnotationRecord[]
-  ) {}
-
-  get directory(): string {
-    return this._directory
-  }
-
-  get result(): Result {
-    return this._testRecord?.result === Result.Failed ||
-      this._lintRecord?.result === Result.Failed
-      ? Result.Failed
-      : Result.Passed
-  }
-
-  makeModuleTableRecord(): ModuleTableRecord {
-    return {
-      name: this._testRecord?.path ?? this._lintRecord?.path ?? '-',
-      version: this._testRecord?.version ?? '-',
-      testResult: this._testRecord?.result ?? '-',
-      testPassed: this._testRecord?.passed.toString() ?? '-',
-      testFailed: this._testRecord?.failed.toString() ?? '-',
-      testElapsed: this._testRecord?.time ?? '-',
-      lintResult: this._lintRecord?.result ?? '-'
-    }
-  }
-
-  makeFailedTestTableRecords(): FailedTestTableRecord[] {
-    return this._testFailures ?? []
-  }
-
-  makeFailedLintTableRecords(): FailedLintTableRecord[] {
-    return this._lintFailures ?? []
-  }
-
-  makeAnnotationMessages(): string[] {
-    return [
-      ...(this._testAnnotations ?? []),
-      ...(this._lintAnnotations ?? [])
-    ].map(annotation => annotation.body)
-  }
+  moduleTableRecord: ModuleTableRecord
+  failedTestTableRecords: FailedTestTableRecord[]
+  failedLintTableRecords: FailedLintTableRecord[]
+  annotationMessages: string[]
 }
 
 export class GoModulesFactory {
@@ -172,7 +108,7 @@ export class GoModulesFactory {
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<GoModule[]> {
+  ): Promise<Module[]> {
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(async d =>
@@ -246,18 +182,28 @@ export class GoModulesFactory {
       }
     })
 
-    const modules = Array.from(map).map(
-      ([path, [test, lint]]) =>
-        new GoModule(
-          path,
-          test?.summary,
-          lint?.summary,
-          test?.failures,
-          lint?.failures,
-          test?.annotations,
-          lint?.annotations
-        )
-    )
+    const modules = Array.from(map).map(([path, [test, lint]]) => ({
+      result:
+        test?.summary.result === Result.Failed ||
+        lint?.summary.result === Result.Failed
+          ? Result.Failed
+          : Result.Passed,
+      moduleTableRecord: {
+        name: test?.summary.path ?? lint?.summary.path ?? path,
+        version: test?.summary.version ?? '-',
+        testResult: test?.summary.result ?? '-',
+        testPassed: test?.summary.passed ?? '-',
+        testFailed: test?.summary.failed ?? '-',
+        testElapsed: test?.summary.time ?? '-',
+        lintResult: lint?.summary.result ?? '-'
+      },
+      failedTestTableRecords: test?.failures ?? [],
+      failedLintTableRecords: lint?.failures ?? [],
+      annotationMessages: [
+        ...(test?.annotations ?? []),
+        ...(lint?.annotations ?? [])
+      ].map(annotation => annotation.body)
+    }))
 
     return modules
   }
