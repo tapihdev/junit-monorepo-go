@@ -41721,20 +41721,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-const fs_1 = __importDefault(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
-const factory_1 = __nccwpck_require__(7534);
-const type_1 = __nccwpck_require__(4619);
-const table_2 = __nccwpck_require__(8719);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41760,25 +41753,16 @@ async function run() {
         const failedLintLimit = lint?.annotationLimit || 10;
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
-        core.info(`* search and read junit reports`);
-        const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
-        const factory = new table_2.GoModulesFactory(repoterFactory);
-        const modules = await factory.fromXml(owner, repo, sha, testDirs, lintDirs, testReportXml, lintReportXml);
-        const moduleTable = (0, table_1.createModuleTable)(modules.map(module => module.makeModuleTableRecord()));
-        const failedTestTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedTestTableRecords()).flat(), failedTestLimit);
-        const failedLintTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedLintTableRecords()).flat(), failedLintLimit);
-        const result = modules.every(m => m.result === type_1.Result.Passed)
-            ? type_1.Result.Passed
-            : type_1.Result.Failed;
-        modules.forEach(m => m.makeAnnotationMessages().forEach(annotation => core.info(annotation)));
-        const body = (0, table_2.makeMarkdownReport)({
+        core.info(`* make a junit report`);
+        const { body, annotations } = await (0, table_1.report)({
             owner,
             repo,
-            pullNumber,
             sha,
             runId,
+            pullNumber,
             actor
-        }, result, moduleTable, failedTestTable, failedLintTable);
+        }, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit);
+        annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41812,20 +41796,42 @@ async function run() {
 /***/ }),
 
 /***/ 8719:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoModulesFactory = exports.GoModule = void 0;
+exports.report = report;
 exports.makeMarkdownReport = makeMarkdownReport;
 exports.createModuleTable = createModuleTable;
 exports.createFailedCaseTable = createFailedCaseTable;
+const fs_1 = __importDefault(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
 const type_2 = __nccwpck_require__(4874);
+const factory_1 = __nccwpck_require__(7534);
 const summary_1 = __nccwpck_require__(200);
 const failure_1 = __nccwpck_require__(5382);
 const annotation_1 = __nccwpck_require__(6855);
+async function report(context, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit) {
+    const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
+    const factory = new GoModulesFactory(repoterFactory);
+    const modules = await factory.fromXml(context.owner, context.repo, context.sha, testDirs, lintDirs, testReportXml, lintReportXml);
+    const moduleTable = createModuleTable(modules.map(module => module.makeModuleTableRecord()));
+    const failedTestTable = createFailedCaseTable(modules.map(m => m.makeFailedTestTableRecords()).flat(), failedTestLimit);
+    const failedLintTable = createFailedCaseTable(modules.map(m => m.makeFailedLintTableRecords()).flat(), failedLintLimit);
+    const result = modules.every(m => m.result === type_1.Result.Passed)
+        ? type_1.Result.Passed
+        : type_1.Result.Failed;
+    const body = makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable);
+    return {
+        body,
+        annotations: modules.map(m => m.makeAnnotationMessages()).flat()
+    };
+}
 class GoModule {
     _directory;
     _testRecord;

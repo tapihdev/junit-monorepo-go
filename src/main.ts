@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import fs from 'fs'
 
 import {
   getGitHubToken,
@@ -9,10 +8,7 @@ import {
   getSha
 } from './input'
 import { Client as GitHubClient } from './github'
-import { createFailedCaseTable, createModuleTable } from './table'
-import { JUnitReporterFactoryImpl } from './junit/factory'
-import { Result } from './type'
-import { makeMarkdownReport, GoModulesFactory } from './table'
+import { report } from './table'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -43,52 +39,24 @@ export async function run(): Promise<void> {
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
 
-    core.info(`* search and read junit reports`)
-    const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
-    const factory = new GoModulesFactory(repoterFactory)
-    const modules = await factory.fromXml(
-      owner,
-      repo,
-      sha,
-      testDirs,
-      lintDirs,
-      testReportXml,
-      lintReportXml
-    )
-
-    const moduleTable = createModuleTable(
-      modules.map(module => module.makeModuleTableRecord())
-    )
-    const failedTestTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedTestTableRecords()).flat(),
-      failedTestLimit
-    )
-    const failedLintTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedLintTableRecords()).flat(),
-      failedLintLimit
-    )
-    const result = modules.every(m => m.result === Result.Passed)
-      ? Result.Passed
-      : Result.Failed
-
-    modules.forEach(m =>
-      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
-    )
-
-    const body = makeMarkdownReport(
+    core.info(`* make a junit report`)
+    const { body, annotations } = await report(
       {
         owner,
         repo,
-        pullNumber,
         sha,
         runId,
+        pullNumber,
         actor
       },
-      result,
-      moduleTable,
-      failedTestTable,
-      failedLintTable
+      testDirs,
+      lintDirs,
+      testReportXml,
+      lintReportXml,
+      failedTestLimit,
+      failedLintLimit
     )
+    annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)

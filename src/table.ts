@@ -1,3 +1,5 @@
+import fs from 'fs'
+
 import {
   Result,
   AnyRecord,
@@ -8,7 +10,7 @@ import {
 } from './type'
 
 import { GotestsumSummary, ReporterType } from './junit/type'
-import { JUnitReporterFactory } from './junit/factory'
+import { JUnitReporterFactory, JUnitReporterFactoryImpl } from './junit/factory'
 import {
   AnnotationRecord,
   GotestsumSummaryRecord,
@@ -21,6 +23,71 @@ import {
 } from './data/summary'
 import { FailureSummaryViewImpl } from './data/failure'
 import { AnnotationViewImpl } from './data/annotation'
+
+export type GitHubActionsContext = {
+  owner: string
+  repo: string
+  sha: string
+  pullNumber: number | undefined
+  runId: number
+  actor: string
+}
+
+// NOTE: This is a temporary implementation
+type Output = {
+  body: string
+  annotations: string[]
+}
+
+export async function report(
+  context: GitHubActionsContext,
+  testDirs: string[],
+  lintDirs: string[],
+  testReportXml: string,
+  lintReportXml: string,
+  failedTestLimit: number,
+  failedLintLimit: number
+): Promise<Output> {
+  const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
+  const factory = new GoModulesFactory(repoterFactory)
+  const modules = await factory.fromXml(
+    context.owner,
+    context.repo,
+    context.sha,
+    testDirs,
+    lintDirs,
+    testReportXml,
+    lintReportXml
+  )
+
+  const moduleTable = createModuleTable(
+    modules.map(module => module.makeModuleTableRecord())
+  )
+  const failedTestTable = createFailedCaseTable(
+    modules.map(m => m.makeFailedTestTableRecords()).flat(),
+    failedTestLimit
+  )
+  const failedLintTable = createFailedCaseTable(
+    modules.map(m => m.makeFailedLintTableRecords()).flat(),
+    failedLintLimit
+  )
+  const result = modules.every(m => m.result === Result.Passed)
+    ? Result.Passed
+    : Result.Failed
+
+  const body = makeMarkdownReport(
+    context,
+    result,
+    moduleTable,
+    failedTestTable,
+    failedLintTable
+  )
+
+  return {
+    body,
+    annotations: modules.map(m => m.makeAnnotationMessages()).flat()
+  }
+}
 
 export interface Module {
   directory: string
@@ -194,21 +261,6 @@ export class GoModulesFactory {
 
     return modules
   }
-}
-
-export type GitHubContext = {
-  owner: string
-  repo: string
-  sha: string
-}
-
-export type GitHubActionsContext = {
-  owner: string
-  repo: string
-  sha: string
-  pullNumber: number | undefined
-  runId: number
-  actor: string
 }
 
 export function makeMarkdownReport(
