@@ -2,11 +2,6 @@
   "additionalProperties": {
     "additionalProperties": false,
     "properties": {
-      "annotationLimit": {
-        "description": "Limit number of annotations of failed tests.",
-        "type": "number",
-        "minimum": 0
-      },
       "directories": {
         "description": "Directories to search for JUnit reports.",
         "items": {

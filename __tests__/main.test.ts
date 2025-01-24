@@ -81,7 +81,6 @@ test:
   directories:
   - go/app1
   - go/app2
-  annotationLimit: 10
 lint:
   title: '[Lint](./golangci.toml)'
   type: golangci-lint
@@ -89,7 +88,6 @@ lint:
   directories:
   - go/app1
   - go/app3
-  annotationLimit: 5
 `.slice(1, -1)
         case 'pull-request-number':
           return ''
@@ -176,7 +174,6 @@ test:
   directories:
   - go/app1
   - go/app2
-  annotationLimit: 10
 lint:
   title: '[Lint](./golangci.toml)'
   type: golangci-lint
@@ -184,7 +181,6 @@ lint:
   directories:
   - go/app1
   - go/app3
-  annotationLimit: 5
 `.slice(1, -1)
         case 'pull-request-number':
           return ''

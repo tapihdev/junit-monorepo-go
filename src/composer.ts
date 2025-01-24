@@ -96,10 +96,10 @@ export class TableComposer {
     ).render()
   }
 
-  failures(context: GitHubContext, type: 'test' | 'lint', limit = 10): string {
+  failures(context: GitHubContext, limit = 10): string {
     const { owner, repo, sha } = context
-    const reports = type === 'test' ? this.tests : this.lints
-    const failures = reports
+    const failures = [this.tests, this.lints]
+      .flat()
       .map(d =>
         d.failures.map(f => {
           const view = new FailureSummaryViewImpl(d.path, f)
@@ -107,19 +107,20 @@ export class TableComposer {
         })
       )
       .flat()
-    const testFailuresLimited = failures.slice(0, limit)
+    const limited = failures.slice(0, limit)
     if (failures.length > limit) {
-      testFailuresLimited.push({
+      limited.push({
         file: `:warning: and ${failures.length - limit} more...`,
+        type: '-',
         test: '-',
         message: '-'
       })
     }
 
     return new Table(
-      { file: 'File', test: 'Case', message: 'Message' },
-      { file: ':---', test: ':---', message: ':------' },
-      testFailuresLimited
+      { file: 'File', type: 'Type', test: 'Case', message: 'Message' },
+      { file: ':---', type: ':---', test: ':---', message: ':------' },
+      limited
     ).render()
   }
 

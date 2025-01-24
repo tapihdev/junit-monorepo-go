@@ -21,6 +21,7 @@ export class FailureSummaryViewImpl implements FailureSummaryView {
     const joinedMessage = this._failure.message.replace(/\n/g, ' ')
     return {
       file: fileColumn,
+      type: this._failure.type.toString(),
       test: this._failure.test,
       message: joinedMessage
     }

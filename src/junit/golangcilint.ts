@@ -6,7 +6,7 @@ import {
   GolangCILintSummary,
   Failure
 } from './type'
-import { Result } from '../type'
+import { ReporterType, Result } from '../type'
 
 export class GolangCILintReportImpl implements GolangCILintReport {
   constructor(
@@ -63,7 +63,8 @@ export class GolangCILintReportImpl implements GolangCILintReport {
           file,
           line: parseInt(line),
           test: testcase.$.name,
-          message
+          message,
+          type: ReporterType.GolangCILint
         }
       })
   }

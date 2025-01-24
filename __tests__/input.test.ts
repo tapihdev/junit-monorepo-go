@@ -22,14 +22,13 @@ describe('input', () => {
     const testCases = [
       {
         input:
-          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": 10 }',
+          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
         expected: {
           test: {
             title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
-            fileName: 'test.xml',
-            annotationLimit: 10
+            fileName: 'test.xml'
           }
         }
       },
@@ -41,8 +40,7 @@ describe('input', () => {
             title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
-            fileName: 'test.xml',
-            annotationLimit: undefined
+            fileName: 'test.xml'
           }
         }
       },
@@ -54,8 +52,7 @@ describe('input', () => {
             title: 'Lint',
             type: 'golangci-lint',
             directories: ['go/app1', 'go/app2'],
-            fileName: 'lint.xml',
-            annotationLimit: undefined
+            fileName: 'lint.xml'
           }
         }
       }
@@ -79,10 +76,6 @@ describe('input', () => {
       {
         input:
           'test: { "title": "Test", "type": "invalid type", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }'
-      },
-      {
-        input:
-          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml", "annotationLimit": -1 }'
       }
     ]
     for (const { input } of testCases) {

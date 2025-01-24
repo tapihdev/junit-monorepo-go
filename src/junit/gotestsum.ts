@@ -1,5 +1,5 @@
 import { JUnitReport, GotestsumReport, Failure, GotestsumSummary } from './type'
-import { Result } from '../type'
+import { ReporterType, Result } from '../type'
 
 export class GotestsumReportImpl implements GotestsumReport {
   // gotestsum reports failures in the following format:
@@ -56,7 +56,8 @@ export class GotestsumReportImpl implements GotestsumReport {
             file: match[1],
             line: parseInt(match[2]),
             test: testcase.$.name,
-            message: match[0]
+            message: match[0],
+            type: ReporterType.Gotestsum
           } as Failure
         })
       })

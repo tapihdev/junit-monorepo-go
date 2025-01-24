@@ -41131,24 +41131,25 @@ class TableComposer {
             lintResult: ':---'
         }, Array.from(summaryRecords.values())).render();
     }
-    failures(context, type, limit = 10) {
+    failures(context, limit = 10) {
         const { owner, repo, sha } = context;
-        const reports = type === 'test' ? this.tests : this.lints;
-        const failures = reports
+        const failures = [this.tests, this.lints]
+            .flat()
             .map(d => d.failures.map(f => {
             const view = new failure_1.FailureSummaryViewImpl(d.path, f);
             return view.render(owner, repo, sha);
         }))
             .flat();
-        const testFailuresLimited = failures.slice(0, limit);
+        const limited = failures.slice(0, limit);
         if (failures.length > limit) {
-            testFailuresLimited.push({
+            limited.push({
                 file: `:warning: and ${failures.length - limit} more...`,
+                type: '-',
                 test: '-',
                 message: '-'
             });
         }
-        return new table_1.Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
+        return new table_1.Table({ file: 'File', type: 'Type', test: 'Case', message: 'Message' }, { file: ':---', type: ':---', test: ':---', message: ':------' }, limited).render();
     }
     annotations() {
         const testAnnotations = this.tests
@@ -41181,11 +41182,6 @@ exports.ConfigSchema = void 0;
 const zod_1 = __nccwpck_require__(4809);
 exports.ConfigSchema = zod_1.z.record(zod_1.z
     .object({
-    annotationLimit: zod_1.z
-        .number()
-        .gte(0)
-        .describe('Limit number of annotations of failed tests.')
-        .optional(),
     directories: zod_1.z
         .array(zod_1.z.string())
         .describe('Directories to search for JUnit reports.'),
@@ -41316,6 +41312,7 @@ class FailureSummaryViewImpl {
         const joinedMessage = this._failure.message.replace(/\n/g, ' ');
         return {
             file: fileColumn,
+            type: this._failure.type.toString(),
             test: this._failure.test,
             message: joinedMessage
         };
@@ -41647,7 +41644,8 @@ class GolangCILintReportImpl {
                 file,
                 line: parseInt(line),
                 test: testcase.$.name,
-                message
+                message,
+                type: type_1.ReporterType.GolangCILint
             };
         });
     }
@@ -41735,7 +41733,8 @@ class GotestsumReportImpl {
                     file: match[1],
                     line: parseInt(match[2]),
                     test: testcase.$.name,
-                    message: match[0]
+                    message: match[0],
+                    type: type_1.ReporterType.Gotestsum
                 };
             });
         })
@@ -41875,8 +41874,6 @@ async function run() {
         const lintDirs = lint?.directories ?? [];
         const testReportXml = test.fileName;
         const lintReportXml = lint?.fileName ?? '';
-        const failedTestLimit = test?.annotationLimit || 10;
-        const failedLintLimit = lint?.annotationLimit || 10;
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* make a junit report`);
@@ -41891,8 +41888,7 @@ async function run() {
         const composer = new composer_1.TableComposer(tests, lints);
         const result = composer.result();
         const summary = composer.summary(githubContext);
-        const testFailures = composer.failures(githubContext, 'test', failedTestLimit);
-        const lintFailures = composer.failures(githubContext, 'lint', failedLintLimit);
+        const failures = composer.failures(githubContext);
         const annotations = composer.annotations();
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
@@ -41901,7 +41897,7 @@ async function run() {
             runId,
             pullNumber,
             actor
-        }, result, summary, testFailures, lintFailures);
+        }, result, summary, failures);
         annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
@@ -41943,7 +41939,7 @@ async function run() {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.makeMarkdownReport = makeMarkdownReport;
 const type_1 = __nccwpck_require__(4619);
-function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
+function makeMarkdownReport(context, result, moduleTable, failureTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
     const commitUrl = pullNumber === undefined
         ? `https://github.com/${owner}/${repo}/commit/${sha}`
@@ -41955,26 +41951,15 @@ function makeMarkdownReport(context, result, moduleTable, failedTestTable, faile
 #### Result: ${result === type_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
-${failedTestTable === ''
+${failureTable === ''
         ? ''
         : `
 <br/>
 
 <details open>
-<summary> Failed Tests </summary>
+<summary> Failures </summary>
 
-${failedTestTable}
-
-</details>
-`}${failedLintTable === ''
-        ? ''
-        : `
-<br/>
-
-<details open>
-<summary> Failed Lints </summary>
-
-${failedLintTable}
+${failureTable}
 
 </details>
 `}

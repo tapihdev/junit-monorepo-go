@@ -13,8 +13,7 @@ export function makeMarkdownReport(
   context: GitHubActionsContext,
   result: Result,
   moduleTable: string,
-  failedTestTable: string,
-  failedLintTable: string
+  failureTable: string
 ): string {
   const { owner, repo, sha, pullNumber, runId, actor } = context
   const commitUrl =
@@ -30,32 +29,19 @@ export function makeMarkdownReport(
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
 ${
-  failedTestTable === ''
+  failureTable === ''
     ? ''
     : `
 <br/>
 
 <details open>
-<summary> Failed Tests </summary>
+<summary> Failures </summary>
 
-${failedTestTable}
-
-</details>
-`
-}${
-    failedLintTable === ''
-      ? ''
-      : `
-<br/>
-
-<details open>
-<summary> Failed Lints </summary>
-
-${failedLintTable}
+${failureTable}
 
 </details>
 `
-  }
+}
 ---
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1)

@@ -1,5 +1,5 @@
 import { TableComposer } from '../src/composer'
-import { Result } from '../src/type'
+import { ReporterType, Result } from '../src/type'
 
 // TODO: should not depend on views
 describe('TableComposer#result', () => {
@@ -229,14 +229,16 @@ describe('TableComposer#failures', () => {
                 file: 'foo1_test.go',
                 line: 1,
                 test: 'Test1/Case',
-                message: 'aaa'
+                message: 'aaa',
+                type: ReporterType.Gotestsum
               },
               {
                 subDir: 'module2',
                 file: 'bar1_test.go',
                 line: 2,
                 test: 'Test2/Case',
-                message: 'bbb'
+                message: 'bbb',
+                type: ReporterType.Gotestsum
               }
             ]
           },
@@ -254,14 +256,33 @@ describe('TableComposer#failures', () => {
                 file: 'foo2_test.go',
                 line: 1,
                 test: 'Test3/Case',
-                message: 'ccc'
-              },
+                message: 'ccc',
+                type: ReporterType.Gotestsum
+              }
+            ]
+          }
+        ],
+        lints: [
+          {
+            path: 'go/app1',
+            summary: {
+              result: Result.Passed
+            },
+            failures: []
+          },
+          {
+            path: 'go/app2',
+            summary: {
+              result: Result.Failed
+            },
+            failures: [
               {
-                subDir: 'module2',
-                file: 'bar2_test.go',
-                line: 2,
-                test: 'Test4/Case',
-                message: 'ddd'
+                subDir: 'module1',
+                file: 'foo.go',
+                line: 1,
+                test: 'Func1',
+                message: 'ccc',
+                type: ReporterType.GolangCILint
               }
             ]
           }
@@ -269,12 +290,12 @@ describe('TableComposer#failures', () => {
         limit: 10
       },
       expected: `
-| File | Case | Message |
-| :--- | :--- | :------ |
-| [go/app1/module1/foo1_test.go:1](https://github.com/owner/repo/blob/sha/go/app1/module1/foo1_test.go#L1) | Test1/Case | aaa |
-| [go/app1/module2/bar1_test.go:2](https://github.com/owner/repo/blob/sha/go/app1/module2/bar1_test.go#L2) | Test2/Case | bbb |
-| [go/app2/module1/foo2_test.go:1](https://github.com/owner/repo/blob/sha/go/app2/module1/foo2_test.go#L1) | Test3/Case | ccc |
-| [go/app2/module2/bar2_test.go:2](https://github.com/owner/repo/blob/sha/go/app2/module2/bar2_test.go#L2) | Test4/Case | ddd |
+| File | Type | Case | Message |
+| :--- | :--- | :--- | :------ |
+| [go/app1/module1/foo1_test.go:1](https://github.com/owner/repo/blob/sha/go/app1/module1/foo1_test.go#L1) | gotestsum | Test1/Case | aaa |
+| [go/app1/module2/bar1_test.go:2](https://github.com/owner/repo/blob/sha/go/app1/module2/bar1_test.go#L2) | gotestsum | Test2/Case | bbb |
+| [go/app2/module1/foo2_test.go:1](https://github.com/owner/repo/blob/sha/go/app2/module1/foo2_test.go#L1) | gotestsum | Test3/Case | ccc |
+| [go/app2/module1/foo.go:1](https://github.com/owner/repo/blob/sha/go/app2/module1/foo.go#L1) | golangci-lint | Func1 | ccc |
 `.slice(1, -1)
     },
     {
@@ -295,14 +316,16 @@ describe('TableComposer#failures', () => {
                 file: 'foo1_test.go',
                 line: 1,
                 test: 'Test1/Case',
-                message: 'aaa'
+                message: 'aaa',
+                type: ReporterType.Gotestsum
               },
               {
                 subDir: 'module2',
                 file: 'bar1_test.go',
                 line: 2,
                 test: 'Test2/Case',
-                message: 'bbb'
+                message: 'bbb',
+                type: ReporterType.Gotestsum
               }
             ]
           },
@@ -320,14 +343,33 @@ describe('TableComposer#failures', () => {
                 file: 'foo2_test.go',
                 line: 1,
                 test: 'Test3/Case',
-                message: 'ccc'
-              },
+                message: 'ccc',
+                type: ReporterType.Gotestsum
+              }
+            ]
+          }
+        ],
+        lints: [
+          {
+            path: 'go/app1',
+            summary: {
+              result: Result.Passed
+            },
+            failures: []
+          },
+          {
+            path: 'go/app2',
+            summary: {
+              result: Result.Failed
+            },
+            failures: [
               {
-                subDir: 'module2',
-                file: 'bar2_test.go',
-                line: 2,
-                test: 'Test4/Case',
-                message: 'ddd'
+                subDir: 'module1',
+                file: 'foo.go',
+                line: 1,
+                test: 'Func1',
+                message: 'ccc',
+                type: ReporterType.GolangCILint
               }
             ]
           }
@@ -335,18 +377,18 @@ describe('TableComposer#failures', () => {
         limit: 2
       },
       expected: `
-| File | Case | Message |
-| :--- | :--- | :------ |
-| [go/app1/module1/foo1_test.go:1](https://github.com/owner/repo/blob/sha/go/app1/module1/foo1_test.go#L1) | Test1/Case | aaa |
-| [go/app1/module2/bar1_test.go:2](https://github.com/owner/repo/blob/sha/go/app1/module2/bar1_test.go#L2) | Test2/Case | bbb |
+| File | Type | Case | Message |
+| :--- | :--- | :--- | :------ |
+| [go/app1/module1/foo1_test.go:1](https://github.com/owner/repo/blob/sha/go/app1/module1/foo1_test.go#L1) | gotestsum | Test1/Case | aaa |
+| [go/app1/module2/bar1_test.go:2](https://github.com/owner/repo/blob/sha/go/app1/module2/bar1_test.go#L2) | gotestsum | Test2/Case | bbb |
 | :warning: and 2 more... | - | - |
 `.slice(1, -1)
     }
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const composer = new TableComposer(input.tests, [])
-    const actual = composer.failures(githubContext, 'test', input.limit)
+    const composer = new TableComposer(input.tests, inputs.lint)
+    const actual = composer.failures(githubContext, input.limit)
     expect(actual).toEqual(expected)
   })
 })
