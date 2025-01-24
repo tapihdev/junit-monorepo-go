@@ -82,7 +82,7 @@ export class MultiJunitReportersFactoryImpl
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<[GotestsumReport[], GolangCILintReport[]]> {
+  ): Promise<[GotestsumReportImpl[], GolangCILintReportImpl[]]> {
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(
@@ -91,7 +91,7 @@ export class MultiJunitReportersFactoryImpl
               ReporterType.Gotestsum,
               d,
               testReportXml
-            )) as GotestsumReport
+            )) as GotestsumReportImpl
         )
       ),
       await Promise.all(
@@ -101,7 +101,7 @@ export class MultiJunitReportersFactoryImpl
               ReporterType.GolangCILint,
               d,
               lintReportXml
-            )) as GolangCILintReport
+            )) as GolangCILintReportImpl
         )
       )
     ])

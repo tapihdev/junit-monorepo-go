@@ -10,7 +10,7 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
-import { TableComposer } from './table'
+import { TableComposer } from './composer'
 
 import {
   SingleJUnitReporterFactoryImpl,
@@ -66,8 +66,16 @@ export async function run(): Promise<void> {
     const composer = new TableComposer(tests, lints)
     const result = composer.result()
     const summary = composer.summary(githubContext)
-    const testFailures = composer.testFailures(githubContext, failedTestLimit)
-    const lintFailures = composer.lintFailures(githubContext, failedLintLimit)
+    const testFailures = composer.failures(
+      githubContext,
+      'test',
+      failedTestLimit
+    )
+    const lintFailures = composer.failures(
+      githubContext,
+      'lint',
+      failedLintLimit
+    )
     const annotations = composer.annotations()
 
     const body = makeMarkdownReport(

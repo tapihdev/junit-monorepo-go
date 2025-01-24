@@ -96,19 +96,7 @@ export class TableComposer {
     ).render()
   }
 
-  testFailures(context: GitHubContext, limit: number): string {
-    return this.failures(context, 'test', limit)
-  }
-
-  lintFailures(context: GitHubContext, limit: number): string {
-    return this.failures(context, 'lint', limit)
-  }
-
-  private failures(
-    context: GitHubContext,
-    type: 'test' | 'lint',
-    limit: number
-  ): string {
+  failures(context: GitHubContext, type: 'test' | 'lint', limit = 10): string {
     const { owner, repo, sha } = context
     const reports = type === 'test' ? this.tests : this.lints
     const failures = reports
@@ -155,5 +143,3 @@ export class TableComposer {
     return [...testAnnotations, ...lintAnnotations]
   }
 }
-
-

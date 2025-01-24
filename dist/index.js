@@ -41046,6 +41046,131 @@ exports.NEVER = parseUtil_1.INVALID;
 
 /***/ }),
 
+/***/ 1401:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TableComposer = void 0;
+const type_1 = __nccwpck_require__(4619);
+const summary_1 = __nccwpck_require__(200);
+const failure_1 = __nccwpck_require__(5382);
+const annotation_1 = __nccwpck_require__(6855);
+const table_1 = __nccwpck_require__(8719);
+class TableComposer {
+    tests;
+    lints;
+    static undefinedString = '-';
+    constructor(tests, lints) {
+        this.tests = tests;
+        this.lints = lints;
+    }
+    result() {
+        return [this.tests, this.lints]
+            .flat()
+            .some(m => m.summary.result === type_1.Result.Failed)
+            ? type_1.Result.Failed
+            : type_1.Result.Passed;
+    }
+    summary(context) {
+        const { owner, repo, sha } = context;
+        const testSummaryRecords = this.tests.map(d => {
+            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
+            return summaryView.render(owner, repo, sha);
+        });
+        const lintSummaryRecords = this.lints.map(d => {
+            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
+            return summaryView.render(owner, repo, sha);
+        });
+        const summaryRecords = new Map();
+        testSummaryRecords.forEach(r => summaryRecords.set(r.path, {
+            name: r.path,
+            version: r.version,
+            testResult: r.result,
+            testPassed: r.passed,
+            testFailed: r.failed,
+            testElapsed: r.time,
+            lintResult: TableComposer.undefinedString
+        }));
+        lintSummaryRecords.forEach(r => {
+            const v = summaryRecords.get(r.path);
+            if (v !== undefined) {
+                summaryRecords.set(r.path, {
+                    ...v,
+                    lintResult: r.result
+                });
+            }
+            else {
+                summaryRecords.set(r.path, {
+                    name: r.path,
+                    version: TableComposer.undefinedString,
+                    testResult: TableComposer.undefinedString,
+                    testPassed: TableComposer.undefinedString,
+                    testFailed: TableComposer.undefinedString,
+                    testElapsed: TableComposer.undefinedString,
+                    lintResult: r.result
+                });
+            }
+        });
+        return new table_1.Table({
+            name: 'Module',
+            version: 'Version',
+            testResult: 'Test',
+            testPassed: 'Passed',
+            testFailed: 'Failed',
+            testElapsed: 'Time',
+            lintResult: 'Lint'
+        }, {
+            name: ':-----',
+            version: '------:',
+            testResult: ':---',
+            testPassed: '-----:',
+            testFailed: '-----:',
+            testElapsed: '---:',
+            lintResult: ':---'
+        }, Array.from(summaryRecords.values())).render();
+    }
+    failures(context, type, limit = 10) {
+        const { owner, repo, sha } = context;
+        const reports = type === 'test' ? this.tests : this.lints;
+        const failures = reports
+            .map(d => d.failures.map(f => {
+            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+            return view.render(owner, repo, sha);
+        }))
+            .flat();
+        const testFailuresLimited = failures.slice(0, limit);
+        if (failures.length > limit) {
+            testFailuresLimited.push({
+                file: `:warning: and ${failures.length - limit} more...`,
+                test: '-',
+                message: '-'
+            });
+        }
+        return new table_1.Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
+    }
+    annotations() {
+        const testAnnotations = this.tests
+            .map(d => d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render().body;
+        }))
+            .flat();
+        const lintAnnotations = this.lints
+            .map(d => d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render().body;
+        }))
+            .flat();
+        return [...testAnnotations, ...lintAnnotations];
+    }
+}
+exports.TableComposer = TableComposer;
+
+
+/***/ }),
+
 /***/ 4846:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -41743,7 +41868,7 @@ const fs = __importStar(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const markdown_1 = __nccwpck_require__(3758);
-const table_1 = __nccwpck_require__(8719);
+const composer_1 = __nccwpck_require__(1401);
 const factory_1 = __nccwpck_require__(7534);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
@@ -41779,11 +41904,11 @@ async function run() {
             repo,
             sha
         };
-        const composer = new table_1.TableComposer(tests, lints);
+        const composer = new composer_1.TableComposer(tests, lints);
         const result = composer.result();
         const summary = composer.summary(githubContext);
-        const testFailures = composer.testFailures(githubContext, failedTestLimit);
-        const lintFailures = composer.lintFailures(githubContext, failedLintLimit);
+        const testFailures = composer.failures(githubContext, 'test', failedTestLimit);
+        const lintFailures = composer.failures(githubContext, 'lint', failedLintLimit);
         const annotations = composer.annotations();
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
@@ -41878,131 +42003,12 @@ ${failedLintTable}
 /***/ }),
 
 /***/ 8719:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TableComposer = void 0;
-const type_1 = __nccwpck_require__(4619);
-const summary_1 = __nccwpck_require__(200);
-const failure_1 = __nccwpck_require__(5382);
-const annotation_1 = __nccwpck_require__(6855);
-class TableComposer {
-    tests;
-    lints;
-    static undefinedString = '-';
-    constructor(tests, lints) {
-        this.tests = tests;
-        this.lints = lints;
-    }
-    result() {
-        return [this.tests, this.lints]
-            .flat()
-            .some(m => m.summary.result === type_1.Result.Failed)
-            ? type_1.Result.Failed
-            : type_1.Result.Passed;
-    }
-    summary(context) {
-        const { owner, repo, sha } = context;
-        const testSummaryRecords = this.tests.map(d => {
-            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
-            return summaryView.render(owner, repo, sha);
-        });
-        const lintSummaryRecords = this.lints.map(d => {
-            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
-            return summaryView.render(owner, repo, sha);
-        });
-        const summaryRecords = new Map();
-        testSummaryRecords.forEach(r => summaryRecords.set(r.path, {
-            name: r.path,
-            version: r.version,
-            testResult: r.result,
-            testPassed: r.passed,
-            testFailed: r.failed,
-            testElapsed: r.time,
-            lintResult: TableComposer.undefinedString
-        }));
-        lintSummaryRecords.forEach(r => {
-            const v = summaryRecords.get(r.path);
-            if (v !== undefined) {
-                summaryRecords.set(r.path, {
-                    ...v,
-                    lintResult: r.result
-                });
-            }
-            else {
-                summaryRecords.set(r.path, {
-                    name: r.path,
-                    version: TableComposer.undefinedString,
-                    testResult: TableComposer.undefinedString,
-                    testPassed: TableComposer.undefinedString,
-                    testFailed: TableComposer.undefinedString,
-                    testElapsed: TableComposer.undefinedString,
-                    lintResult: r.result
-                });
-            }
-        });
-        return new Table({
-            name: 'Module',
-            version: 'Version',
-            testResult: 'Test',
-            testPassed: 'Passed',
-            testFailed: 'Failed',
-            testElapsed: 'Time',
-            lintResult: 'Lint'
-        }, {
-            name: ':-----',
-            version: '------:',
-            testResult: ':---',
-            testPassed: '-----:',
-            testFailed: '-----:',
-            testElapsed: '---:',
-            lintResult: ':---'
-        }, Array.from(summaryRecords.values())).render();
-    }
-    testFailures(context, limit) {
-        return this.failures(context, 'test', limit);
-    }
-    lintFailures(context, limit) {
-        return this.failures(context, 'lint', limit);
-    }
-    failures(context, type, limit) {
-        const { owner, repo, sha } = context;
-        const reports = type === 'test' ? this.tests : this.lints;
-        const failures = reports
-            .map(d => d.failures.map(f => {
-            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-            return view.render(owner, repo, sha);
-        }))
-            .flat();
-        const testFailuresLimited = failures.slice(0, limit);
-        if (failures.length > limit) {
-            testFailuresLimited.push({
-                file: `:warning: and ${failures.length - limit} more...`,
-                test: '-',
-                message: '-'
-            });
-        }
-        return new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
-    }
-    annotations() {
-        const testAnnotations = this.tests
-            .map(d => d.failures.map(f => {
-            const view = new annotation_1.AnnotationViewImpl(d.path, f);
-            return view.render().body;
-        }))
-            .flat();
-        const lintAnnotations = this.lints
-            .map(d => d.failures.map(f => {
-            const view = new annotation_1.AnnotationViewImpl(d.path, f);
-            return view.render().body;
-        }))
-            .flat();
-        return [...testAnnotations, ...lintAnnotations];
-    }
-}
-exports.TableComposer = TableComposer;
+exports.Table = void 0;
 class Table {
     header;
     separator;
@@ -42029,6 +42035,7 @@ class Table {
         ].join('\n');
     }
 }
+exports.Table = Table;
 
 
 /***/ }),
