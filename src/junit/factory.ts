@@ -16,7 +16,7 @@ export interface MultiJunitReportersFactory {
 }
 
 export interface SingleJUnitReporterFactory {
-  fromJSON(
+  fromXml(
     type: ReporterType,
     directory: string,
     fileName: string
@@ -33,7 +33,7 @@ type JUnitReportUnsafe = {
 export class SingleJUnitReporterFactoryImpl implements SingleJUnitReporterFactory {
   constructor(private readonly reader: FileReader) {}
 
-  async fromJSON(
+  async fromXml(
     type: ReporterType,
     directory: string,
     fileName: string
@@ -75,7 +75,7 @@ export class MultiJunitReportersFactoryImpl {
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(
-          async (d) => (await this._parser.fromJSON(
+          async (d) => (await this._parser.fromXml(
             ReporterType.Gotestsum,
             d,
             testReportXml
@@ -84,7 +84,7 @@ export class MultiJunitReportersFactoryImpl {
       ),
       await Promise.all(
         lintDirectories.map(
-          async (d) => (await this._parser.fromJSON(
+          async (d) => (await this._parser.fromXml(
             ReporterType.GolangCILint,
             d,
             lintReportXml

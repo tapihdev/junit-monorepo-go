@@ -302,7 +302,7 @@ Details: Bar]]></failure>
 
   it.each(testCases)('%s', async ({ input, expected }) => {
     const factory = new SingleJUnitReporterFactoryImpl(input.reader)
-    const report = await factory.fromJSON(input.type, 'path/to', 'junit.xml')
+    const report = await factory.fromXml(input.type, 'path/to', 'junit.xml')
     expect(input.reader).toHaveBeenCalledWith('path/to/junit.xml', {
       encoding: 'utf8'
     })
@@ -312,7 +312,7 @@ Details: Bar]]></failure>
 
 describe('MultiJunitReportersFactory', () => {
   const singleFactoryMock = {
-    fromJSON: jest.spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromJSON').mockResolvedValue({
+    fromXml: jest.spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromXml').mockResolvedValue({
       tests: ['path/to/test.xml'],
       lints: ['path/to/lint.xml']
     })
@@ -362,7 +362,7 @@ describe('MultiJunitReportersFactory', () => {
 
   it.each(testCases)('%s', async ({ input, expected }) => {
     const factory = new MultiJunitReportersFactoryImpl(input.reader)
-    const report = await factory.fromJSON(input.type, 'path/to', 'junit.xml')
+    const report = await factory.fromXml(input.type, 'path/to', 'junit.xml')
     expect(input.reader).toHaveBeenCalledWith('path/to/junit.xml', {
       encoding: 'utf8'
     })
