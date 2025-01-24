@@ -41131,10 +41131,10 @@ class TableComposer {
             lintResult: ':---'
         }, Array.from(summaryRecords.values())).render();
     }
-    failures(context, type, limit = 10) {
+    failures(context, limit = 10) {
         const { owner, repo, sha } = context;
-        const reports = type === 'test' ? this.tests : this.lints;
-        const failures = reports
+        const failures = [this.tests, this.lints]
+            .flat()
             .map(d => d.failures.map(f => {
             const view = new failure_1.FailureSummaryViewImpl(d.path, f);
             return view.render(owner, repo, sha);
@@ -41877,6 +41877,7 @@ async function run() {
         const lintReportXml = lint?.fileName ?? '';
         const failedTestLimit = test?.annotationLimit || 10;
         const failedLintLimit = lint?.annotationLimit || 10;
+        const limit = failedTestLimit + failedLintLimit;
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* make a junit report`);
@@ -41891,8 +41892,7 @@ async function run() {
         const composer = new composer_1.TableComposer(tests, lints);
         const result = composer.result();
         const summary = composer.summary(githubContext);
-        const testFailures = composer.failures(githubContext, 'test', failedTestLimit);
-        const lintFailures = composer.failures(githubContext, 'lint', failedLintLimit);
+        const failures = composer.failures(githubContext, limit);
         const annotations = composer.annotations();
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
@@ -41901,7 +41901,7 @@ async function run() {
             runId,
             pullNumber,
             actor
-        }, result, summary, testFailures, lintFailures);
+        }, result, summary, failures);
         annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
@@ -41943,7 +41943,7 @@ async function run() {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.makeMarkdownReport = makeMarkdownReport;
 const type_1 = __nccwpck_require__(4619);
-function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
+function makeMarkdownReport(context, result, moduleTable, failureTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
     const commitUrl = pullNumber === undefined
         ? `https://github.com/${owner}/${repo}/commit/${sha}`
@@ -41955,26 +41955,15 @@ function makeMarkdownReport(context, result, moduleTable, failedTestTable, faile
 #### Result: ${result === type_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
 
 ${moduleTable === '' ? 'No test results found.' : moduleTable}
-${failedTestTable === ''
+${failureTable === ''
         ? ''
         : `
 <br/>
 
 <details open>
-<summary> Failed Tests </summary>
+<summary> Failures </summary>
 
-${failedTestTable}
-
-</details>
-`}${failedLintTable === ''
-        ? ''
-        : `
-<br/>
-
-<details open>
-<summary> Failed Lints </summary>
-
-${failedLintTable}
+${failureTable}
 
 </details>
 `}

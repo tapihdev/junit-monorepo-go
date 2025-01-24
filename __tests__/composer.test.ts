@@ -346,7 +346,7 @@ describe('TableComposer#failures', () => {
 
   it.each(testCases)('%s', ({ input, expected }) => {
     const composer = new TableComposer(input.tests, [])
-    const actual = composer.failures(githubContext, 'test', input.limit)
+    const actual = composer.failures(githubContext, input.limit)
     expect(actual).toEqual(expected)
   })
 })

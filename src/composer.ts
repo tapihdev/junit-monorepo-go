@@ -96,10 +96,10 @@ export class TableComposer {
     ).render()
   }
 
-  failures(context: GitHubContext, type: 'test' | 'lint', limit = 10): string {
+  failures(context: GitHubContext, limit = 10): string {
     const { owner, repo, sha } = context
-    const reports = type === 'test' ? this.tests : this.lints
-    const failures = reports
+    const failures = [this.tests, this.lints]
+      .flat()
       .map(d =>
         d.failures.map(f => {
           const view = new FailureSummaryViewImpl(d.path, f)
