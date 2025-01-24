@@ -63,7 +63,7 @@ export class SingleJUnitReporterFactoryImpl implements SingleJUnitReporterFactor
   }
 }
 
-export class MultiJunitReportersFactoryImpl {
+export class MultiJunitReportersFactoryImpl implements MultiJunitReportersFactory {
   constructor(private _parser: SingleJUnitReporterFactory) { }
 
   async fromXml(
