@@ -4,7 +4,7 @@ import {
   SingleJUnitReporterFactoryImpl,
   MultiJunitReportersFactoryImpl
 } from '../../src/junit/factory'
-import { ReporterType } from '../../src/junit/type'
+import { ReporterType } from '../../src/type'
 import { Result } from '../../src/type'
 
 jest.mock('../../src/junit/gotestsum', () => {

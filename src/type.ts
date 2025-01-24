@@ -39,3 +39,7 @@ export enum Result {
 }
 
 export type AnnotationRecord = string
+export enum ReporterType {
+  GolangCILint = 'golangci-lint',
+  Gotestsum = 'gotestsum'
+}
