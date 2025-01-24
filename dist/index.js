@@ -41508,7 +41508,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MultiJunitReportersFactoryImpl = exports.SingleJUnitReporterFactoryImpl = void 0;
 const path_1 = __importDefault(__nccwpck_require__(6928));
 const xml2js_1 = __nccwpck_require__(758);
-const type_1 = __nccwpck_require__(4874);
+const type_1 = __nccwpck_require__(4619);
 const golangcilint_1 = __nccwpck_require__(549);
 const gotestsum_1 = __nccwpck_require__(5765);
 class SingleJUnitReporterFactoryImpl {
@@ -41806,22 +41806,6 @@ exports.GotestsumReportImpl = GotestsumReportImpl;
 
 /***/ }),
 
-/***/ 4874:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReporterType = void 0;
-var ReporterType;
-(function (ReporterType) {
-    ReporterType["GolangCILint"] = "golangci-lint";
-    ReporterType["Gotestsum"] = "gotestsum";
-})(ReporterType || (exports.ReporterType = ReporterType = {}));
-
-
-/***/ }),
-
 /***/ 1730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -42046,7 +42030,7 @@ exports.Table = Table;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Result = void 0;
+exports.ReporterType = exports.Result = void 0;
 var Result;
 (function (Result) {
     Result["Passed"] = "passed";
@@ -42054,6 +42038,11 @@ var Result;
     Result["Skipped"] = "skipped";
     Result["Unknown"] = "unknown";
 })(Result || (exports.Result = Result = {}));
+var ReporterType;
+(function (ReporterType) {
+    ReporterType["GolangCILint"] = "golangci-lint";
+    ReporterType["Gotestsum"] = "gotestsum";
+})(ReporterType || (exports.ReporterType = ReporterType = {}));
 
 
 /***/ }),

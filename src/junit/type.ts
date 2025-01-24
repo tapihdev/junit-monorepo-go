@@ -1,10 +1,5 @@
 import { Result } from '../type'
 
-export enum ReporterType {
-  GolangCILint = 'golangci-lint',
-  Gotestsum = 'gotestsum'
-}
-
 // Reportable represents a JUnit report with a summary and a list of failed cases
 export interface Reportable<T extends Summary> {
   readonly path: string

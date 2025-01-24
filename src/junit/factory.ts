@@ -6,10 +6,10 @@ import {
   JUnitReport,
   TestSuites,
   Reporter,
-  ReporterType,
   GolangCILintReport,
   GotestsumReport
 } from './type'
+import { ReporterType } from '../type'
 import { GolangCILintReportImpl } from './golangcilint'
 import { GotestsumReportImpl } from './gotestsum'
 
