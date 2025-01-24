@@ -41247,6 +41247,32 @@ exports.GolangCILintSummaryViewImpl = GolangCILintSummaryViewImpl;
 
 /***/ }),
 
+/***/ 6373:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GoModulesFactory = void 0;
+const type_1 = __nccwpck_require__(4874);
+class GoModulesFactory {
+    _parser;
+    constructor(_parser) {
+        this._parser = _parser;
+    }
+    async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const all = await Promise.all([
+            await Promise.all(testDirectories.map(async (d) => (await this._parser.fromJSON(type_1.ReporterType.Gotestsum, d, testReportXml)))),
+            await Promise.all(lintDirectories.map(async (d) => (await this._parser.fromJSON(type_1.ReporterType.GolangCILint, d, lintReportXml))))
+        ]);
+        return [all[0], all[1]];
+    }
+}
+exports.GoModulesFactory = GoModulesFactory;
+
+
+/***/ }),
+
 /***/ 9248:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -41804,21 +41830,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModulesFactory = void 0;
 exports.report = report;
 exports.makeMarkdownReport = makeMarkdownReport;
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
-const type_2 = __nccwpck_require__(4874);
 const factory_1 = __nccwpck_require__(7534);
 const summary_1 = __nccwpck_require__(200);
 const failure_1 = __nccwpck_require__(5382);
 const annotation_1 = __nccwpck_require__(6855);
+const factory_2 = __nccwpck_require__(6373);
 const undefinedString = '-';
 async function report(context, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit) {
     const { owner, repo, sha } = context;
     const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
-    const factory = new GoModulesFactory(repoterFactory);
+    const factory = new factory_2.GoModulesFactory(repoterFactory);
     const [test, lint] = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
     // result
     const result = [test, lint]
@@ -41934,20 +41959,6 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
         annotations
     };
 }
-class GoModulesFactory {
-    _parser;
-    constructor(_parser) {
-        this._parser = _parser;
-    }
-    async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
-        const all = await Promise.all([
-            await Promise.all(testDirectories.map(async (d) => (await this._parser.fromJSON(type_2.ReporterType.Gotestsum, d, testReportXml)))),
-            await Promise.all(lintDirectories.map(async (d) => (await this._parser.fromJSON(type_2.ReporterType.GolangCILint, d, lintReportXml))))
-        ]);
-        return [all[0], all[1]];
-    }
-}
-exports.GoModulesFactory = GoModulesFactory;
 function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
     const commitUrl = pullNumber === undefined

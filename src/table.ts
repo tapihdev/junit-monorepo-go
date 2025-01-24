@@ -2,8 +2,7 @@ import fs from 'fs'
 
 import { Result, AnyRecord, ModuleTableRecord } from './type'
 
-import { GolangCILintReport, GotestsumReport, ReporterType } from './junit/type'
-import { JUnitReporterFactory, JUnitReporterFactoryImpl } from './junit/factory'
+import { JUnitReporterFactoryImpl } from './junit/factory'
 import { AnnotationRecord } from './data/type'
 import {
   GotestsumSummaryViewImpl,
@@ -11,6 +10,7 @@ import {
 } from './data/summary'
 import { FailureSummaryViewImpl } from './data/failure'
 import { AnnotationViewImpl } from './data/annotation'
+import { GoModulesFactory } from './factory'
 
 const undefinedString = '-'
 
@@ -196,42 +196,6 @@ export async function report(
   return {
     body,
     annotations
-  }
-}
-
-export class GoModulesFactory {
-  constructor(private _parser: JUnitReporterFactory) {}
-
-  async fromXml(
-    testDirectories: string[],
-    lintDirectories: string[],
-    testReportXml: string,
-    lintReportXml: string
-  ): Promise<[GotestsumReport[], GolangCILintReport[]]> {
-    const all = await Promise.all([
-      await Promise.all(
-        testDirectories.map(
-          async d =>
-            (await this._parser.fromJSON(
-              ReporterType.Gotestsum,
-              d,
-              testReportXml
-            )) as GotestsumReport
-        )
-      ),
-      await Promise.all(
-        lintDirectories.map(
-          async d =>
-            (await this._parser.fromJSON(
-              ReporterType.GolangCILint,
-              d,
-              lintReportXml
-            )) as GolangCILintReport
-        )
-      )
-    ])
-
-    return [all[0], all[1]]
   }
 }
 
