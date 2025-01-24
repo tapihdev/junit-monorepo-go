@@ -1,26 +1,26 @@
 import * as path from 'path'
 
-import {
-  JUnitReport,
-  GolangCILintReport,
-  GolangCILintSummary,
-  Failure
-} from './type'
-import { ReporterType, Result } from '../type'
+import { JUnitReport, GolangCILintReporter } from './type'
+import { ReporterType, Result, GitHubContext } from '../type'
+import { GolangCILintSummaryReportImpl } from 'src/report/golangcilint'
+import { FailureReportImpl } from 'src/report/failure'
 
-export class GolangCILintReportImpl implements GolangCILintReport {
+export class GolangCILintReporterImpl implements GolangCILintReporter {
   constructor(
+    readonly context: GitHubContext,
     readonly path: string,
     private readonly _junit: JUnitReport
   ) {}
 
-  get summary(): GolangCILintSummary {
-    return {
-      result: this.result
-    }
+  get summary(): GolangCILintSummaryReportImpl {
+    return new GolangCILintSummaryReportImpl(
+      this.context,
+      this.path,
+      this.result
+    )
   }
 
-  get failures(): Failure[] {
+  get failures(): FailureReportImpl[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -58,14 +58,16 @@ export class GolangCILintReportImpl implements GolangCILintReport {
         const [fullPath, line] = testcase.$.classname.split(':')
         const file = path.basename(fullPath)
         const subDir = path.dirname(fullPath)
-        return {
+        return new FailureReportImpl(
+          this.context,
+          ReporterType.GolangCILint,
+          this.path,
           subDir,
           file,
-          line: parseInt(line),
-          test: testcase.$.name,
-          message,
-          type: ReporterType.GolangCILint
-        }
+          parseInt(line),
+          testcase.$.name,
+          message
+        )
       })
   }
 

@@ -1,17 +1,25 @@
-import { Result } from '../type'
-import { Index, GolangCILintReport, GolangCILintSummaryRecord } from './type'
+import { Result, GitHubContext } from '../type'
+import {
+  Index,
+  GolangCILintSummaryReport,
+  GolangCILintSummaryRecord
+} from './type'
 
-export class GolangCILintReportImpl implements GolangCILintReport {
+export class GolangCILintSummaryReportImpl
+  implements GolangCILintSummaryReport
+{
   constructor(
-    readonly rootDir: string,
-    readonly result: Result,
+    readonly context: GitHubContext,
+    readonly moduleDir: string,
+    readonly result: Result
   ) {}
 
-  toIndex(): Index {
-    return this.rootDir
+  get index(): Index {
+    const { owner, repo, sha } = this.context
+    return `[${this.moduleDir}](https://github.com/${owner}/${repo}/blob/${sha}/${this.moduleDir})`
   }
 
-  toRecord(): GolangCILintSummaryRecord {
+  get record(): GolangCILintSummaryRecord {
     return {
       result: this.result === Result.Failed ? '❌Failed' : '✅Passed'
     }

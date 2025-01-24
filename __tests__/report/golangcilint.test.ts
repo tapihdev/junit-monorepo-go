@@ -1,41 +1,52 @@
 import { Result } from '../../src/type'
-import { GolangCILintReportImpl } from '../../src/report/golangcilint'
+import { GolangCILintSummaryReportImpl } from '../../src/report/golangcilint'
 
 describe('GolangCILintSummaryImpl', () => {
+  const context = {
+    owner: 'owner',
+    repo: 'repo',
+    sha: 'sha'
+  }
   const testCases = [
     {
       name: 'should render a passed summary',
       input: {
+        context,
         moduleDir: 'path/to/go',
-        result: Result.Passed,
+        result: Result.Passed
       },
       expected: {
-        index: 'path/to/go',
+        index:
+          '[path/to/go](https://github.com/owner/repo/blob/sha/path/to/go)',
         record: {
-          result: '✅Passed',
+          result: '✅Passed'
         }
       }
     },
     {
       name: 'should render a failed summary',
       input: {
+        context,
         moduleDir: 'path/to/go',
-        result: Result.Failed,
+        result: Result.Failed
       },
       expected: {
-        index: 'path/to/go',
+        index:
+          '[path/to/go](https://github.com/owner/repo/blob/sha/path/to/go)',
         record: {
-          result: '❌Failed',
+          result: '❌Failed'
         }
       }
     }
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const summary = new GolangCILintReportImpl(input.moduleDir, input.result)
-    const index = summary.toIndex()
-    const record = summary.toRecord()
-    expect(index).toEqual(expected.index)
-    expect(record).toEqual(expected.record)
+    const summary = new GolangCILintSummaryReportImpl(
+      input.context,
+      input.moduleDir,
+      input.result
+    )
+    expect(summary.index).toEqual(expected.index)
+    expect(summary.record).toEqual(expected.record)
   })
 })

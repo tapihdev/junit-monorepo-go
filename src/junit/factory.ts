@@ -5,29 +5,31 @@ import { parseStringPromise } from 'xml2js'
 import {
   JUnitReport,
   TestSuites,
-  Reporter,
-  GolangCILintReport,
-  GotestsumReport
+  GolangCILintReporter,
+  GotestsumReporter,
+  AnyReporter
 } from './type'
-import { ReporterType } from '../type'
-import { GolangCILintReportImpl } from './golangcilint'
-import { GotestsumReportImpl } from './gotestsum'
+import { ReporterType, GitHubContext } from '../type'
+import { GolangCILintReporterImpl } from './golangcilint'
+import { GotestsumReporterImpl } from './gotestsum'
 
 export interface MultiJunitReportersFactory {
   fromXml(
+    context: GitHubContext,
     testDirectories: string[],
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<[GotestsumReport[], GolangCILintReport[]]>
+  ): Promise<[GotestsumReporter[], GolangCILintReporter[]]>
 }
 
 export interface SingleJUnitReporterFactory {
   fromXml(
+    context: GitHubContext,
     type: ReporterType,
     directory: string,
     fileName: string
-  ): Promise<Reporter>
+  ): Promise<AnyReporter>
 }
 
 export type FileReader = typeof fs.promises.readFile
@@ -43,10 +45,11 @@ export class SingleJUnitReporterFactoryImpl
   constructor(private readonly reader: FileReader) {}
 
   async fromXml(
+    context: GitHubContext,
     type: ReporterType,
     directory: string,
     fileName: string
-  ): Promise<Reporter> {
+  ): Promise<AnyReporter> {
     const content = await this.reader(path.join(directory, fileName), {
       encoding: 'utf8'
     })
@@ -54,9 +57,9 @@ export class SingleJUnitReporterFactoryImpl
 
     switch (type) {
       case ReporterType.GolangCILint:
-        return new GolangCILintReportImpl(directory, parsed)
+        return new GolangCILintReporterImpl(context, directory, parsed)
       case ReporterType.Gotestsum:
-        return new GotestsumReportImpl(directory, parsed)
+        return new GotestsumReporterImpl(context, directory, parsed)
     }
   }
 
@@ -78,30 +81,33 @@ export class MultiJunitReportersFactoryImpl
   constructor(private _parser: SingleJUnitReporterFactory) {}
 
   async fromXml(
+    context: GitHubContext,
     testDirectories: string[],
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<[GotestsumReportImpl[], GolangCILintReportImpl[]]> {
+  ): Promise<[GotestsumReporter[], GolangCILintReporter[]]> {
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(
           async d =>
             (await this._parser.fromXml(
+              context,
               ReporterType.Gotestsum,
               d,
               testReportXml
-            )) as GotestsumReportImpl
+            )) as GotestsumReporter
         )
       ),
       await Promise.all(
         lintDirectories.map(
           async d =>
             (await this._parser.fromXml(
+              context,
               ReporterType.GolangCILint,
               d,
               lintReportXml
-            )) as GolangCILintReportImpl
+            )) as GolangCILintReporter
         )
       )
     ])

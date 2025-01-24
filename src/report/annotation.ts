@@ -4,14 +4,14 @@ export class AnnotationReportImpl implements AnnotationReport {
   constructor(
     readonly filePath: string,
     readonly line: number,
-    readonly message: string,
+    readonly message: string
   ) {}
 
-  toIndex(): Index {
+  get index(): Index {
     return `${this.filePath}:${this.line}`
   }
 
-  toRecord(): AnnotationRecord {
+  get record(): AnnotationRecord {
     return {
       body: `::error file=${this.filePath},line=${this.line}::${this.message}`
     }

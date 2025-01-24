@@ -1,10 +1,13 @@
-import { AnyRecord } from './type'
+export type Record<T extends Object> = {
+  readonly index: string
+  readonly record: T
+}
 
-export class Table<T extends AnyRecord> {
+export class Table<T extends Object> {
   constructor(
-    private readonly header: T,
-    private readonly separator: T,
-    private readonly records: T[]
+    readonly header: Record<T>,
+    readonly separator: Record<T>,
+    readonly records: Record<T>[]
   ) {}
 
   get rows(): number {
@@ -21,9 +24,11 @@ export class Table<T extends AnyRecord> {
     }
 
     return [
-      `| ${Object.values(this.header).join(' | ')} |`,
-      `| ${Object.values(this.separator).join(' | ')} |`,
-      ...this.records.map(r => `| ${Object.values(r).join(' | ')} |`)
+      `| ${this.header.index} | ${Object.values(this.header.record).join(' | ')} |`,
+      `| ${this.separator.index} | ${Object.values(this.separator.record).join(' | ')} |`,
+      ...this.records.map(
+        r => `| ${r.index} | ${Object.values(r.record).join(' | ')} |`
+      )
     ].join('\n')
   }
 }

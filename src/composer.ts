@@ -3,10 +3,10 @@ import { Result, ModuleTableRecord } from './type'
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
-} from './view/summary'
-import { FailureSummaryViewImpl } from './view/failure'
-import { AnnotationViewImpl } from './view/annotation'
-import { GolangCILintReport, GotestsumReport } from './junit/type'
+} from './composer/table'
+import { FailureSummaryViewImpl } from './composer/failure'
+import { AnnotationViewImpl } from './composer/annotation'
+import { GolangCILintSummaryReport, GotestsumSummaryReport } from './junit/type'
 import { Table } from './table'
 
 export type GitHubContext = {
@@ -19,8 +19,8 @@ export class TableComposer {
   private static undefinedString = '-'
 
   constructor(
-    private readonly tests: GotestsumReport[],
-    private readonly lints: GolangCILintReport[]
+    private readonly tests: GotestsumSummaryReport[],
+    private readonly lints: GolangCILintSummaryReport[]
   ) {}
 
   result(): Result {

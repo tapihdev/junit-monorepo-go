@@ -1,12 +1,18 @@
 import { JUnitReport } from '../../src/junit/type'
-import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
+import { GolangCILintReporterImpl } from '../../src/junit/golangcilint'
 import { ReporterType, Result } from '../../src/type'
 
 describe('golangcilint', () => {
+  const context = {
+    owner: 'owner',
+    repo: 'repo',
+    sha: 'sha'
+  }
   const testCases = [
     {
       name: 'should parse the junit report with no failure',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {}
@@ -23,6 +29,7 @@ describe('golangcilint', () => {
     {
       name: 'should parse the junit report with testsuites',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -109,7 +116,11 @@ describe('golangcilint', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const report = new GolangCILintReportImpl(input.path, input.report)
+    const report = new GolangCILintReporterImpl(
+      input.context,
+      input.path,
+      input.report
+    )
     expect(report.path).toBe(expected.path)
     expect(report.summary).toEqual(expected.summary)
     expect(report.failures).toEqual(expected.failures)

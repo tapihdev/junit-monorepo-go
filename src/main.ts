@@ -49,18 +49,20 @@ export async function run(): Promise<void> {
       fs.promises.readFile
     )
     const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+    const githubContext = {
+      owner,
+      repo,
+      sha
+    }
+
     const [tests, lints] = await multiFactory.fromXml(
+      githubContext,
       testDirs,
       lintDirs,
       testReportXml,
       lintReportXml
     )
 
-    const githubContext = {
-      owner,
-      repo,
-      sha
-    }
     const composer = new TableComposer(tests, lints)
     const result = composer.result()
     const summary = composer.summary(githubContext)

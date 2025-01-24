@@ -41054,9 +41054,9 @@ exports.NEVER = parseUtil_1.INVALID;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TableComposer = void 0;
 const type_1 = __nccwpck_require__(4619);
-const summary_1 = __nccwpck_require__(200);
-const failure_1 = __nccwpck_require__(5382);
-const annotation_1 = __nccwpck_require__(6855);
+const summary_1 = __nccwpck_require__(5845);
+const failure_1 = __nccwpck_require__(5183);
+const annotation_1 = __nccwpck_require__(6272);
 const table_1 = __nccwpck_require__(8719);
 class TableComposer {
     tests;
@@ -41192,179 +41192,6 @@ exports.ConfigSchema = zod_1.z.record(zod_1.z
         .describe('Type of JUnit reporter.')
 })
     .strict());
-
-
-/***/ }),
-
-/***/ 6855:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AnnotationViewImpl = void 0;
-const path = __importStar(__nccwpck_require__(6928));
-class AnnotationViewImpl {
-    path;
-    _failure;
-    constructor(path, _failure) {
-        this.path = path;
-        this._failure = _failure;
-    }
-    render() {
-        const fullPath = path.join(this.path, this._failure.subDir, this._failure.file);
-        return {
-            body: `::error file=${fullPath},line=${this._failure.line}::${this._failure.message}`
-        };
-    }
-}
-exports.AnnotationViewImpl = AnnotationViewImpl;
-
-
-/***/ }),
-
-/***/ 5382:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FailureSummaryViewImpl = void 0;
-const path = __importStar(__nccwpck_require__(6928));
-class FailureSummaryViewImpl {
-    path;
-    _failure;
-    constructor(path, _failure) {
-        this.path = path;
-        this._failure = _failure;
-    }
-    render(owner, repo, sha) {
-        const fullPath = path.join(this.path, this._failure.subDir, this._failure.file);
-        const fileTitle = `${fullPath}:${this._failure.line}`;
-        const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${this._failure.line}`;
-        const fileColumn = `[${fileTitle}](${fileLink})`;
-        const joinedMessage = this._failure.message.replace(/\n/g, ' ');
-        return {
-            file: fileColumn,
-            type: this._failure.type.toString(),
-            test: this._failure.test,
-            message: joinedMessage
-        };
-    }
-}
-exports.FailureSummaryViewImpl = FailureSummaryViewImpl;
-
-
-/***/ }),
-
-/***/ 200:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GolangCILintSummaryViewImpl = exports.GotestsumSummaryViewImpl = void 0;
-const type_1 = __nccwpck_require__(4619);
-class GotestsumSummaryViewImpl {
-    path;
-    _summary;
-    constructor(path, _summary) {
-        this.path = path;
-        this._summary = _summary;
-    }
-    render(owner, repo, sha) {
-        return {
-            path: `[${this.path}](https://github.com/${owner}/${repo}/blob/${sha}/${this.path})`,
-            version: this._summary.version ?? '-',
-            result: this._summary.result === type_1.Result.Failed ? '❌Failed' : '✅Passed',
-            passed: this._summary.passed.toString(),
-            failed: this._summary.failed.toString(),
-            time: this._summary.time?.toFixed(1).concat('s') ?? '-'
-        };
-    }
-}
-exports.GotestsumSummaryViewImpl = GotestsumSummaryViewImpl;
-class GolangCILintSummaryViewImpl {
-    path;
-    _summary;
-    constructor(path, _summary) {
-        this.path = path;
-        this._summary = _summary;
-    }
-    render(owner, repo, sha) {
-        return {
-            path: `[${this.path}](https://github.com/${owner}/${repo}/blob/${sha}/${this.path})`,
-            result: this._summary.result === type_1.Result.Failed ? '❌Failed' : '✅Passed'
-        };
-    }
-}
-exports.GolangCILintSummaryViewImpl = GolangCILintSummaryViewImpl;
 
 
 /***/ }),
@@ -42028,6 +41855,179 @@ var ReporterType;
     ReporterType["GolangCILint"] = "golangci-lint";
     ReporterType["Gotestsum"] = "gotestsum";
 })(ReporterType || (exports.ReporterType = ReporterType = {}));
+
+
+/***/ }),
+
+/***/ 6272:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AnnotationViewImpl = void 0;
+const path = __importStar(__nccwpck_require__(6928));
+class AnnotationViewImpl {
+    path;
+    _failure;
+    constructor(path, _failure) {
+        this.path = path;
+        this._failure = _failure;
+    }
+    render() {
+        const fullPath = path.join(this.path, this._failure.subDir, this._failure.file);
+        return {
+            body: `::error file=${fullPath},line=${this._failure.line}::${this._failure.message}`
+        };
+    }
+}
+exports.AnnotationViewImpl = AnnotationViewImpl;
+
+
+/***/ }),
+
+/***/ 5183:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FailureSummaryViewImpl = void 0;
+const path = __importStar(__nccwpck_require__(6928));
+class FailureSummaryViewImpl {
+    path;
+    _failure;
+    constructor(path, _failure) {
+        this.path = path;
+        this._failure = _failure;
+    }
+    render(owner, repo, sha) {
+        const fullPath = path.join(this.path, this._failure.subDir, this._failure.file);
+        const fileTitle = `${fullPath}:${this._failure.line}`;
+        const fileLink = `https://github.com/${owner}/${repo}/blob/${sha}/${fullPath}#L${this._failure.line}`;
+        const fileColumn = `[${fileTitle}](${fileLink})`;
+        const joinedMessage = this._failure.message.replace(/\n/g, ' ');
+        return {
+            file: fileColumn,
+            type: this._failure.type.toString(),
+            test: this._failure.test,
+            message: joinedMessage
+        };
+    }
+}
+exports.FailureSummaryViewImpl = FailureSummaryViewImpl;
+
+
+/***/ }),
+
+/***/ 5845:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GolangCILintSummaryViewImpl = exports.GotestsumSummaryViewImpl = void 0;
+const type_1 = __nccwpck_require__(4619);
+class GotestsumSummaryViewImpl {
+    path;
+    _summary;
+    constructor(path, _summary) {
+        this.path = path;
+        this._summary = _summary;
+    }
+    render(owner, repo, sha) {
+        return {
+            path: `[${this.path}](https://github.com/${owner}/${repo}/blob/${sha}/${this.path})`,
+            version: this._summary.version ?? '-',
+            result: this._summary.result === type_1.Result.Failed ? '❌Failed' : '✅Passed',
+            passed: this._summary.passed.toString(),
+            failed: this._summary.failed.toString(),
+            time: this._summary.time?.toFixed(1).concat('s') ?? '-'
+        };
+    }
+}
+exports.GotestsumSummaryViewImpl = GotestsumSummaryViewImpl;
+class GolangCILintSummaryViewImpl {
+    path;
+    _summary;
+    constructor(path, _summary) {
+        this.path = path;
+        this._summary = _summary;
+    }
+    render(owner, repo, sha) {
+        return {
+            path: `[${this.path}](https://github.com/${owner}/${repo}/blob/${sha}/${this.path})`,
+            result: this._summary.result === type_1.Result.Failed ? '❌Failed' : '✅Passed'
+        };
+    }
+}
+exports.GolangCILintSummaryViewImpl = GolangCILintSummaryViewImpl;
 
 
 /***/ }),

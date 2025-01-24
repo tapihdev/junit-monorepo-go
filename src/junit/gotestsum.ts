@@ -1,7 +1,9 @@
-import { JUnitReport, GotestsumReport, Failure, GotestsumSummary } from './type'
-import { ReporterType, Result } from '../type'
+import { JUnitReport, GotestsumReporter } from './type'
+import { ReporterType, Result, GitHubContext } from '../type'
+import { GotestsumSummaryReportImpl } from 'src/report/gotestsum'
+import { FailureReportImpl } from 'src/report/failure'
 
-export class GotestsumReportImpl implements GotestsumReport {
+export class GotestsumReporterImpl implements GotestsumReporter {
   // gotestsum reports failures in the following format:
   // 1. === RUN   Test&#xA;    baz_test.go:1: error;
   // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
@@ -10,21 +12,24 @@ export class GotestsumReportImpl implements GotestsumReport {
   private static goVersoinRegex = /go([\d.]+) ([\w\d/])+/
 
   constructor(
+    readonly context: GitHubContext,
     readonly path: string,
     private readonly _junit: JUnitReport
   ) {}
 
-  get summary(): GotestsumSummary {
-    return {
-      result: this.result,
-      passed: this.passed,
-      failed: this.failed,
-      time: this.time,
-      version: this.version
-    }
+  get summary(): GotestsumSummaryReportImpl {
+    return new GotestsumSummaryReportImpl(
+      this.context,
+      this.path,
+      this.result,
+      this.passed,
+      this.failed,
+      this.version,
+      this.time
+    )
   }
 
-  get failures(): Failure[] {
+  get failures(): FailureReportImpl[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -40,7 +45,7 @@ export class GotestsumReportImpl implements GotestsumReport {
           testcase.failure
             ?.map(
               failure =>
-                failure._?.match(GotestsumReportImpl.failureRegex) ?? null
+                failure._?.match(GotestsumReporterImpl.failureRegex) ?? null
             )
             .filter(match => match !== null) ?? []
 
@@ -51,14 +56,20 @@ export class GotestsumReportImpl implements GotestsumReport {
               `message does match the regex but length is not 3: ${match.groups}`
             )
           }
-          return {
-            subDir: testcase.$.classname,
-            file: match[1],
-            line: parseInt(match[2]),
-            test: testcase.$.name,
-            message: match[0],
-            type: ReporterType.Gotestsum
-          } as Failure
+          const subDir = testcase.$.classname
+          const file = match[1]
+          const line = parseInt(match[2])
+          const message = match[0]
+          return new FailureReportImpl(
+            this.context,
+            ReporterType.Gotestsum,
+            this.path,
+            subDir,
+            file,
+            line,
+            testcase.$.name,
+            message
+          )
         })
       })
       .flat()
@@ -132,7 +143,7 @@ export class GotestsumReportImpl implements GotestsumReport {
     }
 
     const property = filtered[0]
-    const match = property.value.match(GotestsumReportImpl.goVersoinRegex)
+    const match = property.value.match(GotestsumReporterImpl.goVersoinRegex)
     if (match === null) {
       throw new Error(`go.version does not match the regex: ${property.value}`)
     }

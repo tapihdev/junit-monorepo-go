@@ -21,6 +21,11 @@ jest.mock('../../src/junit/golangcilint', () => {
 describe('JUnitReporterFactoryImpl', () => {
   const directory = 'path/to'
   const fileName = 'junit.xml'
+  const context = {
+    owner: 'owner',
+    repo: 'repo',
+    sha: 'sha'
+  }
 
   describe('Gotestsum', () => {
     const testCases = [
@@ -236,6 +241,7 @@ describe('JUnitReporterFactoryImpl', () => {
         '../../src/junit/gotestsum'
       )
       gotestsumMock.mockReturnValue({
+        context,
         path: 'path/to',
         summary: {
           result: Result.Passed,
@@ -249,7 +255,12 @@ describe('JUnitReporterFactoryImpl', () => {
         .spyOn(fs.promises, 'readFile')
         .mockResolvedValue(input.xml)
       const factory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
-      await factory.fromXml(ReporterType.Gotestsum, directory, fileName)
+      await factory.fromXml(
+        context,
+        ReporterType.Gotestsum,
+        directory,
+        fileName
+      )
 
       expect(fileReaderMock).toHaveBeenCalledWith('path/to/junit.xml', {
         encoding: 'utf8'
@@ -373,6 +384,7 @@ Details: Bar]]></failure>
         '../../src/junit/golangcilint'
       )
       golangCILintMock.mockReturnValue({
+        context,
         path: 'path/to',
         summary: {
           result: Result.Passed
@@ -383,7 +395,12 @@ Details: Bar]]></failure>
         .spyOn(fs.promises, 'readFile')
         .mockResolvedValue(input.xml)
       const factory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
-      await factory.fromXml(ReporterType.GolangCILint, directory, fileName)
+      await factory.fromXml(
+        context,
+        ReporterType.GolangCILint,
+        directory,
+        fileName
+      )
 
       expect(fileReaderMock).toHaveBeenCalledWith('path/to/junit.xml', {
         encoding: 'utf8'
@@ -398,6 +415,11 @@ Details: Bar]]></failure>
 
 // TODO: use mock
 describe('MultiJunitReportersFactory', () => {
+  const context = {
+    owner: 'owner',
+    repo: 'repo',
+    sha: 'sha'
+  }
   const testCases = [
     {
       name: 'should create empty arrays',
@@ -472,6 +494,7 @@ describe('MultiJunitReportersFactory', () => {
     )
     const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
     const report = await multiFactory.fromXml(
+      context,
       input.testDirectories,
       input.lintDirectories,
       input.testReportXml,

@@ -1,12 +1,18 @@
 import { JUnitReport } from '../../src/junit/type'
-import { GotestsumReportImpl } from '../../src/junit/gotestsum'
+import { GotestsumReporterImpl } from '../../src/junit/gotestsum'
 import { ReporterType, Result } from '../../src/type'
 
 describe('gotestsum', () => {
+  const context = {
+    owner: 'owner',
+    repo: 'repo',
+    sha: 'sha'
+  }
   const testCases = [
     {
       name: 'should parse the junit report with no testsuite',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -57,6 +63,7 @@ describe('gotestsum', () => {
     {
       name: 'should parse the junit report with undefined testsuite',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -84,6 +91,7 @@ describe('gotestsum', () => {
     {
       name: 'should parse the junit report with empty testsuite',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -112,6 +120,7 @@ describe('gotestsum', () => {
     {
       name: 'should parse the failed junit report with testsuite',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -204,6 +213,7 @@ describe('gotestsum', () => {
     {
       name: 'should parse the failed junit report with no testsuite',
       input: {
+        context,
         path: 'path/to',
         report: {
           testsuites: {
@@ -263,7 +273,11 @@ describe('gotestsum', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const report = new GotestsumReportImpl(input.path, input.report)
+    const report = new GotestsumReporterImpl(
+      input.context,
+      input.path,
+      input.report
+    )
     expect(report.path).toBe(expected.path)
     expect(report.summary).toEqual(expected.summary)
     expect(report.failures).toEqual(expected.failures)

@@ -1,16 +1,29 @@
 export type Index = string
 
+// Reports
 export interface Report<T extends AnyRecord> {
-  toIndex(): Index
-  toRecord(): T
+  readonly index: Index
+  readonly record: T
 }
 
-export type AnyReport = GotestsumReport | GolangCILintReport | FailureReport | AnnotationReport
-export type GotestsumReport = Report<GotestsumSummaryRecord>
-export type GolangCILintReport = Report<GolangCILintSummaryRecord>
-export type FailureReport = Report<FailureRecord>
+export interface TransformableToAnnotation {
+  readonly annotation: AnnotationReport
+}
+
+export type AnyReport =
+  | GotestsumSummaryReport
+  | GolangCILintSummaryReport
+  | FailureReport
+  | AnnotationReport
+
+export type SummaryReport = GotestsumSummaryReport | GolangCILintSummaryReport
+export type GotestsumSummaryReport = Report<GotestsumSummaryRecord>
+export type GolangCILintSummaryReport = Report<GolangCILintSummaryRecord>
+
+export type FailureReport = Report<FailureRecord> & TransformableToAnnotation
 export type AnnotationReport = Report<AnnotationRecord>
 
+// Records
 export type AnyRecord =
   | GotestsumSummaryRecord
   | GolangCILintSummaryRecord
@@ -38,7 +51,3 @@ export type FailureRecord = {
 export type AnnotationRecord = {
   body: string
 }
-
-
-
-
