@@ -25,6 +25,7 @@ export type GolangCILintSummaryRecord = {
 
 export type FailureRecord = {
   file: string
+  type: string
   test: string
   message: string
 }

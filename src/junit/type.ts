@@ -1,4 +1,4 @@
-import { Result } from '../type'
+import { ReporterType, Result } from '../type'
 
 // Reportable represents a JUnit report with a summary and a list of failed cases
 export interface Reportable<T extends Summary> {
@@ -31,6 +31,7 @@ export type Failure = {
   line: number
   test: string
   message: string
+  type: ReporterType
 }
 
 // Raw schema of a JUnit report

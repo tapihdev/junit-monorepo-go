@@ -107,19 +107,20 @@ export class TableComposer {
         })
       )
       .flat()
-    const testFailuresLimited = failures.slice(0, limit)
+    const limited = failures.slice(0, limit)
     if (failures.length > limit) {
-      testFailuresLimited.push({
+      limited.push({
         file: `:warning: and ${failures.length - limit} more...`,
+        type: '-',
         test: '-',
         message: '-'
       })
     }
 
     return new Table(
-      { file: 'File', test: 'Case', message: 'Message' },
-      { file: ':---', test: ':---', message: ':------' },
-      testFailuresLimited
+      { file: 'File', type: 'Type', test: 'Case', message: 'Message' },
+      { file: ':---', type: ':---', test: ':---', message: ':------' },
+      limited
     ).render()
   }
 

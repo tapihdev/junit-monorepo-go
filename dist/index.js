@@ -41140,15 +41140,16 @@ class TableComposer {
             return view.render(owner, repo, sha);
         }))
             .flat();
-        const testFailuresLimited = failures.slice(0, limit);
+        const limited = failures.slice(0, limit);
         if (failures.length > limit) {
-            testFailuresLimited.push({
+            limited.push({
                 file: `:warning: and ${failures.length - limit} more...`,
+                type: '-',
                 test: '-',
                 message: '-'
             });
         }
-        return new table_1.Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
+        return new table_1.Table({ file: 'File', type: 'Type', test: 'Case', message: 'Message' }, { file: ':---', type: ':---', test: ':---', message: ':------' }, limited).render();
     }
     annotations() {
         const testAnnotations = this.tests
@@ -41311,6 +41312,7 @@ class FailureSummaryViewImpl {
         const joinedMessage = this._failure.message.replace(/\n/g, ' ');
         return {
             file: fileColumn,
+            type: this._failure.type.toString(),
             test: this._failure.test,
             message: joinedMessage
         };
@@ -41642,7 +41644,8 @@ class GolangCILintReportImpl {
                 file,
                 line: parseInt(line),
                 test: testcase.$.name,
-                message
+                message,
+                type: type_1.ReporterType.GolangCILint
             };
         });
     }
@@ -41730,7 +41733,8 @@ class GotestsumReportImpl {
                     file: match[1],
                     line: parseInt(match[2]),
                     test: testcase.$.name,
-                    message: match[0]
+                    message: match[0],
+                    type: type_1.ReporterType.Gotestsum
                 };
             });
         })
