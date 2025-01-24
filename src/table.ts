@@ -3,7 +3,6 @@ import fs from 'fs'
 import { Result, AnyRecord, ModuleTableRecord } from './type'
 
 import { JUnitReporterFactoryImpl } from './junit/factory'
-import { AnnotationRecord } from './data/type'
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
@@ -14,23 +13,23 @@ import { GoModulesFactory } from './factory'
 
 const undefinedString = '-'
 
-export type GitHubActionsContext = {
+export type GitHubContext = {
   owner: string
   repo: string
   sha: string
-  pullNumber: number | undefined
-  runId: number
-  actor: string
 }
 
 // NOTE: This is a temporary implementation
 type Output = {
-  body: string
-  annotations: AnnotationRecord[]
+  result: Result
+  moduleTable: string
+  failedTestTable: string
+  failedLintTable: string
+  annotations: string[]
 }
 
 export async function report(
-  context: GitHubActionsContext,
+  context: GitHubContext,
   testDirs: string[],
   lintDirs: string[],
   testReportXml: string,
@@ -116,7 +115,7 @@ export async function report(
       lintResult: ':---'
     },
     Array.from(summaryRecords.values())
-  )
+  ).render()
 
   // NOTE: concat(Table[], axis=1)
   const testFailures = test
@@ -139,7 +138,7 @@ export async function report(
     { file: 'File', test: 'Case', message: 'Message' },
     { file: ':---', test: ':---', message: ':------' },
     testFailuresLimited
-  )
+  ).render()
 
   // NOTE: concat(Table[], axis=1)
   const lintFailures = lint
@@ -164,14 +163,14 @@ export async function report(
     { file: 'File', test: 'Case', message: 'Message' },
     { file: ':---', test: ':---', message: ':------' },
     lintFailuresLimited
-  )
+  ).render()
 
   // annotations
   const testAnnotations = test
     .map(d =>
       d.failures.map(f => {
         const view = new AnnotationViewImpl(d.path, f)
-        return view.render()
+        return view.render().body
       })
     )
     .flat()
@@ -179,76 +178,19 @@ export async function report(
     .map(d =>
       d.failures.map(f => {
         const view = new AnnotationViewImpl(d.path, f)
-        return view.render()
+        return view.render().body
       })
     )
     .flat()
   const annotations = [...testAnnotations, ...lintAnnotations]
 
-  const body = makeMarkdownReport(
-    context,
-    result,
-    moduleTable.render(),
-    failedTestTable.render(),
-    failedLintTable.render()
-  )
-
   return {
-    body,
+    result,
+    moduleTable,
+    failedTestTable,
+    failedLintTable,
     annotations
   }
-}
-
-export function makeMarkdownReport(
-  context: GitHubActionsContext,
-  result: Result,
-  moduleTable: string,
-  failedTestTable: string,
-  failedLintTable: string
-): string {
-  const { owner, repo, sha, pullNumber, runId, actor } = context
-  const commitUrl =
-    pullNumber === undefined
-      ? `https://github.com/${owner}/${repo}/commit/${sha}`
-      : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`
-  const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`
-
-  return `
-## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
-
-#### Result: ${result === Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
-
-${moduleTable === '' ? 'No test results found.' : moduleTable}
-${
-  failedTestTable === ''
-    ? ''
-    : `
-<br/>
-
-<details open>
-<summary> Failed Tests </summary>
-
-${failedTestTable}
-
-</details>
-`
-}${
-    failedLintTable === ''
-      ? ''
-      : `
-<br/>
-
-<details open>
-<summary> Failed Lints </summary>
-
-${failedLintTable}
-
-</details>
-`
-  }
----
-*This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
-`.slice(1, -1)
 }
 
 class Table<T extends AnyRecord> {

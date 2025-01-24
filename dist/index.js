@@ -41754,6 +41754,7 @@ const github = __importStar(__nccwpck_require__(3228));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
+const markdown_1 = __nccwpck_require__(3758);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41780,15 +41781,16 @@ async function run() {
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* make a junit report`);
-        const { body, annotations } = await (0, table_1.report)({
+        const reported = await (0, table_1.report)({ owner, repo, sha }, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit);
+        const body = (0, markdown_1.makeMarkdownReport)({
             owner,
             repo,
             sha,
             runId,
             pullNumber,
             actor
-        }, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit);
-        annotations.forEach(annotation => core.info(annotation.body));
+        }, reported.result, reported.moduleTable, reported.failedTestTable, reported.failedLintTable);
+        reported.annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41821,6 +41823,57 @@ async function run() {
 
 /***/ }),
 
+/***/ 3758:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.makeMarkdownReport = makeMarkdownReport;
+const type_1 = __nccwpck_require__(4619);
+function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
+    const { owner, repo, sha, pullNumber, runId, actor } = context;
+    const commitUrl = pullNumber === undefined
+        ? `https://github.com/${owner}/${repo}/commit/${sha}`
+        : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
+    const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+    return `
+## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
+
+#### Result: ${result === type_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
+
+${moduleTable === '' ? 'No test results found.' : moduleTable}
+${failedTestTable === ''
+        ? ''
+        : `
+<br/>
+
+<details open>
+<summary> Failed Tests </summary>
+
+${failedTestTable}
+
+</details>
+`}${failedLintTable === ''
+        ? ''
+        : `
+<br/>
+
+<details open>
+<summary> Failed Lints </summary>
+
+${failedLintTable}
+
+</details>
+`}
+---
+*This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
+`.slice(1, -1);
+}
+
+
+/***/ }),
+
 /***/ 8719:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -41831,7 +41884,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.report = report;
-exports.makeMarkdownReport = makeMarkdownReport;
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
 const factory_1 = __nccwpck_require__(7534);
@@ -41906,7 +41958,7 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
         testFailed: '-----:',
         testElapsed: '---:',
         lintResult: ':---'
-    }, Array.from(summaryRecords.values()));
+    }, Array.from(summaryRecords.values())).render();
     // NOTE: concat(Table[], axis=1)
     const testFailures = test
         .map(d => d.failures.map(f => {
@@ -41922,7 +41974,7 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
             message: '-'
         });
     }
-    const failedTestTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited);
+    const failedTestTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
     // NOTE: concat(Table[], axis=1)
     const lintFailures = lint
         .map(d => d.failures.map(f => {
@@ -41938,65 +41990,28 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
             message: '-'
         });
     }
-    const failedLintTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, lintFailuresLimited);
+    const failedLintTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, lintFailuresLimited).render();
     // annotations
     const testAnnotations = test
         .map(d => d.failures.map(f => {
         const view = new annotation_1.AnnotationViewImpl(d.path, f);
-        return view.render();
+        return view.render().body;
     }))
         .flat();
     const lintAnnotations = lint
         .map(d => d.failures.map(f => {
         const view = new annotation_1.AnnotationViewImpl(d.path, f);
-        return view.render();
+        return view.render().body;
     }))
         .flat();
     const annotations = [...testAnnotations, ...lintAnnotations];
-    const body = makeMarkdownReport(context, result, moduleTable.render(), failedTestTable.render(), failedLintTable.render());
     return {
-        body,
+        result,
+        moduleTable,
+        failedTestTable,
+        failedLintTable,
         annotations
     };
-}
-function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
-    const { owner, repo, sha, pullNumber, runId, actor } = context;
-    const commitUrl = pullNumber === undefined
-        ? `https://github.com/${owner}/${repo}/commit/${sha}`
-        : `https://github.com/${owner}/${repo}/pull/${pullNumber}/commits/${sha}`;
-    const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
-    return `
-## 🥽 Go Test Report <sup>[CI](${runUrl})</sup>
-
-#### Result: ${result === type_1.Result.Passed ? '`Passed`🙆‍♀️' : '`Failed`🙅‍♂️'}
-
-${moduleTable === '' ? 'No test results found.' : moduleTable}
-${failedTestTable === ''
-        ? ''
-        : `
-<br/>
-
-<details open>
-<summary> Failed Tests </summary>
-
-${failedTestTable}
-
-</details>
-`}${failedLintTable === ''
-        ? ''
-        : `
-<br/>
-
-<details open>
-<summary> Failed Lints </summary>
-
-${failedLintTable}
-
-</details>
-`}
----
-*This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
-`.slice(1, -1);
 }
 class Table {
     header;

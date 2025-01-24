@@ -9,6 +9,7 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { report } from './table'
+import { makeMarkdownReport } from './markdown'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -40,7 +41,17 @@ export async function run(): Promise<void> {
     const { runId, actor } = github.context
 
     core.info(`* make a junit report`)
-    const { body, annotations } = await report(
+    const reported = await report(
+      { owner, repo, sha },
+      testDirs,
+      lintDirs,
+      testReportXml,
+      lintReportXml,
+      failedTestLimit,
+      failedLintLimit
+    )
+
+    const body = makeMarkdownReport(
       {
         owner,
         repo,
@@ -49,14 +60,12 @@ export async function run(): Promise<void> {
         pullNumber,
         actor
       },
-      testDirs,
-      lintDirs,
-      testReportXml,
-      lintReportXml,
-      failedTestLimit,
-      failedLintLimit
+      reported.result,
+      reported.moduleTable,
+      reported.failedTestTable,
+      reported.failedLintTable
     )
-    annotations.forEach(annotation => core.info(annotation.body))
+    reported.annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
