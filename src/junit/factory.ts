@@ -2,24 +2,47 @@ import * as fs from 'fs'
 import path from 'path'
 import { parseStringPromise } from 'xml2js'
 
-import { JUnitReport, TestSuites, Reporter, ReporterType } from './type'
+import {
+  JUnitReport,
+  TestSuites,
+  Reporter,
+  ReporterType,
+  GolangCILintReport,
+  GotestsumReport
+} from './type'
 import { GolangCILintReportImpl } from './golangcilint'
 import { GotestsumReportImpl } from './gotestsum'
 
-export type FileReader = typeof fs.promises.readFile
+export interface MultiJunitReportersFactory {
+  fromXml(
+    testDirectories: string[],
+    lintDirectories: string[],
+    testReportXml: string,
+    lintReportXml: string
+  ): Promise<[GotestsumReport[], GolangCILintReport[]]>
+}
 
-export interface JUnitReporterFactory {
-  fromJSON(
+export interface SingleJUnitReporterFactory {
+  fromXml(
     type: ReporterType,
     directory: string,
     fileName: string
   ): Promise<Reporter>
 }
 
-export class JUnitReporterFactoryImpl implements JUnitReporterFactory {
+export type FileReader = typeof fs.promises.readFile
+
+// NOTE: xml2js returns an empty string instead of an empty object
+type JUnitReportUnsafe = {
+  testsuites: TestSuites | ''
+}
+
+export class SingleJUnitReporterFactoryImpl
+  implements SingleJUnitReporterFactory
+{
   constructor(private readonly reader: FileReader) {}
 
-  async fromJSON(
+  async fromXml(
     type: ReporterType,
     directory: string,
     fileName: string
@@ -49,7 +72,40 @@ export class JUnitReporterFactoryImpl implements JUnitReporterFactory {
   }
 }
 
-// NOTE: xml2js returns an empty string instead of an empty object
-type JUnitReportUnsafe = {
-  testsuites: TestSuites | ''
+export class MultiJunitReportersFactoryImpl
+  implements MultiJunitReportersFactory
+{
+  constructor(private _parser: SingleJUnitReporterFactory) {}
+
+  async fromXml(
+    testDirectories: string[],
+    lintDirectories: string[],
+    testReportXml: string,
+    lintReportXml: string
+  ): Promise<[GotestsumReportImpl[], GolangCILintReportImpl[]]> {
+    const all = await Promise.all([
+      await Promise.all(
+        testDirectories.map(
+          async d =>
+            (await this._parser.fromXml(
+              ReporterType.Gotestsum,
+              d,
+              testReportXml
+            )) as GotestsumReportImpl
+        )
+      ),
+      await Promise.all(
+        lintDirectories.map(
+          async d =>
+            (await this._parser.fromXml(
+              ReporterType.GolangCILint,
+              d,
+              lintReportXml
+            )) as GolangCILintReportImpl
+        )
+      )
+    ])
+
+    return [all[0], all[1]]
+  }
 }

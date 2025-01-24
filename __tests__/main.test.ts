@@ -11,7 +11,7 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import { GoModulesFactory } from '../src/factory'
+import fs from 'fs'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -26,9 +26,7 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let repositoryFactoryFromXmlMock: jest.SpiedFunction<
-  GoModulesFactory['fromXml']
->
+let readerMock: jest.SpiedFunction<(typeof fs.promises)['readFile']>
 
 describe('action', () => {
   beforeEach(() => {
@@ -47,9 +45,11 @@ describe('action', () => {
     upsertCommentMock = jest
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
-    repositoryFactoryFromXmlMock = jest
-      .spyOn(GoModulesFactory.prototype, 'fromXml')
-      .mockResolvedValue([])
+
+    readerMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
+        <?xml version="1.0" encoding="UTF-8"?>
+        <testsuites></testsuites>
+        `)
   })
 
   it('should post comment and summary', async () => {
@@ -58,7 +58,11 @@ describe('action', () => {
 
 #### Result: \`Passed\`🙆‍♀️
 
-No test results found.
+| Module | Version | Test | Passed | Failed | Time | Lint |
+| :----- | ------: | :--- | -----: | -----: | ---: | :--- |
+| [go/app1](https://github.com/owner/repo/blob/sha/go/app1) | - | ✅Passed | 0 | 0 | - | ✅Passed |
+| [go/app2](https://github.com/owner/repo/blob/sha/go/app2) | - | ✅Passed | 0 | 0 | - | - |
+| [go/app3](https://github.com/owner/repo/blob/sha/go/app3) | - | - | - | - | - | ✅Passed |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/pull/123/commits/sha) pushed by @actor.*
@@ -107,32 +111,29 @@ lint:
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly
+    expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
     expect(infoMock).toHaveBeenNthCalledWith(
-      1,
-      '* search and read junit reports'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      3,
+      2,
       '* upsert comment matching <!-- commented by junit-monorepo-go -->'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(4, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'created comment: 123')
     expect(infoMock).toHaveBeenNthCalledWith(
-      5,
+      4,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(6, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
-    expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
-      1,
-      'owner',
-      'repo',
-      'sha',
-      ['go/app1', 'go/app2'],
-      ['go/app1', 'go/app3'],
-      'test.xml',
-      'lint.xml'
-    )
+    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
+    expect(readerMock).toHaveBeenNthCalledWith(1, 'go/app1/test.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(2, 'go/app2/test.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(3, 'go/app1/lint.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(4, 'go/app3/lint.xml', {
+      encoding: 'utf8'
+    })
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
@@ -152,7 +153,11 @@ lint:
 
 #### Result: \`Passed\`🙆‍♀️
 
-No test results found.
+| Module | Version | Test | Passed | Failed | Time | Lint |
+| :----- | ------: | :--- | -----: | -----: | ---: | :--- |
+| [go/app1](https://github.com/owner/repo/blob/sha/go/app1) | - | ✅Passed | 0 | 0 | - | ✅Passed |
+| [go/app2](https://github.com/owner/repo/blob/sha/go/app2) | - | ✅Passed | 0 | 0 | - | - |
+| [go/app3](https://github.com/owner/repo/blob/sha/go/app3) | - | - | - | - | - | ✅Passed |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/commit/sha) pushed by @actor.*
@@ -201,27 +206,24 @@ lint:
     expect(runMock).toHaveReturned()
 
     // Verify that all of the core library functions were called correctly
+    expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
     expect(infoMock).toHaveBeenNthCalledWith(
-      1,
-      '* search and read junit reports'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(2, '* make markdown report')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      3,
+      2,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(4, '* annotate failed tests')
-    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
-    expect(repositoryFactoryFromXmlMock).toHaveBeenNthCalledWith(
-      1,
-      'owner',
-      'repo',
-      'sha',
-      ['go/app1', 'go/app2'],
-      ['go/app1', 'go/app3'],
-      'test.xml',
-      'lint.xml'
-    )
+    expect(readerMock).toHaveBeenNthCalledWith(1, 'go/app1/test.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(2, 'go/app2/test.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(3, 'go/app1/lint.xml', {
+      encoding: 'utf8'
+    })
+    expect(readerMock).toHaveBeenNthCalledWith(4, 'go/app3/lint.xml', {
+      encoding: 'utf8'
+    })
+    expect(infoMock).toHaveBeenNthCalledWith(3, '* set output')
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)

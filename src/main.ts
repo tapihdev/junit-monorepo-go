@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import fs from 'fs'
+import * as fs from 'fs'
 
 import {
   getGitHubToken,
@@ -9,11 +9,13 @@ import {
   getSha
 } from './input'
 import { Client as GitHubClient } from './github'
-import { createFailedCaseTable, createModuleTable } from './table'
-import { GoModulesFactory } from './factory'
-import { JUnitReporterFactoryImpl } from './junit/factory'
-import { Result } from './type'
-import { makeMarkdownReport } from './table'
+import { makeMarkdownReport } from './markdown'
+import { TableComposer } from './composer'
+
+import {
+  SingleJUnitReporterFactoryImpl,
+  MultiJunitReportersFactoryImpl
+} from './junit/factory'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -44,49 +46,53 @@ export async function run(): Promise<void> {
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
 
-    core.info(`* search and read junit reports`)
-    const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
-    const factory = new GoModulesFactory(repoterFactory)
-    const modules = await factory.fromXml(
-      owner,
-      repo,
-      sha,
+    core.info(`* make a junit report`)
+    const singleFactory = new SingleJUnitReporterFactoryImpl(
+      fs.promises.readFile
+    )
+    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+    const [tests, lints] = await multiFactory.fromXml(
       testDirs,
       lintDirs,
       testReportXml,
       lintReportXml
     )
 
-    core.info('* make markdown report')
-    const moduleTable = createModuleTable(
-      modules.map(module => module.makeModuleTableRecord())
-    )
-    const failedTestTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedTestTableRecords()).flat(),
+    const githubContext = {
+      owner,
+      repo,
+      sha
+    }
+    const composer = new TableComposer(tests, lints)
+    const result = composer.result()
+    const summary = composer.summary(githubContext)
+    const testFailures = composer.failures(
+      githubContext,
+      'test',
       failedTestLimit
     )
-    const failedLintTable = createFailedCaseTable(
-      modules.map(m => m.makeFailedLintTableRecords()).flat(),
+    const lintFailures = composer.failures(
+      githubContext,
+      'lint',
       failedLintLimit
     )
-    const result = modules.every(m => m.result === Result.Passed)
-      ? Result.Passed
-      : Result.Failed
+    const annotations = composer.annotations()
 
     const body = makeMarkdownReport(
       {
         owner,
         repo,
-        pullNumber,
         sha,
         runId,
+        pullNumber,
         actor
       },
       result,
-      moduleTable,
-      failedTestTable,
-      failedLintTable
+      summary,
+      testFailures,
+      lintFailures
     )
+    annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
@@ -107,11 +113,6 @@ export async function run(): Promise<void> {
 
     core.info('* post summary to summary page')
     await core.summary.addRaw(body).write()
-
-    core.info('* annotate failed tests')
-    modules.forEach(m =>
-      m.makeAnnotationMessages().forEach(annotation => core.info(annotation))
-    )
 
     core.info('* set output')
     core.setOutput('body', body)

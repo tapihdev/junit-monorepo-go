@@ -41046,6 +41046,131 @@ exports.NEVER = parseUtil_1.INVALID;
 
 /***/ }),
 
+/***/ 1401:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TableComposer = void 0;
+const type_1 = __nccwpck_require__(4619);
+const summary_1 = __nccwpck_require__(200);
+const failure_1 = __nccwpck_require__(5382);
+const annotation_1 = __nccwpck_require__(6855);
+const table_1 = __nccwpck_require__(8719);
+class TableComposer {
+    tests;
+    lints;
+    static undefinedString = '-';
+    constructor(tests, lints) {
+        this.tests = tests;
+        this.lints = lints;
+    }
+    result() {
+        return [this.tests, this.lints]
+            .flat()
+            .some(m => m.summary.result === type_1.Result.Failed)
+            ? type_1.Result.Failed
+            : type_1.Result.Passed;
+    }
+    summary(context) {
+        const { owner, repo, sha } = context;
+        const testSummaryRecords = this.tests.map(d => {
+            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
+            return summaryView.render(owner, repo, sha);
+        });
+        const lintSummaryRecords = this.lints.map(d => {
+            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
+            return summaryView.render(owner, repo, sha);
+        });
+        const summaryRecords = new Map();
+        testSummaryRecords.forEach(r => summaryRecords.set(r.path, {
+            name: r.path,
+            version: r.version,
+            testResult: r.result,
+            testPassed: r.passed,
+            testFailed: r.failed,
+            testElapsed: r.time,
+            lintResult: TableComposer.undefinedString
+        }));
+        lintSummaryRecords.forEach(r => {
+            const v = summaryRecords.get(r.path);
+            if (v !== undefined) {
+                summaryRecords.set(r.path, {
+                    ...v,
+                    lintResult: r.result
+                });
+            }
+            else {
+                summaryRecords.set(r.path, {
+                    name: r.path,
+                    version: TableComposer.undefinedString,
+                    testResult: TableComposer.undefinedString,
+                    testPassed: TableComposer.undefinedString,
+                    testFailed: TableComposer.undefinedString,
+                    testElapsed: TableComposer.undefinedString,
+                    lintResult: r.result
+                });
+            }
+        });
+        return new table_1.Table({
+            name: 'Module',
+            version: 'Version',
+            testResult: 'Test',
+            testPassed: 'Passed',
+            testFailed: 'Failed',
+            testElapsed: 'Time',
+            lintResult: 'Lint'
+        }, {
+            name: ':-----',
+            version: '------:',
+            testResult: ':---',
+            testPassed: '-----:',
+            testFailed: '-----:',
+            testElapsed: '---:',
+            lintResult: ':---'
+        }, Array.from(summaryRecords.values())).render();
+    }
+    failures(context, type, limit = 10) {
+        const { owner, repo, sha } = context;
+        const reports = type === 'test' ? this.tests : this.lints;
+        const failures = reports
+            .map(d => d.failures.map(f => {
+            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+            return view.render(owner, repo, sha);
+        }))
+            .flat();
+        const testFailuresLimited = failures.slice(0, limit);
+        if (failures.length > limit) {
+            testFailuresLimited.push({
+                file: `:warning: and ${failures.length - limit} more...`,
+                test: '-',
+                message: '-'
+            });
+        }
+        return new table_1.Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
+    }
+    annotations() {
+        const testAnnotations = this.tests
+            .map(d => d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render().body;
+        }))
+            .flat();
+        const lintAnnotations = this.lints
+            .map(d => d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render().body;
+        }))
+            .flat();
+        return [...testAnnotations, ...lintAnnotations];
+    }
+}
+exports.TableComposer = TableComposer;
+
+
+/***/ }),
+
 /***/ 4846:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -41247,75 +41372,6 @@ exports.GolangCILintSummaryViewImpl = GolangCILintSummaryViewImpl;
 
 /***/ }),
 
-/***/ 6373:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModulesFactory = void 0;
-const type_1 = __nccwpck_require__(4874);
-const module_1 = __nccwpck_require__(6471);
-const summary_1 = __nccwpck_require__(200);
-const failure_1 = __nccwpck_require__(5382);
-const annotation_1 = __nccwpck_require__(6855);
-class GoModulesFactory {
-    _parser;
-    constructor(_parser) {
-        this._parser = _parser;
-    }
-    async fromXml(owner, repo, sha, testDirectories, lintDirectories, testReportXml, lintReportXml) {
-        const all = await Promise.all([
-            await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.Gotestsum, d, testReportXml))),
-            await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_1.ReporterType.GolangCILint, d, lintReportXml)))
-        ]);
-        // TODO: Remove this after refactoring is done
-        const test = all[0];
-        const lint = all[1];
-        const map = new Map();
-        test.forEach(d => {
-            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            return map.set(d.path, [{ summary, failures, annotations }, undefined]);
-        });
-        // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-        new Set(lint).forEach(d => {
-            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            const lint = { summary, failures, annotations };
-            const v = map.get(d.path);
-            if (v !== undefined) {
-                map.set(d.path, [v[0], lint]);
-            }
-            else {
-                map.set(d.path, [undefined, lint]);
-            }
-        });
-        const modules = Array.from(map).map(([path, [test, lint]]) => new module_1.GoModule(path, test?.summary, lint?.summary, test?.failures, lint?.failures, test?.annotations, lint?.annotations));
-        return modules;
-    }
-}
-exports.GoModulesFactory = GoModulesFactory;
-
-
-/***/ }),
-
 /***/ 9248:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -41449,18 +41505,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JUnitReporterFactoryImpl = void 0;
+exports.MultiJunitReportersFactoryImpl = exports.SingleJUnitReporterFactoryImpl = void 0;
 const path_1 = __importDefault(__nccwpck_require__(6928));
 const xml2js_1 = __nccwpck_require__(758);
 const type_1 = __nccwpck_require__(4874);
 const golangcilint_1 = __nccwpck_require__(549);
 const gotestsum_1 = __nccwpck_require__(5765);
-class JUnitReporterFactoryImpl {
+class SingleJUnitReporterFactoryImpl {
     reader;
     constructor(reader) {
         this.reader = reader;
     }
-    async fromJSON(type, directory, fileName) {
+    async fromXml(type, directory, fileName) {
         const content = await this.reader(path_1.default.join(directory, fileName), {
             encoding: 'utf8'
         });
@@ -41480,7 +41536,21 @@ class JUnitReporterFactoryImpl {
         return parsedUnsafe;
     }
 }
-exports.JUnitReporterFactoryImpl = JUnitReporterFactoryImpl;
+exports.SingleJUnitReporterFactoryImpl = SingleJUnitReporterFactoryImpl;
+class MultiJunitReportersFactoryImpl {
+    _parser;
+    constructor(_parser) {
+        this._parser = _parser;
+    }
+    async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
+        const all = await Promise.all([
+            await Promise.all(testDirectories.map(async (d) => (await this._parser.fromXml(type_1.ReporterType.Gotestsum, d, testReportXml)))),
+            await Promise.all(lintDirectories.map(async (d) => (await this._parser.fromXml(type_1.ReporterType.GolangCILint, d, lintReportXml))))
+        ]);
+        return [all[0], all[1]];
+    }
+}
+exports.MultiJunitReportersFactoryImpl = MultiJunitReportersFactoryImpl;
 
 
 /***/ }),
@@ -41790,21 +41860,16 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
-const fs_1 = __importDefault(__nccwpck_require__(9896));
+const fs = __importStar(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
-const table_1 = __nccwpck_require__(8719);
-const factory_1 = __nccwpck_require__(6373);
-const factory_2 = __nccwpck_require__(7534);
-const type_1 = __nccwpck_require__(4619);
-const table_2 = __nccwpck_require__(8719);
+const markdown_1 = __nccwpck_require__(3758);
+const composer_1 = __nccwpck_require__(1401);
+const factory_1 = __nccwpck_require__(7534);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41830,25 +41895,30 @@ async function run() {
         const failedLintLimit = lint?.annotationLimit || 10;
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
-        core.info(`* search and read junit reports`);
-        const repoterFactory = new factory_2.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
-        const factory = new factory_1.GoModulesFactory(repoterFactory);
-        const modules = await factory.fromXml(owner, repo, sha, testDirs, lintDirs, testReportXml, lintReportXml);
-        core.info('* make markdown report');
-        const moduleTable = (0, table_1.createModuleTable)(modules.map(module => module.makeModuleTableRecord()));
-        const failedTestTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedTestTableRecords()).flat(), failedTestLimit);
-        const failedLintTable = (0, table_1.createFailedCaseTable)(modules.map(m => m.makeFailedLintTableRecords()).flat(), failedLintLimit);
-        const result = modules.every(m => m.result === type_1.Result.Passed)
-            ? type_1.Result.Passed
-            : type_1.Result.Failed;
-        const body = (0, table_2.makeMarkdownReport)({
+        core.info(`* make a junit report`);
+        const singleFactory = new factory_1.SingleJUnitReporterFactoryImpl(fs.promises.readFile);
+        const multiFactory = new factory_1.MultiJunitReportersFactoryImpl(singleFactory);
+        const [tests, lints] = await multiFactory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
+        const githubContext = {
             owner,
             repo,
-            pullNumber,
+            sha
+        };
+        const composer = new composer_1.TableComposer(tests, lints);
+        const result = composer.result();
+        const summary = composer.summary(githubContext);
+        const testFailures = composer.failures(githubContext, 'test', failedTestLimit);
+        const lintFailures = composer.failures(githubContext, 'lint', failedLintLimit);
+        const annotations = composer.annotations();
+        const body = (0, markdown_1.makeMarkdownReport)({
+            owner,
+            repo,
             sha,
             runId,
+            pullNumber,
             actor
-        }, result, moduleTable, failedTestTable, failedLintTable);
+        }, result, summary, testFailures, lintFailures);
+        annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41868,8 +41938,6 @@ async function run() {
         }
         core.info('* post summary to summary page');
         await core.summary.addRaw(body).write();
-        core.info('* annotate failed tests');
-        modules.forEach(m => m.makeAnnotationMessages().forEach(annotation => core.info(annotation)));
         core.info('* set output');
         core.setOutput('body', body);
     }
@@ -41883,78 +41951,13 @@ async function run() {
 
 /***/ }),
 
-/***/ 6471:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GoModule = void 0;
-const type_1 = __nccwpck_require__(4619);
-class GoModule {
-    _directory;
-    _testRecord;
-    _lintRecord;
-    _testFailures;
-    _lintFailures;
-    _testAnnotations;
-    _lintAnnotations;
-    constructor(_directory, _testRecord, _lintRecord, _testFailures, _lintFailures, _testAnnotations, _lintAnnotations) {
-        this._directory = _directory;
-        this._testRecord = _testRecord;
-        this._lintRecord = _lintRecord;
-        this._testFailures = _testFailures;
-        this._lintFailures = _lintFailures;
-        this._testAnnotations = _testAnnotations;
-        this._lintAnnotations = _lintAnnotations;
-    }
-    get directory() {
-        return this._directory;
-    }
-    get result() {
-        return this._testRecord?.result === type_1.Result.Failed ||
-            this._lintRecord?.result === type_1.Result.Failed
-            ? type_1.Result.Failed
-            : type_1.Result.Passed;
-    }
-    makeModuleTableRecord() {
-        return {
-            name: this._testRecord?.path ?? this._lintRecord?.path ?? '-',
-            version: this._testRecord?.version ?? '-',
-            testResult: this._testRecord?.result ?? '-',
-            testPassed: this._testRecord?.passed.toString() ?? '-',
-            testFailed: this._testRecord?.failed.toString() ?? '-',
-            testElapsed: this._testRecord?.time ?? '-',
-            lintResult: this._lintRecord?.result ?? '-'
-        };
-    }
-    makeFailedTestTableRecords() {
-        return this._testFailures ?? [];
-    }
-    makeFailedLintTableRecords() {
-        return this._lintFailures ?? [];
-    }
-    makeAnnotationMessages() {
-        return [
-            ...(this._testAnnotations ?? []),
-            ...(this._lintAnnotations ?? [])
-        ].map(annotation => annotation.body);
-    }
-}
-exports.GoModule = GoModule;
-
-
-/***/ }),
-
-/***/ 8719:
+/***/ 3758:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.makeMarkdownReport = makeMarkdownReport;
-exports.createModuleTable = createModuleTable;
-exports.createFailedCaseTable = createFailedCaseTable;
 const type_1 = __nccwpck_require__(4619);
 function makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
@@ -41995,46 +41998,44 @@ ${failedLintTable}
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1);
 }
-function renderTable(header, separator, records) {
-    if (records.length === 0) {
-        return '';
+
+
+/***/ }),
+
+/***/ 8719:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Table = void 0;
+class Table {
+    header;
+    separator;
+    records;
+    constructor(header, separator, records) {
+        this.header = header;
+        this.separator = separator;
+        this.records = records;
     }
-    return [
-        `| ${Object.values(header).join(' | ')} |`,
-        `| ${Object.values(separator).join(' | ')} |`,
-        ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
-    ].join('\n');
-}
-function createModuleTable(modules) {
-    return renderTable({
-        name: 'Module',
-        version: 'Version',
-        testResult: 'Test',
-        testPassed: 'Passed',
-        testFailed: 'Failed',
-        testElapsed: 'Time',
-        lintResult: 'Lint'
-    }, {
-        name: ':-----',
-        version: '------:',
-        testResult: ':---',
-        testPassed: '-----:',
-        testFailed: '-----:',
-        testElapsed: '---:',
-        lintResult: ':---'
-    }, modules);
-}
-function createFailedCaseTable(failed, limit) {
-    const failedLimited = failed.slice(0, limit);
-    if (failed.length > limit) {
-        failedLimited.push({
-            file: `:warning: and ${failed.length - limit} more...`,
-            test: '-',
-            message: '-'
-        });
+    get rows() {
+        return this.records.length;
     }
-    return renderTable({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLimited);
+    get columns() {
+        return Object.keys(this.header).length;
+    }
+    render() {
+        if (this.rows === 0) {
+            return '';
+        }
+        return [
+            `| ${Object.values(this.header).join(' | ')} |`,
+            `| ${Object.values(this.separator).join(' | ')} |`,
+            ...this.records.map(r => `| ${Object.values(r).join(' | ')} |`)
+        ].join('\n');
+    }
 }
+exports.Table = Table;
 
 
 /***/ }),
