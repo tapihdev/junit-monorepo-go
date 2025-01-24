@@ -41,9 +41,6 @@ export async function run(): Promise<void> {
     const lintDirs = lint?.directories ?? []
     const testReportXml = test.fileName
     const lintReportXml = lint?.fileName ?? ''
-    const failedTestLimit = test?.annotationLimit || 10
-    const failedLintLimit = lint?.annotationLimit || 10
-    const limit = failedTestLimit + failedLintLimit
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
 
@@ -67,7 +64,7 @@ export async function run(): Promise<void> {
     const composer = new TableComposer(tests, lints)
     const result = composer.result()
     const summary = composer.summary(githubContext)
-    const failures = composer.failures(githubContext, limit)
+    const failures = composer.failures(githubContext)
     const annotations = composer.annotations()
 
     const body = makeMarkdownReport(

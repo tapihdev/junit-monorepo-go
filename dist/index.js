@@ -41181,11 +41181,6 @@ exports.ConfigSchema = void 0;
 const zod_1 = __nccwpck_require__(4809);
 exports.ConfigSchema = zod_1.z.record(zod_1.z
     .object({
-    annotationLimit: zod_1.z
-        .number()
-        .gte(0)
-        .describe('Limit number of annotations of failed tests.')
-        .optional(),
     directories: zod_1.z
         .array(zod_1.z.string())
         .describe('Directories to search for JUnit reports.'),
@@ -41875,9 +41870,6 @@ async function run() {
         const lintDirs = lint?.directories ?? [];
         const testReportXml = test.fileName;
         const lintReportXml = lint?.fileName ?? '';
-        const failedTestLimit = test?.annotationLimit || 10;
-        const failedLintLimit = lint?.annotationLimit || 10;
-        const limit = failedTestLimit + failedLintLimit;
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* make a junit report`);
@@ -41892,7 +41884,7 @@ async function run() {
         const composer = new composer_1.TableComposer(tests, lints);
         const result = composer.result();
         const summary = composer.summary(githubContext);
-        const failures = composer.failures(githubContext, limit);
+        const failures = composer.failures(githubContext);
         const annotations = composer.annotations();
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
