@@ -9,8 +9,8 @@ import {
   getSha
 } from './input'
 import { Client as GitHubClient } from './github'
-import { report } from './table'
 import { makeMarkdownReport } from './markdown'
+import { TableComposer } from './table'
 
 import {
   SingleJUnitReporterFactoryImpl,
@@ -58,13 +58,17 @@ export async function run(): Promise<void> {
       lintReportXml
     )
 
-    const reported = await report(
-      { owner, repo, sha },
-      tests,
-      lints,
-      failedTestLimit,
-      failedLintLimit
-    )
+    const githubContext = {
+      owner,
+      repo,
+      sha
+    }
+    const composer = new TableComposer(tests, lints)
+    const result = composer.result()
+    const summary = composer.summary(githubContext)
+    const testFailures = composer.testFailures(githubContext, failedTestLimit)
+    const lintFailures = composer.lintFailures(githubContext, failedLintLimit)
+    const annotations = composer.annotations()
 
     const body = makeMarkdownReport(
       {
@@ -75,12 +79,12 @@ export async function run(): Promise<void> {
         pullNumber,
         actor
       },
-      reported.result,
-      reported.moduleTable,
-      reported.failedTestTable,
-      reported.failedLintTable
+      result,
+      summary,
+      testFailures,
+      lintFailures
     )
-    reported.annotations.forEach(annotation => core.info(annotation))
+    annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
