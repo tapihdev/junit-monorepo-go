@@ -41762,7 +41762,7 @@ async function run() {
             pullNumber,
             actor
         }, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit);
-        annotations.forEach(annotation => core.info(annotation));
+        annotations.forEach(annotation => core.info(annotation.body));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
             const client = new github_1.Client(github.getOctokit(token));
@@ -41807,8 +41807,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoModulesFactory = void 0;
 exports.report = report;
 exports.makeMarkdownReport = makeMarkdownReport;
-exports.createModuleTable = createModuleTable;
-exports.createFailedCaseTable = createFailedCaseTable;
 const fs_1 = __importDefault(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
 const type_2 = __nccwpck_require__(4874);
@@ -41816,77 +41814,124 @@ const factory_1 = __nccwpck_require__(7534);
 const summary_1 = __nccwpck_require__(200);
 const failure_1 = __nccwpck_require__(5382);
 const annotation_1 = __nccwpck_require__(6855);
+const undefinedString = '-';
 async function report(context, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit) {
+    const { owner, repo, sha } = context;
     const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
     const factory = new GoModulesFactory(repoterFactory);
     const [test, lint] = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
-    const { owner, repo, sha } = context;
-    const map = new Map();
-    test.forEach(d => {
+    // result
+    const result = [test, lint]
+        .flat()
+        .some(m => m.summary.result === type_1.Result.Failed)
+        ? type_1.Result.Failed
+        : type_1.Result.Passed;
+    // NOTE: concat(Table[], axis=0)
+    const testSummaryRecords = test.map(d => {
         const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
-        const summary = summaryView.render(owner, repo, sha);
-        const failures = d.failures.map(f => {
-            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-            return view.render(owner, repo, sha);
-        });
-        const annotations = d.failures.map(f => {
-            const view = new annotation_1.AnnotationViewImpl(d.path, f);
-            return view.render();
-        });
-        return map.set(d.path, [{ summary, failures, annotations }, undefined]);
+        return summaryView.render(owner, repo, sha);
     });
-    // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-    new Set(lint).forEach(d => {
+    const lintSummaryRecords = lint.map(d => {
         const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
-        const summary = summaryView.render(owner, repo, sha);
-        const failures = d.failures.map(f => {
-            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-            return view.render(owner, repo, sha);
-        });
-        const annotations = d.failures.map(f => {
-            const view = new annotation_1.AnnotationViewImpl(d.path, f);
-            return view.render();
-        });
-        const lint = { summary, failures, annotations };
-        const v = map.get(d.path);
+        return summaryView.render(owner, repo, sha);
+    });
+    const summaryRecords = new Map();
+    testSummaryRecords.forEach(r => summaryRecords.set(r.path, {
+        name: r.path,
+        version: r.version,
+        testResult: r.result,
+        testPassed: r.passed,
+        testFailed: r.failed,
+        testElapsed: r.time,
+        lintResult: undefinedString
+    }));
+    lintSummaryRecords.forEach(r => {
+        const v = summaryRecords.get(r.path);
         if (v !== undefined) {
-            map.set(d.path, [v[0], lint]);
+            summaryRecords.set(r.path, {
+                ...v,
+                lintResult: r.result
+            });
         }
         else {
-            map.set(d.path, [undefined, lint]);
+            summaryRecords.set(r.path, {
+                name: r.path,
+                version: undefinedString,
+                testResult: undefinedString,
+                testPassed: undefinedString,
+                testFailed: undefinedString,
+                testElapsed: undefinedString,
+                lintResult: r.result
+            });
         }
     });
-    const modules = Array.from(map).map(([path, [test, lint]]) => ({
-        result: test?.summary.result === type_1.Result.Failed ||
-            lint?.summary.result === type_1.Result.Failed
-            ? type_1.Result.Failed
-            : type_1.Result.Passed,
-        moduleTableRecord: {
-            name: test?.summary.path ?? lint?.summary.path ?? path,
-            version: test?.summary.version ?? '-',
-            testResult: test?.summary.result ?? '-',
-            testPassed: test?.summary.passed ?? '-',
-            testFailed: test?.summary.failed ?? '-',
-            testElapsed: test?.summary.time ?? '-',
-            lintResult: lint?.summary.result ?? '-'
-        },
-        failedTestTableRecords: test?.failures ?? [],
-        failedLintTableRecords: lint?.failures ?? [],
-        annotationMessages: [
-            ...(test?.annotations ?? []),
-            ...(lint?.annotations ?? [])
-        ].map(annotation => annotation.body)
-    }));
-    const moduleTable = createModuleTable(modules.map(module => module.moduleTableRecord));
-    const failedTestTable = createFailedCaseTable(modules.map(m => m.failedTestTableRecords).flat(), failedTestLimit);
-    const failedLintTable = createFailedCaseTable(modules.map(m => m.failedLintTableRecords).flat(), failedLintLimit);
-    const result = modules.every(m => m.result === type_1.Result.Passed)
-        ? type_1.Result.Passed
-        : type_1.Result.Failed;
-    const body = makeMarkdownReport(context, result, moduleTable, failedTestTable, failedLintTable);
+    const moduleTable = new Table({
+        name: 'Module',
+        version: 'Version',
+        testResult: 'Test',
+        testPassed: 'Passed',
+        testFailed: 'Failed',
+        testElapsed: 'Time',
+        lintResult: 'Lint'
+    }, {
+        name: ':-----',
+        version: '------:',
+        testResult: ':---',
+        testPassed: '-----:',
+        testFailed: '-----:',
+        testElapsed: '---:',
+        lintResult: ':---'
+    }, Array.from(summaryRecords.values()));
+    // NOTE: concat(Table[], axis=1)
+    const testFailures = test
+        .map(d => d.failures.map(f => {
+        const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+        return view.render(owner, repo, sha);
+    }))
+        .flat();
+    const testFailuresLimited = testFailures.slice(0, failedTestLimit);
+    if (testFailures.length > failedTestLimit) {
+        testFailuresLimited.push({
+            file: `:warning: and ${testFailures.length - failedTestLimit} more...`,
+            test: '-',
+            message: '-'
+        });
+    }
+    const failedTestTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited);
+    // NOTE: concat(Table[], axis=1)
+    const lintFailures = lint
+        .map(d => d.failures.map(f => {
+        const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+        return view.render(owner, repo, sha);
+    }))
+        .flat();
+    const lintFailuresLimited = testFailures.slice(0, failedTestLimit);
+    if (testFailures.length > failedTestLimit) {
+        testFailuresLimited.push({
+            file: `:warning: and ${lintFailures.length - failedLintLimit} more...`,
+            test: '-',
+            message: '-'
+        });
+    }
+    const failedLintTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, lintFailuresLimited);
+    // annotations
+    const testAnnotations = test
+        .map(d => d.failures.map(f => {
+        const view = new annotation_1.AnnotationViewImpl(d.path, f);
+        return view.render();
+    }))
+        .flat();
+    const lintAnnotations = lint
+        .map(d => d.failures.map(f => {
+        const view = new annotation_1.AnnotationViewImpl(d.path, f);
+        return view.render();
+    }))
+        .flat();
+    const annotations = [...testAnnotations, ...lintAnnotations];
+    const body = makeMarkdownReport(context, result, moduleTable.render(), failedTestTable.render(), failedLintTable.render());
     return {
         body,
-        annotations: modules.map(m => m.annotationMessages).flat()
+        annotations
     };
 }
 class GoModulesFactory {
@@ -41896,8 +41941,8 @@ class GoModulesFactory {
     }
     async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
         const all = await Promise.all([
-            await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.Gotestsum, d, testReportXml))),
-            await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.GolangCILint, d, lintReportXml)))
+            await Promise.all(testDirectories.map(async (d) => (await this._parser.fromJSON(type_2.ReporterType.Gotestsum, d, testReportXml)))),
+            await Promise.all(lintDirectories.map(async (d) => (await this._parser.fromJSON(type_2.ReporterType.GolangCILint, d, lintReportXml))))
         ]);
         return [all[0], all[1]];
     }
@@ -41942,45 +41987,31 @@ ${failedLintTable}
 *This comment is created for the commit [${sha.slice(0, 7)}](${commitUrl}) pushed by @${actor}.*
 `.slice(1, -1);
 }
-function renderTable(header, separator, records) {
-    if (records.length === 0) {
-        return '';
+class Table {
+    header;
+    separator;
+    records;
+    constructor(header, separator, records) {
+        this.header = header;
+        this.separator = separator;
+        this.records = records;
     }
-    return [
-        `| ${Object.values(header).join(' | ')} |`,
-        `| ${Object.values(separator).join(' | ')} |`,
-        ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
-    ].join('\n');
-}
-function createModuleTable(modules) {
-    return renderTable({
-        name: 'Module',
-        version: 'Version',
-        testResult: 'Test',
-        testPassed: 'Passed',
-        testFailed: 'Failed',
-        testElapsed: 'Time',
-        lintResult: 'Lint'
-    }, {
-        name: ':-----',
-        version: '------:',
-        testResult: ':---',
-        testPassed: '-----:',
-        testFailed: '-----:',
-        testElapsed: '---:',
-        lintResult: ':---'
-    }, modules);
-}
-function createFailedCaseTable(failed, limit) {
-    const failedLimited = failed.slice(0, limit);
-    if (failed.length > limit) {
-        failedLimited.push({
-            file: `:warning: and ${failed.length - limit} more...`,
-            test: '-',
-            message: '-'
-        });
+    get rows() {
+        return this.records.length;
     }
-    return renderTable({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, failedLimited);
+    get columns() {
+        return Object.keys(this.header).length;
+    }
+    render() {
+        if (this.rows === 0) {
+            return '';
+        }
+        return [
+            `| ${Object.values(this.header).join(' | ')} |`,
+            `| ${Object.values(this.separator).join(' | ')} |`,
+            ...this.records.map(r => `| ${Object.values(r).join(' | ')} |`)
+        ].join('\n');
+    }
 }
 
 

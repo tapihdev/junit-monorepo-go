@@ -1,4 +1,3 @@
-import { createFailedCaseTable, createModuleTable } from '../src/table'
 import { FailedCaseTableRecord, ModuleTableRecord } from '../src/type'
 import { Result } from '../src/type'
 import { makeMarkdownReport } from '../src/table'

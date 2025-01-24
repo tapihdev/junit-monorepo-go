@@ -1,31 +1,18 @@
 import fs from 'fs'
 
-import {
-  Result,
-  AnyRecord,
-  ModuleTableRecord,
-  FailedCaseTableRecord
-} from './type'
+import { Result, AnyRecord, ModuleTableRecord } from './type'
 
-import {
-  GolangCILintReport,
-  GolangCILintSummary,
-  GotestsumSummary,
-  ReporterType
-} from './junit/type'
+import { GolangCILintReport, GotestsumReport, ReporterType } from './junit/type'
 import { JUnitReporterFactory, JUnitReporterFactoryImpl } from './junit/factory'
-import {
-  AnnotationRecord,
-  GotestsumSummaryRecord,
-  GolangCILintSummaryRecord,
-  FailureRecord
-} from './data/type'
+import { AnnotationRecord } from './data/type'
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
 } from './data/summary'
 import { FailureSummaryViewImpl } from './data/failure'
 import { AnnotationViewImpl } from './data/annotation'
+
+const undefinedString = '-'
 
 export type GitHubActionsContext = {
   owner: string
@@ -61,78 +48,154 @@ export async function report(
     lintReportXml
   )
 
+  // result
+  const result = [test, lint]
+    .flat()
+    .some(m => m.summary.result === Result.Failed)
+    ? Result.Failed
+    : Result.Passed
+
   // NOTE: concat(Table[], axis=0)
   const testSummaryRecords = test.map(d => {
-    const summaryView = new GotestsumSummaryViewImpl(
-      d.path,
-      d.summary as GotestsumSummary
-    )
+    const summaryView = new GotestsumSummaryViewImpl(d.path, d.summary)
     return summaryView.render(owner, repo, sha)
   })
   const lintSummaryRecords = lint.map(d => {
-    const summaryView = new GolangCILintSummaryViewImpl(
-      d.path,
-      d.summary as GolangCILintSummary
-    )
+    const summaryView = new GolangCILintSummaryViewImpl(d.path, d.summary)
     return summaryView.render(owner, repo, sha)
   })
-  const summaryRecords = new Map<string, [GotestsumSummaryRecord?, GolangCILintSummaryRecord?]>()
-  testSummaryRecords.forEach(r => summaryRecords.set(r.path, [r, undefined]))
+  const summaryRecords = new Map<string, ModuleTableRecord>()
+  testSummaryRecords.forEach(r =>
+    summaryRecords.set(r.path, {
+      name: r.path,
+      version: r.version,
+      testResult: r.result,
+      testPassed: r.passed,
+      testFailed: r.failed,
+      testElapsed: r.time,
+      lintResult: undefinedString
+    })
+  )
   lintSummaryRecords.forEach(r => {
     const v = summaryRecords.get(r.path)
     if (v !== undefined) {
-      summaryRecords.set(r.path, [v[0], r])
+      summaryRecords.set(r.path, {
+        ...v,
+        lintResult: r.result
+      })
     } else {
-      summaryRecords.set(r.path, [undefined, r])
+      summaryRecords.set(r.path, {
+        name: r.path,
+        version: undefinedString,
+        testResult: undefinedString,
+        testPassed: undefinedString,
+        testFailed: undefinedString,
+        testElapsed: undefinedString,
+        lintResult: r.result
+      })
     }
   })
 
+  const moduleTable = new Table(
+    {
+      name: 'Module',
+      version: 'Version',
+      testResult: 'Test',
+      testPassed: 'Passed',
+      testFailed: 'Failed',
+      testElapsed: 'Time',
+      lintResult: 'Lint'
+    },
+    {
+      name: ':-----',
+      version: '------:',
+      testResult: ':---',
+      testPassed: '-----:',
+      testFailed: '-----:',
+      testElapsed: '---:',
+      lintResult: ':---'
+    },
+    Array.from(summaryRecords.values())
+  )
+
   // NOTE: concat(Table[], axis=1)
-  const testFailures = test.map(d => d.failures.map(f => {
-      const view = new FailureSummaryViewImpl(d.path, f)
-      return view.render(owner, repo, sha)
-  })).flat()
-  const lintFailures = lint.map(d => d.failures.map(f => {
-      const view = new FailureSummaryViewImpl(d.path, f)
-      return view.render(owner, repo, sha)
-  })).flat()
+  const testFailures = test
+    .map(d =>
+      d.failures.map(f => {
+        const view = new FailureSummaryViewImpl(d.path, f)
+        return view.render(owner, repo, sha)
+      })
+    )
+    .flat()
+  const testFailuresLimited = testFailures.slice(0, failedTestLimit)
+  if (testFailures.length > failedTestLimit) {
+    testFailuresLimited.push({
+      file: `:warning: and ${testFailures.length - failedTestLimit} more...`,
+      test: '-',
+      message: '-'
+    })
+  }
+  const failedTestTable = new Table(
+    { file: 'File', test: 'Case', message: 'Message' },
+    { file: ':---', test: ':---', message: ':------' },
+    testFailuresLimited
+  )
 
-  const testAnnotations = test.map(d => d.failures.map(f => {
-      const view = new AnnotationViewImpl(d.path, f)
-      return view.render()
-  })).flat()
-  const lintAnnotations = lint.map(d => d.failures.map(f => {
-      const view = new AnnotationViewImpl(d.path, f)
-      return view.render()
-  })).flat()
+  // NOTE: concat(Table[], axis=1)
+  const lintFailures = lint
+    .map(d =>
+      d.failures.map(f => {
+        const view = new FailureSummaryViewImpl(d.path, f)
+        return view.render(owner, repo, sha)
+      })
+    )
+    .flat()
+
+  const lintFailuresLimited = testFailures.slice(0, failedTestLimit)
+  if (testFailures.length > failedTestLimit) {
+    testFailuresLimited.push({
+      file: `:warning: and ${lintFailures.length - failedLintLimit} more...`,
+      test: '-',
+      message: '-'
+    })
+  }
+
+  const failedLintTable = new Table(
+    { file: 'File', test: 'Case', message: 'Message' },
+    { file: ':---', test: ':---', message: ':------' },
+    lintFailuresLimited
+  )
+
+  // annotations
+  const testAnnotations = test
+    .map(d =>
+      d.failures.map(f => {
+        const view = new AnnotationViewImpl(d.path, f)
+        return view.render()
+      })
+    )
+    .flat()
+  const lintAnnotations = lint
+    .map(d =>
+      d.failures.map(f => {
+        const view = new AnnotationViewImpl(d.path, f)
+        return view.render()
+      })
+    )
+    .flat()
   const annotations = [...testAnnotations, ...lintAnnotations]
-
-  const moduleTable = createModuleTable(
-    modules.map(module => module.moduleTableRecord)
-  )
-  const failedTestTable = createFailedCaseTable(
-    modules.map(m => m.failedTestTableRecords).flat(),
-    failedTestLimit
-  )
-  const failedLintTable = createFailedCaseTable(
-    modules.map(m => m.failedLintTableRecords).flat(),
-    failedLintLimit
-  )
-  const result = modules.every(m => m.result === Result.Passed)
-    ? Result.Passed
-    : Result.Failed
 
   const body = makeMarkdownReport(
     context,
     result,
-    moduleTable,
-    failedTestTable,
-    failedLintTable
+    moduleTable.render(),
+    failedTestTable.render(),
+    failedLintTable.render()
   )
 
   return {
     body,
-    annotations,
+    annotations
   }
 }
 
@@ -144,16 +207,26 @@ export class GoModulesFactory {
     lintDirectories: string[],
     testReportXml: string,
     lintReportXml: string
-  ): Promise<[GolangCILintReport[], GolangCILintReport[]]> {
+  ): Promise<[GotestsumReport[], GolangCILintReport[]]> {
     const all = await Promise.all([
       await Promise.all(
-        testDirectories.map(async d =>
-          this._parser.fromJSON(ReporterType.Gotestsum, d, testReportXml)
+        testDirectories.map(
+          async d =>
+            (await this._parser.fromJSON(
+              ReporterType.Gotestsum,
+              d,
+              testReportXml
+            )) as GotestsumReport
         )
       ),
       await Promise.all(
-        lintDirectories.map(async d =>
-          this._parser.fromJSON(ReporterType.GolangCILint, d, lintReportXml)
+        lintDirectories.map(
+          async d =>
+            (await this._parser.fromJSON(
+              ReporterType.GolangCILint,
+              d,
+              lintReportXml
+            )) as GolangCILintReport
         )
       )
     ])
@@ -214,61 +287,30 @@ ${failedLintTable}
 `.slice(1, -1)
 }
 
-function renderTable<T extends AnyRecord>(
-  header: T,
-  separator: T,
-  records: T[]
-): string {
-  if (records.length === 0) {
-    return ''
+class Table<T extends AnyRecord> {
+  constructor(
+    private readonly header: T,
+    private readonly separator: T,
+    private readonly records: T[]
+  ) {}
+
+  get rows(): number {
+    return this.records.length
   }
 
-  return [
-    `| ${Object.values(header).join(' | ')} |`,
-    `| ${Object.values(separator).join(' | ')} |`,
-    ...records.map(r => `| ${Object.values(r).join(' | ')} |`)
-  ].join('\n')
-}
-
-export function createModuleTable(modules: ModuleTableRecord[]): string {
-  return renderTable(
-    {
-      name: 'Module',
-      version: 'Version',
-      testResult: 'Test',
-      testPassed: 'Passed',
-      testFailed: 'Failed',
-      testElapsed: 'Time',
-      lintResult: 'Lint'
-    },
-    {
-      name: ':-----',
-      version: '------:',
-      testResult: ':---',
-      testPassed: '-----:',
-      testFailed: '-----:',
-      testElapsed: '---:',
-      lintResult: ':---'
-    },
-    modules
-  )
-}
-
-export function createFailedCaseTable(
-  failed: FailedCaseTableRecord[],
-  limit: number
-): string {
-  const failedLimited = failed.slice(0, limit)
-  if (failed.length > limit) {
-    failedLimited.push({
-      file: `:warning: and ${failed.length - limit} more...`,
-      test: '-',
-      message: '-'
-    })
+  get columns(): number {
+    return Object.keys(this.header).length
   }
-  return renderTable(
-    { file: 'File', test: 'Case', message: 'Message' },
-    { file: ':---', test: ':---', message: ':------' },
-    failedLimited
-  )
+
+  render(): string {
+    if (this.rows === 0) {
+      return ''
+    }
+
+    return [
+      `| ${Object.values(this.header).join(' | ')} |`,
+      `| ${Object.values(this.separator).join(' | ')} |`,
+      ...this.records.map(r => `| ${Object.values(r).join(' | ')} |`)
+    ].join('\n')
+  }
 }
