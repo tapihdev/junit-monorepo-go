@@ -9,7 +9,7 @@ import {
 } from './data/summary'
 import { FailureSummaryViewImpl } from './data/failure'
 import { AnnotationViewImpl } from './data/annotation'
-import { MultiJunitReportersFactoryImpl } from './junit/factory'
+import { GolangCILintReport, GotestsumReport } from './junit/type'
 
 const undefinedString = '-'
 
@@ -30,36 +30,26 @@ type Output = {
 
 export async function report(
   context: GitHubContext,
-  testDirs: string[],
-  lintDirs: string[],
-  testReportXml: string,
-  lintReportXml: string,
+  tests: GotestsumReport[],
+  lints: GolangCILintReport[],
   failedTestLimit: number,
   failedLintLimit: number
 ): Promise<Output> {
   const { owner, repo, sha } = context
-  const singleFactory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
-  const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
-  const [test, lint] = await multiFactory.fromXml(
-    testDirs,
-    lintDirs,
-    testReportXml,
-    lintReportXml
-  )
 
   // result
-  const result = [test, lint]
+  const result = [tests, lints]
     .flat()
     .some(m => m.summary.result === Result.Failed)
     ? Result.Failed
     : Result.Passed
 
   // NOTE: concat(Table[], axis=0)
-  const testSummaryRecords = test.map(d => {
+  const testSummaryRecords = tests.map(d => {
     const summaryView = new GotestsumSummaryViewImpl(d.path, d.summary)
     return summaryView.render(owner, repo, sha)
   })
-  const lintSummaryRecords = lint.map(d => {
+  const lintSummaryRecords = lints.map(d => {
     const summaryView = new GolangCILintSummaryViewImpl(d.path, d.summary)
     return summaryView.render(owner, repo, sha)
   })
@@ -118,7 +108,7 @@ export async function report(
   ).render()
 
   // NOTE: concat(Table[], axis=1)
-  const testFailures = test
+  const testFailures = tests
     .map(d =>
       d.failures.map(f => {
         const view = new FailureSummaryViewImpl(d.path, f)
@@ -141,7 +131,7 @@ export async function report(
   ).render()
 
   // NOTE: concat(Table[], axis=1)
-  const lintFailures = lint
+  const lintFailures = lints
     .map(d =>
       d.failures.map(f => {
         const view = new FailureSummaryViewImpl(d.path, f)
@@ -166,7 +156,7 @@ export async function report(
   ).render()
 
   // annotations
-  const testAnnotations = test
+  const testAnnotations = tests
     .map(d =>
       d.failures.map(f => {
         const view = new AnnotationViewImpl(d.path, f)
@@ -174,7 +164,7 @@ export async function report(
       })
     )
     .flat()
-  const lintAnnotations = lint
+  const lintAnnotations = lints
     .map(d =>
       d.failures.map(f => {
         const view = new AnnotationViewImpl(d.path, f)

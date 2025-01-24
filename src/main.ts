@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import * as fs from 'fs'
 
 import {
   getGitHubToken,
@@ -10,6 +11,11 @@ import {
 import { Client as GitHubClient } from './github'
 import { report } from './table'
 import { makeMarkdownReport } from './markdown'
+
+import {
+  SingleJUnitReporterFactoryImpl,
+  MultiJunitReportersFactoryImpl
+} from './junit/factory'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -41,12 +47,21 @@ export async function run(): Promise<void> {
     const { runId, actor } = github.context
 
     core.info(`* make a junit report`)
-    const reported = await report(
-      { owner, repo, sha },
+    const singleFactory = new SingleJUnitReporterFactoryImpl(
+      fs.promises.readFile
+    )
+    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+    const [tests, lints] = await multiFactory.fromXml(
       testDirs,
       lintDirs,
       testReportXml,
-      lintReportXml,
+      lintReportXml
+    )
+
+    const reported = await report(
+      { owner, repo, sha },
+      tests,
+      lints,
       failedTestLimit,
       failedLintLimit
     )

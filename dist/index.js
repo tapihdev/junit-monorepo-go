@@ -41739,10 +41739,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
+const fs = __importStar(__nccwpck_require__(9896));
 const input_1 = __nccwpck_require__(3599);
 const github_1 = __nccwpck_require__(9248);
 const table_1 = __nccwpck_require__(8719);
 const markdown_1 = __nccwpck_require__(3758);
+const factory_1 = __nccwpck_require__(7534);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41769,7 +41771,10 @@ async function run() {
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
         core.info(`* make a junit report`);
-        const reported = await (0, table_1.report)({ owner, repo, sha }, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit);
+        const singleFactory = new factory_1.SingleJUnitReporterFactoryImpl(fs.promises.readFile);
+        const multiFactory = new factory_1.MultiJunitReportersFactoryImpl(singleFactory);
+        const [tests, lints] = await multiFactory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
+        const reported = await (0, table_1.report)({ owner, repo, sha }, tests, lints, failedTestLimit, failedLintLimit);
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
             repo,
@@ -41863,40 +41868,31 @@ ${failedLintTable}
 /***/ }),
 
 /***/ 8719:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.report = report;
-const fs_1 = __importDefault(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
-const factory_1 = __nccwpck_require__(7534);
 const summary_1 = __nccwpck_require__(200);
 const failure_1 = __nccwpck_require__(5382);
 const annotation_1 = __nccwpck_require__(6855);
-const factory_2 = __nccwpck_require__(7534);
 const undefinedString = '-';
-async function report(context, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit) {
+async function report(context, tests, lints, failedTestLimit, failedLintLimit) {
     const { owner, repo, sha } = context;
-    const singleFactory = new factory_1.SingleJUnitReporterFactoryImpl(fs_1.default.promises.readFile);
-    const multiFactory = new factory_2.MultiJunitReportersFactoryImpl(singleFactory);
-    const [test, lint] = await multiFactory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
     // result
-    const result = [test, lint]
+    const result = [tests, lints]
         .flat()
         .some(m => m.summary.result === type_1.Result.Failed)
         ? type_1.Result.Failed
         : type_1.Result.Passed;
     // NOTE: concat(Table[], axis=0)
-    const testSummaryRecords = test.map(d => {
+    const testSummaryRecords = tests.map(d => {
         const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
         return summaryView.render(owner, repo, sha);
     });
-    const lintSummaryRecords = lint.map(d => {
+    const lintSummaryRecords = lints.map(d => {
         const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
         return summaryView.render(owner, repo, sha);
     });
@@ -41948,7 +41944,7 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
         lintResult: ':---'
     }, Array.from(summaryRecords.values())).render();
     // NOTE: concat(Table[], axis=1)
-    const testFailures = test
+    const testFailures = tests
         .map(d => d.failures.map(f => {
         const view = new failure_1.FailureSummaryViewImpl(d.path, f);
         return view.render(owner, repo, sha);
@@ -41964,7 +41960,7 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
     }
     const failedTestTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, testFailuresLimited).render();
     // NOTE: concat(Table[], axis=1)
-    const lintFailures = lint
+    const lintFailures = lints
         .map(d => d.failures.map(f => {
         const view = new failure_1.FailureSummaryViewImpl(d.path, f);
         return view.render(owner, repo, sha);
@@ -41980,13 +41976,13 @@ async function report(context, testDirs, lintDirs, testReportXml, lintReportXml,
     }
     const failedLintTable = new Table({ file: 'File', test: 'Case', message: 'Message' }, { file: ':---', test: ':---', message: ':------' }, lintFailuresLimited).render();
     // annotations
-    const testAnnotations = test
+    const testAnnotations = tests
         .map(d => d.failures.map(f => {
         const view = new annotation_1.AnnotationViewImpl(d.path, f);
         return view.render().body;
     }))
         .flat();
-    const lintAnnotations = lint
+    const lintAnnotations = lints
         .map(d => d.failures.map(f => {
         const view = new annotation_1.AnnotationViewImpl(d.path, f);
         return view.render().body;
