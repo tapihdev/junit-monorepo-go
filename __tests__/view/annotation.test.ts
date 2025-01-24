@@ -1,4 +1,4 @@
-import { AnnotationViewImpl } from '../../src/data/annotation'
+import { AnnotationViewImpl } from '../../src/view/annotation'
 import { ReporterType } from '../../src/type'
 describe('Annotation', () => {
   const testCases = [

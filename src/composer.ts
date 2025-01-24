@@ -3,9 +3,9 @@ import { Result, ModuleTableRecord } from './type'
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
-} from './data/summary'
-import { FailureSummaryViewImpl } from './data/failure'
-import { AnnotationViewImpl } from './data/annotation'
+} from './view/summary'
+import { FailureSummaryViewImpl } from './view/failure'
+import { AnnotationViewImpl } from './view/annotation'
 import { GolangCILintReport, GotestsumReport } from './junit/type'
 import { Table } from './table'
 

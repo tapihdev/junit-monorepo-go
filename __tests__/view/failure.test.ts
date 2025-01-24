@@ -1,4 +1,4 @@
-import { FailureSummaryViewImpl } from '../../src/data/failure'
+import { FailureSummaryViewImpl } from '../../src/view/failure'
 import { ReporterType } from '../../src/type'
 
 describe('Failure', () => {

@@ -1,7 +1,7 @@
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
-} from '../../src/data/summary'
+} from '../../src/view/summary'
 import { Result } from '../../src/type'
 
 describe('GotestsumSummaryViewImpl', () => {
