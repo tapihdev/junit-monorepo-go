@@ -41819,7 +41819,64 @@ const annotation_1 = __nccwpck_require__(6855);
 async function report(context, testDirs, lintDirs, testReportXml, lintReportXml, failedTestLimit, failedLintLimit) {
     const repoterFactory = new factory_1.JUnitReporterFactoryImpl(fs_1.default.promises.readFile);
     const factory = new GoModulesFactory(repoterFactory);
-    const modules = await factory.fromXml(context.owner, context.repo, context.sha, testDirs, lintDirs, testReportXml, lintReportXml);
+    const [test, lint] = await factory.fromXml(testDirs, lintDirs, testReportXml, lintReportXml);
+    const { owner, repo, sha } = context;
+    const map = new Map();
+    test.forEach(d => {
+        const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
+        const summary = summaryView.render(owner, repo, sha);
+        const failures = d.failures.map(f => {
+            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+            return view.render(owner, repo, sha);
+        });
+        const annotations = d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render();
+        });
+        return map.set(d.path, [{ summary, failures, annotations }, undefined]);
+    });
+    // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
+    new Set(lint).forEach(d => {
+        const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
+        const summary = summaryView.render(owner, repo, sha);
+        const failures = d.failures.map(f => {
+            const view = new failure_1.FailureSummaryViewImpl(d.path, f);
+            return view.render(owner, repo, sha);
+        });
+        const annotations = d.failures.map(f => {
+            const view = new annotation_1.AnnotationViewImpl(d.path, f);
+            return view.render();
+        });
+        const lint = { summary, failures, annotations };
+        const v = map.get(d.path);
+        if (v !== undefined) {
+            map.set(d.path, [v[0], lint]);
+        }
+        else {
+            map.set(d.path, [undefined, lint]);
+        }
+    });
+    const modules = Array.from(map).map(([path, [test, lint]]) => ({
+        result: test?.summary.result === type_1.Result.Failed ||
+            lint?.summary.result === type_1.Result.Failed
+            ? type_1.Result.Failed
+            : type_1.Result.Passed,
+        moduleTableRecord: {
+            name: test?.summary.path ?? lint?.summary.path ?? path,
+            version: test?.summary.version ?? '-',
+            testResult: test?.summary.result ?? '-',
+            testPassed: test?.summary.passed ?? '-',
+            testFailed: test?.summary.failed ?? '-',
+            testElapsed: test?.summary.time ?? '-',
+            lintResult: lint?.summary.result ?? '-'
+        },
+        failedTestTableRecords: test?.failures ?? [],
+        failedLintTableRecords: lint?.failures ?? [],
+        annotationMessages: [
+            ...(test?.annotations ?? []),
+            ...(lint?.annotations ?? [])
+        ].map(annotation => annotation.body)
+    }));
     const moduleTable = createModuleTable(modules.map(module => module.moduleTableRecord));
     const failedTestTable = createFailedCaseTable(modules.map(m => m.failedTestTableRecords).flat(), failedTestLimit);
     const failedLintTable = createFailedCaseTable(modules.map(m => m.failedLintTableRecords).flat(), failedLintLimit);
@@ -41837,71 +41894,12 @@ class GoModulesFactory {
     constructor(_parser) {
         this._parser = _parser;
     }
-    async fromXml(owner, repo, sha, testDirectories, lintDirectories, testReportXml, lintReportXml) {
+    async fromXml(testDirectories, lintDirectories, testReportXml, lintReportXml) {
         const all = await Promise.all([
             await Promise.all(testDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.Gotestsum, d, testReportXml))),
             await Promise.all(lintDirectories.map(async (d) => this._parser.fromJSON(type_2.ReporterType.GolangCILint, d, lintReportXml)))
         ]);
-        // TODO: Remove this after refactoring is done
-        const test = all[0];
-        const lint = all[1];
-        const map = new Map();
-        test.forEach(d => {
-            const summaryView = new summary_1.GotestsumSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            return map.set(d.path, [{ summary, failures, annotations }, undefined]);
-        });
-        // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-        new Set(lint).forEach(d => {
-            const summaryView = new summary_1.GolangCILintSummaryViewImpl(d.path, d.summary);
-            const summary = summaryView.render(owner, repo, sha);
-            const failures = d.failures.map(f => {
-                const view = new failure_1.FailureSummaryViewImpl(d.path, f);
-                return view.render(owner, repo, sha);
-            });
-            const annotations = d.failures.map(f => {
-                const view = new annotation_1.AnnotationViewImpl(d.path, f);
-                return view.render();
-            });
-            const lint = { summary, failures, annotations };
-            const v = map.get(d.path);
-            if (v !== undefined) {
-                map.set(d.path, [v[0], lint]);
-            }
-            else {
-                map.set(d.path, [undefined, lint]);
-            }
-        });
-        const modules = Array.from(map).map(([path, [test, lint]]) => ({
-            result: test?.summary.result === type_1.Result.Failed ||
-                lint?.summary.result === type_1.Result.Failed
-                ? type_1.Result.Failed
-                : type_1.Result.Passed,
-            moduleTableRecord: {
-                name: test?.summary.path ?? lint?.summary.path ?? path,
-                version: test?.summary.version ?? '-',
-                testResult: test?.summary.result ?? '-',
-                testPassed: test?.summary.passed ?? '-',
-                testFailed: test?.summary.failed ?? '-',
-                testElapsed: test?.summary.time ?? '-',
-                lintResult: lint?.summary.result ?? '-'
-            },
-            failedTestTableRecords: test?.failures ?? [],
-            failedLintTableRecords: lint?.failures ?? [],
-            annotationMessages: [
-                ...(test?.annotations ?? []),
-                ...(lint?.annotations ?? [])
-            ].map(annotation => annotation.body)
-        }));
-        return modules;
+        return [all[0], all[1]];
     }
 }
 exports.GoModulesFactory = GoModulesFactory;
