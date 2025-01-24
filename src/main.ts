@@ -56,7 +56,7 @@ export async function run(): Promise<void> {
       failedTestLimit,
       failedLintLimit
     )
-    annotations.forEach(annotation => core.info(annotation))
+    annotations.forEach(annotation => core.info(annotation.body))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)

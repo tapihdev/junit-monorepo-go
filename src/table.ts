@@ -9,6 +9,7 @@ import {
 
 import {
   GolangCILintReport,
+  GolangCILintSummary,
   GotestsumSummary,
   ReporterType
 } from './junit/type'
@@ -38,7 +39,7 @@ export type GitHubActionsContext = {
 // NOTE: This is a temporary implementation
 type Output = {
   body: string
-  annotations: string[]
+  annotations: AnnotationRecord[]
 }
 
 export async function report(
@@ -50,6 +51,7 @@ export async function report(
   failedTestLimit: number,
   failedLintLimit: number
 ): Promise<Output> {
+  const { owner, repo, sha } = context
   const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
   const factory = new GoModulesFactory(repoterFactory)
   const [test, lint] = await factory.fromXml(
@@ -58,86 +60,52 @@ export async function report(
     testReportXml,
     lintReportXml
   )
-  const { owner, repo, sha } = context
 
-  const map = new Map<
-    string,
-    [
-      {
-        summary: GotestsumSummaryRecord
-        failures: FailureRecord[]
-        annotations: AnnotationRecord[]
-      }?,
-      {
-        summary: GolangCILintSummaryRecord
-        failures: FailureRecord[]
-        annotations: AnnotationRecord[]
-      }?
-    ]
-  >()
-  test.forEach(d => {
+  // NOTE: concat(Table[], axis=0)
+  const testSummaryRecords = test.map(d => {
     const summaryView = new GotestsumSummaryViewImpl(
       d.path,
       d.summary as GotestsumSummary
     )
-    const summary = summaryView.render(owner, repo, sha)
-    const failures = d.failures.map(f => {
-      const view = new FailureSummaryViewImpl(d.path, f)
-      return view.render(owner, repo, sha)
-    })
-    const annotations = d.failures.map(f => {
-      const view = new AnnotationViewImpl(d.path, f)
-      return view.render()
-    })
-    return map.set(d.path, [{ summary, failures, annotations }, undefined])
+    return summaryView.render(owner, repo, sha)
   })
-  // NOTE: Iterate over a set to avoid maching twice the same directory in lintDirectories
-  new Set(lint).forEach(d => {
+  const lintSummaryRecords = lint.map(d => {
     const summaryView = new GolangCILintSummaryViewImpl(
       d.path,
-      d.summary as GotestsumSummary
+      d.summary as GolangCILintSummary
     )
-    const summary = summaryView.render(owner, repo, sha)
-    const failures = d.failures.map(f => {
-      const view = new FailureSummaryViewImpl(d.path, f)
-      return view.render(owner, repo, sha)
-    })
-    const annotations = d.failures.map(f => {
-      const view = new AnnotationViewImpl(d.path, f)
-      return view.render()
-    })
-    const lint = { summary, failures, annotations }
-
-    const v = map.get(d.path)
+    return summaryView.render(owner, repo, sha)
+  })
+  const summaryRecords = new Map<string, [GotestsumSummaryRecord?, GolangCILintSummaryRecord?]>()
+  testSummaryRecords.forEach(r => summaryRecords.set(r.path, [r, undefined]))
+  lintSummaryRecords.forEach(r => {
+    const v = summaryRecords.get(r.path)
     if (v !== undefined) {
-      map.set(d.path, [v[0], lint])
+      summaryRecords.set(r.path, [v[0], r])
     } else {
-      map.set(d.path, [undefined, lint])
+      summaryRecords.set(r.path, [undefined, r])
     }
   })
 
-  const modules = Array.from(map).map(([path, [test, lint]]) => ({
-    result:
-      test?.summary.result === Result.Failed ||
-      lint?.summary.result === Result.Failed
-        ? Result.Failed
-        : Result.Passed,
-    moduleTableRecord: {
-      name: test?.summary.path ?? lint?.summary.path ?? path,
-      version: test?.summary.version ?? '-',
-      testResult: test?.summary.result ?? '-',
-      testPassed: test?.summary.passed ?? '-',
-      testFailed: test?.summary.failed ?? '-',
-      testElapsed: test?.summary.time ?? '-',
-      lintResult: lint?.summary.result ?? '-'
-    },
-    failedTestTableRecords: test?.failures ?? [],
-    failedLintTableRecords: lint?.failures ?? [],
-    annotationMessages: [
-      ...(test?.annotations ?? []),
-      ...(lint?.annotations ?? [])
-    ].map(annotation => annotation.body)
-  }))
+  // NOTE: concat(Table[], axis=1)
+  const testFailures = test.map(d => d.failures.map(f => {
+      const view = new FailureSummaryViewImpl(d.path, f)
+      return view.render(owner, repo, sha)
+  })).flat()
+  const lintFailures = lint.map(d => d.failures.map(f => {
+      const view = new FailureSummaryViewImpl(d.path, f)
+      return view.render(owner, repo, sha)
+  })).flat()
+
+  const testAnnotations = test.map(d => d.failures.map(f => {
+      const view = new AnnotationViewImpl(d.path, f)
+      return view.render()
+  })).flat()
+  const lintAnnotations = lint.map(d => d.failures.map(f => {
+      const view = new AnnotationViewImpl(d.path, f)
+      return view.render()
+  })).flat()
+  const annotations = [...testAnnotations, ...lintAnnotations]
 
   const moduleTable = createModuleTable(
     modules.map(module => module.moduleTableRecord)
@@ -164,7 +132,7 @@ export async function report(
 
   return {
     body,
-    annotations: modules.map(m => m.annotationMessages).flat()
+    annotations,
   }
 }
 
