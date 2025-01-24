@@ -1,7 +1,18 @@
-import { SingleJUnitReporterFactoryImpl, MultiJunitReportersFactoryImpl } from '../../src/junit/factory'
+import fs from 'fs'
+
+import {
+  SingleJUnitReporterFactoryImpl,
+  MultiJunitReportersFactoryImpl
+} from '../../src/junit/factory'
 import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
 import { GotestsumReportImpl } from '../../src/junit/gotestsum'
-import { ReporterType } from '../../src/junit/type'
+import {
+  GolangCILintSummary,
+  GotestsumReport,
+  GotestsumSummary,
+  ReporterType
+} from '../../src/junit/type'
+import { Result } from '../../src/type'
 
 describe('JUnitReporterFactoryImpl', () => {
   const testCases = [
@@ -311,13 +322,30 @@ Details: Bar]]></failure>
 })
 
 describe('MultiJunitReportersFactory', () => {
-  const singleFactoryMock = {
-    fromXml: jest.spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromXml').mockResolvedValue({
-      tests: ['path/to/test.xml'],
-      lints: ['path/to/lint.xml']
-    })
-  }
-
+  const fromXmlMock = jest
+    .spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromXml')
+    .mockImplementation(
+      async (type: ReporterType, directory: string, filename: string) => {
+        switch (type) {
+          case ReporterType.GolangCILint:
+            return {
+              path: 'path/to/junit.xml',
+              summary: {
+                result: Result.Passed
+              } as GolangCILintSummary,
+              failures: []
+            }
+          case ReporterType.Gotestsum:
+            return {
+              path: 'path/to/junit.xml',
+              summary: {
+                result: Result.Passed
+              } as GotestsumSummary,
+              failures: []
+            }
+        }
+      }
+    )
   const testCases = [
     {
       name: 'should create tests and lints',
@@ -361,13 +389,16 @@ describe('MultiJunitReportersFactory', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const factory = new MultiJunitReportersFactoryImpl(input.reader)
-    const report = await factory.fromXml(input.type, 'path/to', 'junit.xml')
-    expect(input.reader).toHaveBeenCalledWith('path/to/junit.xml', {
-      encoding: 'utf8'
-    })
+    const singleFactory = new SingleJUnitReporterFactoryImpl(
+      fs.promises.readFile
+    )
+    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+    const report = await multiFactory.fromXml(
+      input.testDirectories,
+      input.lintDirectories,
+      input.testReportXml,
+      input.lintReportXml
+    )
     expect(report).toEqual(expected)
   })
 })
-
-

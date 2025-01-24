@@ -2,7 +2,14 @@ import * as fs from 'fs'
 import path from 'path'
 import { parseStringPromise } from 'xml2js'
 
-import { JUnitReport, TestSuites, Reporter, ReporterType, GolangCILintReport, GotestsumReport } from './type'
+import {
+  JUnitReport,
+  TestSuites,
+  Reporter,
+  ReporterType,
+  GolangCILintReport,
+  GotestsumReport
+} from './type'
 import { GolangCILintReportImpl } from './golangcilint'
 import { GotestsumReportImpl } from './gotestsum'
 
@@ -30,7 +37,9 @@ type JUnitReportUnsafe = {
   testsuites: TestSuites | ''
 }
 
-export class SingleJUnitReporterFactoryImpl implements SingleJUnitReporterFactory {
+export class SingleJUnitReporterFactoryImpl
+  implements SingleJUnitReporterFactory
+{
   constructor(private readonly reader: FileReader) {}
 
   async fromXml(
@@ -63,8 +72,10 @@ export class SingleJUnitReporterFactoryImpl implements SingleJUnitReporterFactor
   }
 }
 
-export class MultiJunitReportersFactoryImpl implements MultiJunitReportersFactory {
-  constructor(private _parser: SingleJUnitReporterFactory) { }
+export class MultiJunitReportersFactoryImpl
+  implements MultiJunitReportersFactory
+{
+  constructor(private _parser: SingleJUnitReporterFactory) {}
 
   async fromXml(
     testDirectories: string[],
@@ -75,20 +86,22 @@ export class MultiJunitReportersFactoryImpl implements MultiJunitReportersFactor
     const all = await Promise.all([
       await Promise.all(
         testDirectories.map(
-          async (d) => (await this._parser.fromXml(
-            ReporterType.Gotestsum,
-            d,
-            testReportXml
-          )) as GotestsumReport
+          async d =>
+            (await this._parser.fromXml(
+              ReporterType.Gotestsum,
+              d,
+              testReportXml
+            )) as GotestsumReport
         )
       ),
       await Promise.all(
         lintDirectories.map(
-          async (d) => (await this._parser.fromXml(
-            ReporterType.GolangCILint,
-            d,
-            lintReportXml
-          )) as GolangCILintReport
+          async d =>
+            (await this._parser.fromXml(
+              ReporterType.GolangCILint,
+              d,
+              lintReportXml
+            )) as GolangCILintReport
         )
       )
     ])
