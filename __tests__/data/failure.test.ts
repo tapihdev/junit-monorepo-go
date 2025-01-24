@@ -1,4 +1,5 @@
 import { FailureSummaryViewImpl } from '../../src/data/failure'
+import { ReporterType } from '../../src/type'
 
 describe('Failure', () => {
   const testCases = [
@@ -11,7 +12,8 @@ describe('Failure', () => {
           file: 'foo.go',
           line: 12,
           test: 'errcheck',
-          message: 'Error'
+          message: 'Error',
+          type: ReporterType.GolangCILint
         },
         context: {
           owner: 'owner',
@@ -21,6 +23,7 @@ describe('Failure', () => {
       },
       expected: {
         file: '[path/to/app/foo.go:12](https://github.com/owner/repo/blob/sha/path/to/app/foo.go#L12)',
+        type: ReporterType.GolangCILint,
         test: 'errcheck',
         message: 'Error'
       }

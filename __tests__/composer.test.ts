@@ -207,7 +207,8 @@ describe('TableComposer#failures', () => {
     {
       name: 'empty',
       input: {
-        tests: []
+        tests: [],
+        lints: []
       },
       expected: ''
     },
@@ -381,13 +382,13 @@ describe('TableComposer#failures', () => {
 | :--- | :--- | :--- | :------ |
 | [go/app1/module1/foo1_test.go:1](https://github.com/owner/repo/blob/sha/go/app1/module1/foo1_test.go#L1) | gotestsum | Test1/Case | aaa |
 | [go/app1/module2/bar1_test.go:2](https://github.com/owner/repo/blob/sha/go/app1/module2/bar1_test.go#L2) | gotestsum | Test2/Case | bbb |
-| :warning: and 2 more... | - | - |
+| :warning: and 2 more... | - | - | - |
 `.slice(1, -1)
     }
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const composer = new TableComposer(input.tests, inputs.lint)
+    const composer = new TableComposer(input.tests, input.lints)
     const actual = composer.failures(githubContext, input.limit)
     expect(actual).toEqual(expected)
   })
@@ -421,14 +422,16 @@ describe('TableComposer#annotations', () => {
                 file: 'foo_test.go',
                 line: 1,
                 test: 'Test1/Case',
-                message: 'aaa'
+                message: 'aaa',
+                type: ReporterType.Gotestsum
               },
               {
                 subDir: 'module2',
                 file: 'bar_test.go',
                 line: 2,
                 test: 'Test2/Case',
-                message: 'bbb'
+                message: 'bbb',
+                type: ReporterType.Gotestsum
               }
             ]
           }
@@ -445,7 +448,8 @@ describe('TableComposer#annotations', () => {
                 file: 'foo.go',
                 line: 1,
                 test: 'Func1',
-                message: 'ccc'
+                message: 'ccc',
+                type: ReporterType.GolangCILint
               }
             ]
           }
@@ -475,14 +479,16 @@ describe('TableComposer#annotations', () => {
                 file: 'foo_test.go',
                 line: 1,
                 test: 'Test1/Case',
-                message: 'aaa'
+                message: 'aaa',
+                type: ReporterType.Gotestsum
               },
               {
                 subDir: 'module2',
                 file: 'bar_test.go',
                 line: 2,
                 test: 'Test2/Case',
-                message: 'bbb'
+                message: 'bbb',
+                type: ReporterType.Gotestsum
               }
             ]
           }
@@ -499,7 +505,8 @@ describe('TableComposer#annotations', () => {
                 file: 'foo.go',
                 line: 1,
                 test: 'Func1',
-                message: 'ccc'
+                message: 'ccc',
+                type: ReporterType.GolangCILint
               }
             ]
           }

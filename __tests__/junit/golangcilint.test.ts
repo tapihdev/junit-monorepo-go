@@ -1,6 +1,6 @@
 import { JUnitReport } from '../../src/junit/type'
 import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
-import { Result } from '../../src/type'
+import { ReporterType, Result } from '../../src/type'
 
 describe('golangcilint', () => {
   const testCases = [
@@ -92,14 +92,16 @@ describe('golangcilint', () => {
             file: 'foo_test.go',
             line: 12,
             test: 'errcheck',
-            message: 'Error'
+            message: 'Error',
+            type: ReporterType.GolangCILint
           },
           {
             subDir: 'go/app',
             file: 'bar_test.go',
             line: 56,
             test: 'errcheck',
-            message: 'Error'
+            message: 'Error',
+            type: ReporterType.GolangCILint
           }
         ]
       }

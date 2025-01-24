@@ -1,6 +1,6 @@
 import { JUnitReport } from '../../src/junit/type'
 import { GotestsumReportImpl } from '../../src/junit/gotestsum'
-import { Result } from '../../src/type'
+import { ReporterType, Result } from '../../src/type'
 
 describe('gotestsum', () => {
   const testCases = [
@@ -195,7 +195,8 @@ describe('gotestsum', () => {
             file: 'baz_test.go',
             line: 1,
             test: 'Test2',
-            message: '=== RUN   Test2\n    baz_test.go:1: error;'
+            message: '=== RUN   Test2\n    baz_test.go:1: error;',
+            type: ReporterType.Gotestsum
           }
         ]
       }

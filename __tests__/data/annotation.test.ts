@@ -1,5 +1,5 @@
 import { AnnotationViewImpl } from '../../src/data/annotation'
-
+import { ReporterType } from '../../src/type'
 describe('Annotation', () => {
   const testCases = [
     {
@@ -11,7 +11,8 @@ describe('Annotation', () => {
           file: 'foo.go',
           line: 12,
           test: 'errcheck',
-          message: 'Error'
+          message: 'Error',
+          type: ReporterType.GolangCILint
         }
       },
       expected: `::error file=path/to/app/foo.go,line=12::Error`
