@@ -1,4 +1,4 @@
-import { JUnitReporterFactoryImpl } from '../../src/junit/factory'
+import { SingleJUnitReporterFactoryImpl, MultiJunitReportersFactoryImpl } from '../../src/junit/factory'
 import { GolangCILintReportImpl } from '../../src/junit/golangcilint'
 import { GotestsumReportImpl } from '../../src/junit/gotestsum'
 import { ReporterType } from '../../src/junit/type'
@@ -301,7 +301,7 @@ Details: Bar]]></failure>
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const factory = new JUnitReporterFactoryImpl(input.reader)
+    const factory = new SingleJUnitReporterFactoryImpl(input.reader)
     const report = await factory.fromJSON(input.type, 'path/to', 'junit.xml')
     expect(input.reader).toHaveBeenCalledWith('path/to/junit.xml', {
       encoding: 'utf8'
@@ -309,3 +309,65 @@ Details: Bar]]></failure>
     expect(report).toEqual(expected)
   })
 })
+
+describe('MultiJunitReportersFactory', () => {
+  const singleFactoryMock = {
+    fromJSON: jest.spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromJSON').mockResolvedValue({
+      tests: ['path/to/test.xml'],
+      lints: ['path/to/lint.xml']
+    })
+  }
+
+  const testCases = [
+    {
+      name: 'should create tests and lints',
+      input: {
+        testDirectories: ['path/to'],
+        lintDirectories: ['path/to'],
+        testReportXml: 'test.xml',
+        lintReportXml: 'lint.xml'
+      },
+      expected: {
+        tests: ['path/to/test.xml'],
+        lints: ['path/to/lint.xml']
+      }
+    },
+    {
+      name: 'should create tests',
+      input: {
+        testDirectories: ['path/to'],
+        lintDirectories: [],
+        testReportXml: 'test.xml',
+        lintReportXml: 'lint.xml'
+      },
+      expected: {
+        tests: ['path/to/test.xml'],
+        lints: []
+      }
+    },
+    {
+      name: 'should create lints',
+      input: {
+        testDirectories: [],
+        lintDirectories: ['path/to'],
+        testReportXml: 'test.xml',
+        lintReportXml: 'lint.xml'
+      },
+      expected: {
+        tests: [],
+        lints: ['path/to/lint.xml']
+      }
+    }
+  ]
+
+  it.each(testCases)('%s', async ({ input, expected }) => {
+    const factory = new MultiJunitReportersFactoryImpl(input.reader)
+    const report = await factory.fromJSON(input.type, 'path/to', 'junit.xml')
+    expect(input.reader).toHaveBeenCalledWith('path/to/junit.xml', {
+      encoding: 'utf8'
+    })
+    expect(report).toEqual(expected)
+  })
+})
+
+

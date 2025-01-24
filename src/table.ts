@@ -2,14 +2,14 @@ import fs from 'fs'
 
 import { Result, AnyRecord, ModuleTableRecord } from './type'
 
-import { JUnitReporterFactoryImpl } from './junit/factory'
+import { SingleJUnitReporterFactoryImpl } from './junit/factory'
 import {
   GotestsumSummaryViewImpl,
   GolangCILintSummaryViewImpl
 } from './data/summary'
 import { FailureSummaryViewImpl } from './data/failure'
 import { AnnotationViewImpl } from './data/annotation'
-import { GoModulesFactory } from './factory'
+import { MultiJunitReportersFactoryImpl } from './junit/factory'
 
 const undefinedString = '-'
 
@@ -38,9 +38,9 @@ export async function report(
   failedLintLimit: number
 ): Promise<Output> {
   const { owner, repo, sha } = context
-  const repoterFactory = new JUnitReporterFactoryImpl(fs.promises.readFile)
-  const factory = new GoModulesFactory(repoterFactory)
-  const [test, lint] = await factory.fromXml(
+  const singleFactory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
+  const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+  const [test, lint] = await multiFactory.fromXml(
     testDirs,
     lintDirs,
     testReportXml,
