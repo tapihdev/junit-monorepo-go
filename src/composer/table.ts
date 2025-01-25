@@ -1,20 +1,19 @@
 import {
-  GotestsumSummaryRecord,
-  GolangCILintSummaryRecord,
   FailureRecord,
   GolangCILintSummaryReport,
   FailureReport
 } from '../report/type'
-import { Table } from '../table'
 import { GotestsumSummaryReport } from '../report/type'
+import { Table } from '../table/typed'
+import { UntypedTable } from '../table/untyped'
 
 export interface TableComposer {
   toGotestsumTable(
     reports: GotestsumSummaryReport[]
-  ): Table<GotestsumSummaryRecord>
+  ): UntypedTable
   toGolangCILintTable(
     reports: GolangCILintSummaryReport[]
-  ): Table<GolangCILintSummaryRecord>
+  ): UntypedTable
   toFailuresTable(
     reports: FailureReport[],
     limit?: number
@@ -24,54 +23,38 @@ export interface TableComposer {
 export class TableComposerImpl implements TableComposer {
   toGotestsumTable(
     reports: GotestsumSummaryReport[]
-  ): Table<GotestsumSummaryRecord> {
-    return new Table<GotestsumSummaryRecord>(
+  ): UntypedTable {
+    return new UntypedTable(
       {
         index: 'Module',
-        record: {
-          version: 'Version',
-          result: 'Test',
-          passed: 'Passed',
-          failed: 'Failed',
-          time: 'Time'
-        }
+        values: ['Version', 'Test', 'Passed', 'Failed', 'Time']
       },
       {
         index: ':-----',
-        record: {
-          version: '------:',
-          result: ':---',
-          passed: '-----:',
-          failed: '-----:',
-          time: '---:'
-        }
+        values: ['------:', ':---', '-----:', '-----:', '---:']
       },
       reports.map(report => ({
         index: report.index,
-        record: report.record
+        values: [report.record.version, report.record.result, report.record.passed, report.record.failed, report.record.time]
       }))
     )
   }
 
   toGolangCILintTable(
     reports: GolangCILintSummaryReport[]
-  ): Table<GolangCILintSummaryRecord> {
-    return new Table(
+  ): UntypedTable {
+    return new UntypedTable(
       {
         index: 'Module',
-        record: {
-          result: 'Lint'
-        }
+        values: ['Lint']
       },
       {
         index: ':-----',
-        record: {
-          result: ':---'
-        }
+        values: [':---']
       },
       reports.map(report => ({
         index: report.index,
-        record: report.record
+        values: [report.record.result]
       }))
     )
   }
@@ -79,12 +62,12 @@ export class TableComposerImpl implements TableComposer {
   toFailuresTable(reports: FailureReport[], limit = 10): Table<FailureRecord> {
     const limited = reports.slice(0, limit).map(report => ({
       index: report.index,
-      record: report.record
+      values: report.record
     }))
     if (reports.length > limit) {
       limited.push({
         index: '-',
-        record: {
+        values: {
           type: '-',
           test: '-',
           message: `:warning: and ${reports.length - limit} more...`
@@ -94,7 +77,7 @@ export class TableComposerImpl implements TableComposer {
     return new Table(
       {
         index: 'File',
-        record: {
+        values: {
           type: 'Type',
           test: 'Case',
           message: 'Message'
@@ -102,7 +85,7 @@ export class TableComposerImpl implements TableComposer {
       },
       {
         index: ':---',
-        record: {
+        values: {
           type: ':---',
           test: ':---',
           message: ':------'

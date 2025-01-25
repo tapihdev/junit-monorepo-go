@@ -27,7 +27,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             version: 'Version',
             result: 'Test',
             passed: 'Passed',
@@ -37,7 +37,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             version: '------:',
             result: ':---',
             passed: '-----:',
@@ -56,7 +56,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             version: 'Version',
             testResult: 'Test',
             testPassed: 'Passed',
@@ -67,7 +67,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             version: '------:',
             testResult: ':---',
             testPassed: '-----:',
@@ -87,7 +87,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             version: 'Version',
             testResult: 'Test',
             testPassed: 'Passed',
@@ -98,7 +98,7 @@ describe('TableComposerImpl#toGotestsumTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             version: '------:',
             testResult: ':---',
             testPassed: '-----:',
@@ -143,7 +143,7 @@ describe('TableComposerImpl#toGolangCILintTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             type: 'Type',
             test: 'Test',
             message: 'Message'
@@ -151,7 +151,7 @@ describe('TableComposerImpl#toGolangCILintTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             type: ':---',
             test: ':---',
             message: ':---'
@@ -168,7 +168,7 @@ describe('TableComposerImpl#toGolangCILintTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             type: 'Type',
             test: 'Test',
             message: 'Message'
@@ -176,7 +176,7 @@ describe('TableComposerImpl#toGolangCILintTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             type: ':---',
             test: ':---',
             message: ':---'
@@ -229,7 +229,7 @@ describe('TableComposerImpl#toFailuresTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             type: 'Type',
             test: 'Test',
             message: 'Message'
@@ -237,7 +237,7 @@ describe('TableComposerImpl#toFailuresTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             type: ':---',
             test: ':---',
             message: ':---'
@@ -259,7 +259,7 @@ describe('TableComposerImpl#toFailuresTable', () => {
       expected: {
         header: {
           index: 'Module',
-          record: {
+          values: {
             type: 'Type',
             test: 'Test',
             message: 'Message'
@@ -267,7 +267,7 @@ describe('TableComposerImpl#toFailuresTable', () => {
         },
         separator: {
           index: ':-----',
-          record: {
+          values: {
             type: ':---',
             test: ':---',
             message: ':---'

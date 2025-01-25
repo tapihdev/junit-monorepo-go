@@ -7,7 +7,7 @@ import {
 import { FailureSummaryViewImpl } from './composer/failure'
 import { AnnotationViewImpl } from './composer/annotation'
 import { GolangCILintSummaryReport, GotestsumSummaryReport } from './junit/type'
-import { Table } from './table'
+import { Table } from './table/typed'
 
 export type GitHubContext = {
   owner: string
