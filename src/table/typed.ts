@@ -1,3 +1,5 @@
+import { UntypedTable } from "./untyped"
+
 export type Row<T extends Record<string, string | undefined>> = {
   readonly index: string
   readonly values: T
@@ -18,26 +20,29 @@ export class Table<T extends Record<string, string | undefined>> {
     return Object.keys(this.header.values).length
   }
 
-  static concatVertical<T extends Record<string, string | undefined>>(table1: Table<T>, table2: Table<T>): Table<T> {
+  concat(other: Table<T>): Table<T> {
     return new Table(
-      table1.header,
-      table1.separator,
-      [...table1.records, ...table2.records]
+      this.header,
+      this.separator,
+      [...this.records, ...other.records]
     )
   }
 
-  toString(): string {
-    if (this.rows === 0) {
-      return ''
-    }
-
-    const header = `| ${this.header.index} | ${Object.values(this.header.values).join(' | ')} |`
-    const separator = `| ${this.separator.index} | ${Object.values(this.separator.values).join(' | ')} |`
-
-    return [
-      header,
-      separator,
-      ...this.records.map(r => `| ${r.index} | ${Object.values(r.values).join(' | ')} |`)
-    ].join('\n')
+  toUntyped(): UntypedTable {
+    return new UntypedTable(
+      {
+        index: this.header.index,
+        values: Object.values(this.header.values)
+      },
+      {
+        index: this.separator.index,
+        values: Object.values(this.separator.values)
+      },
+      this.records.map(r => ({
+        index: r.index,
+        values: Object.values(r.values)
+      }))
+    )
   }
 }
+

@@ -18,18 +18,18 @@ export class UntypedTable {
     return this.header.values.length
   }
 
-  static joinLeft(table1: UntypedTable, table2: UntypedTable): UntypedTable {
+  join(other: UntypedTable): UntypedTable {
     const header = {
-      index: table1.header.index,
-      values: [...table1.header.values, ...table2.header.values]
+      index: this.header.index,
+      values: [...this.header.values, ...other.header.values]
     }
     const separator = {
-      index: table1.separator.index,
-      values: [...table1.separator.values, ...table2.separator.values]
+      index: this.separator.index,
+      values: [...this.separator.values, ...other.separator.values]
     }
     const table2Map = new Map<string, UntypedRow>()
-    table2.records.forEach(record => table2Map.set(record.index, record))
-    const merged = table1.records.map(record => {
+    other.records.forEach(record => table2Map.set(record.index, record))
+    const merged = this.records.map(record => {
       const v = table2Map.get(record.index)
       if (v) {
         return {
