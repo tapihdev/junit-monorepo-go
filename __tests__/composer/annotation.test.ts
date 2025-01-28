@@ -1,4 +1,4 @@
-import { AnnotationComposerImpl } from '../../src/composer/annotation'
+import { AnnotationComposer } from '../../src/composer/annotation'
 import { FailureReport } from '../../src/report/type'
 
 describe('Annotation', () => {
@@ -48,7 +48,7 @@ describe('Annotation', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new AnnotationComposerImpl()
+    const view = new AnnotationComposer()
     const result = view.toArray(input.failures)
     expect(result).toEqual(expected)
   })
