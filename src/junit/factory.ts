@@ -5,23 +5,11 @@ import { parseStringPromise } from 'xml2js'
 import {
   JUnitReport,
   TestSuites,
-  GolangCILintReporter,
-  GotestsumReporter,
   AnyReporter
 } from './type'
 import { ReporterType, GitHubContext } from '../type'
 import { GolangCILintReporterImpl } from './golangcilint'
 import { GotestsumReporterImpl } from './gotestsum'
-
-export interface MultiJunitReportersFactory {
-  fromXml(
-    context: GitHubContext,
-    testDirectories: string[],
-    lintDirectories: string[],
-    testReportXml: string,
-    lintReportXml: string
-  ): Promise<[GotestsumReporter[], GolangCILintReporter[]]>
-}
 
 export interface SingleJUnitReporterFactory {
   fromXml(
@@ -75,43 +63,3 @@ export class SingleJUnitReporterFactoryImpl
   }
 }
 
-export class MultiJunitReportersFactoryImpl
-  implements MultiJunitReportersFactory
-{
-  constructor(private _parser: SingleJUnitReporterFactory) {}
-
-  async fromXml(
-    context: GitHubContext,
-    testDirectories: string[],
-    lintDirectories: string[],
-    testReportXml: string,
-    lintReportXml: string
-  ): Promise<[GotestsumReporter[], GolangCILintReporter[]]> {
-    const all = await Promise.all([
-      await Promise.all(
-        testDirectories.map(
-          async d =>
-            (await this._parser.fromXml(
-              context,
-              ReporterType.Gotestsum,
-              d,
-              testReportXml
-            )) as GotestsumReporter
-        )
-      ),
-      await Promise.all(
-        lintDirectories.map(
-          async d =>
-            (await this._parser.fromXml(
-              context,
-              ReporterType.GolangCILint,
-              d,
-              lintReportXml
-            )) as GolangCILintReporter
-        )
-      )
-    ])
-
-    return [all[0], all[1]]
-  }
-}

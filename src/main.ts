@@ -13,9 +13,8 @@ import { makeMarkdownReport } from './markdown'
 import { TableComposer } from './composer'
 
 import {
-  SingleJUnitReporterFactoryImpl,
-  MultiJunitReportersFactoryImpl
-} from './junit/factory'
+  SingleJUnitReporterFactoryImpl} from './junit/factory'
+import { MultiJunitReportersFactoryImpl } from './composer/MultiJunitReportersFactoryImpl'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 

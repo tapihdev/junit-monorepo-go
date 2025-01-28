@@ -18,26 +18,28 @@ export class UntypedTable {
     return this.header.values.length
   }
 
-  join(other: UntypedTable): UntypedTable {
+  join(others: UntypedTable[]): UntypedTable {
     const header = {
       index: this.header.index,
-      values: [...this.header.values, ...other.header.values]
+      values: [...this.header.values, ...others.map(o => o.header.values).flat()]
     }
     const separator = {
       index: this.separator.index,
-      values: [...this.separator.values, ...other.separator.values]
+      values: [...this.separator.values, ...others.map(o => o.separator.values).flat()]
     }
-    const table2Map = new Map<string, UntypedRow>()
-    other.records.forEach(record => table2Map.set(record.index, record))
+    const maps = others.map(o => o.records).map(r => new Map<string, UntypedRow>(r.map(r => [r.index, r])))
     const merged = this.records.map(record => {
-      const v = table2Map.get(record.index)
-      if (v) {
-        return {
-          index: record.index,
-          values: [...record.values, ...v.values]
+      const v = others.map(() => new Array(this.columns).fill(undefined))
+      for (const i in others) {
+        const r = maps[i].get(record.index)
+        if (r) {
+          v[i] = r.values
         }
       }
-      return record
+      return {
+        index: record.index,
+        values: [...record.values, ...v.flat()]
+      }
     })
     return new UntypedTable(header, separator, merged)
   }
