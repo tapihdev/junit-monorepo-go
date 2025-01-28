@@ -1,5 +1,7 @@
+import { Result } from '../type';
 import { TableComposerImpl } from './table';
-import { AnnotationComposerImpl } from './annotation';
+import { AnnotationComposer } from './annotation';
+import { ResultComposer } from './result';
 import { ReporterType, GitHubContext } from '../type';
 import { SingleJUnitReporterFactory } from '../junit/factory';
 import { GolangCILintSummaryReport, GotestsumSummaryReport, GolangCILintSummaryRecord, GotestsumSummaryRecord, FailureRecord } from '../report/type';
@@ -12,6 +14,7 @@ type XmlFileGroup = {
 }
 
 type TableSet = {
+  result: Result,
   summary: UntypedTable,
   failures: UntypedTable,
   annotations: string[]
@@ -19,7 +22,8 @@ type TableSet = {
 
 export class SingleTableSetFactory {
   private _tableComposer: TableComposerImpl = new TableComposerImpl();
-  private _annotationComposer: AnnotationComposerImpl = new AnnotationComposerImpl();
+  private _annotationComposer: AnnotationComposer = new AnnotationComposer();
+  private _resultComposer: ResultComposer = new ResultComposer();
 
   constructor(
     private _factory: SingleJUnitReporterFactory,
@@ -45,6 +49,7 @@ export class SingleTableSetFactory {
     const summaryTable = xmlFileGroup.type === ReporterType.GolangCILint ? this._tableComposer.toGolangCILintTable(summaries as GolangCILintSummaryReport[]) : this._tableComposer.toGotestsumTable(summaries as GotestsumSummaryReport[])
 
     return {
+      result: this._resultComposer.toResult(reports.map(r => r.result)),
       summary: summaryTable.toUntyped(),
       failures: this._tableComposer.toFailuresTable(failures).toUntyped(),
       annotations: this._annotationComposer.toArray(failures)
@@ -52,7 +57,9 @@ export class SingleTableSetFactory {
   }
 }
 
-export class MultiTableSetsFactory {
+export class CompositeTableSetFactory {
+  private _resultComposer: ResultComposer = new ResultComposer();
+
   constructor(
     private _factory: SingleTableSetFactory,
   ) {}
@@ -77,6 +84,7 @@ export class MultiTableSetsFactory {
     const others = reportsSets.slice(1)
 
     return {
+      result: this._resultComposer.toResult(reportsSets.map(r => r.result)),
       summary: main.summary.join(others.map(r => r.summary)),
       failures: main.failures.join(others.map(r => r.failures)),
       annotations: reportsSets.flatMap(r => r.annotations)

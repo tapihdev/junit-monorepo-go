@@ -8,20 +8,7 @@ import {
   GolangCILintSummaryRecord
 } from '../report/type'
 
-export interface TableComposer {
-  toGotestsumTable(
-    reports: GotestsumSummaryReport[]
-  ): Table<GotestsumSummaryRecord>
-  toGolangCILintTable(
-    reports: GolangCILintSummaryReport[]
-  ): Table<GolangCILintSummaryRecord>
-  toFailuresTable(
-    reports: FailureReport[],
-    limit?: number
-  ): Table<FailureRecord>
-}
-
-export class TableComposerImpl implements TableComposer {
+export class TableComposerImpl {
   toGotestsumTable(
     reports: GotestsumSummaryReport[]
   ): Table<GotestsumSummaryRecord> {
