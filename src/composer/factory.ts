@@ -1,55 +1,85 @@
 import { TableComposerImpl } from './table';
 import { AnnotationComposerImpl } from './annotation';
 import { ReporterType, GitHubContext } from '../type';
-import { Table } from '../table/typed';
 import { SingleJUnitReporterFactory } from '../junit/factory';
 import { GolangCILintSummaryReport, GotestsumSummaryReport, GolangCILintSummaryRecord, GotestsumSummaryRecord, FailureRecord } from '../report/type';
-import { run } from 'src/main';
+import { UntypedTable } from '../table/untyped';
+
+type XmlFileGroup = {
+  type: ReporterType,
+  directories: string[],
+  fileName: string,
+}
 
 type TableSet = {
-  type: ReporterType,
-  summary: Table<GotestsumSummaryRecord | GolangCILintSummaryRecord>,
-  failures: Table<FailureRecord>,
+  summary: UntypedTable,
+  failures: UntypedTable,
   annotations: string[]
 }
 
-export class TableSetFactory {
+export class SingleTableSetFactory {
   private _tableComposer: TableComposerImpl = new TableComposerImpl();
   private _annotationComposer: AnnotationComposerImpl = new AnnotationComposerImpl();
 
   constructor(
     private _factory: SingleJUnitReporterFactory,
-  ) {
-    this._tableComposer = new TableComposerImpl();
-    this._annotationComposer = new AnnotationComposerImpl();
-  }
+  ) {}
 
   async fromXml(
     context: GitHubContext,
-    type: ReporterType,
-    directories: string[],
-    xmlName: string,
+    xmlFileGroup: XmlFileGroup,
   ): Promise<TableSet> {
     const reports = await Promise.all(
-      directories.map(
+      xmlFileGroup.directories.map(
         async (d) => (await this._factory.fromXml(
           context,
-          type,
+          xmlFileGroup.type,
           d,
-          xmlName
+          xmlFileGroup.fileName
         ))
       )
     )
 
     const summaries = reports.map(r => r.summary)
     const failures = reports.map(r => r.failures).flat()
-    const summaryTable = type === ReporterType.GolangCILint ? this._tableComposer.toGolangCILintTable(summaries as GolangCILintSummaryReport[]) : this._tableComposer.toGotestsumTable(summaries as GotestsumSummaryReport[])
+    const summaryTable = xmlFileGroup.type === ReporterType.GolangCILint ? this._tableComposer.toGolangCILintTable(summaries as GolangCILintSummaryReport[]) : this._tableComposer.toGotestsumTable(summaries as GotestsumSummaryReport[])
 
     return {
-      type,
-      summary: summaryTable,
-      failures: this._tableComposer.toFailuresTable(failures),
+      summary: summaryTable.toUntyped(),
+      failures: this._tableComposer.toFailuresTable(failures).toUntyped(),
       annotations: this._annotationComposer.toArray(failures)
+    }
+  }
+}
+
+export class MultiTableSetsFactory {
+  constructor(
+    private _factory: SingleTableSetFactory,
+  ) {}
+
+  async fromXml(
+    context: GitHubContext,
+    xmlFileGroups: XmlFileGroup[],
+  ): Promise<TableSet | undefined> {
+    if (xmlFileGroups.length === 0) {
+      return undefined
+    }
+    const reportsSets = await Promise.all(
+      xmlFileGroups.map(
+        async (xmlPathSet) => (await this._factory.fromXml(
+          context,
+          xmlPathSet,
+        ))
+      )
+    )
+
+    const main = reportsSets[0]
+    const others = reportsSets.slice(1)
+
+    return {
+      summary: main.summary.join(others.map(r => r.summary)),
+      failures: main.failures.join(others.map(r => r.failures)),
+      annotations: reportsSets.flatMap(r => r.annotations)
     }
   }
 }
