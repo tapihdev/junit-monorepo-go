@@ -10,11 +10,9 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
-import { TableComposer } from './composer'
-
-import {
-  SingleJUnitReporterFactoryImpl} from './junit/factory'
-import { MultiJunitReportersFactoryImpl } from './composer/MultiJunitReportersFactoryImpl'
+import { SingleJUnitReporterFactoryImpl } from './junit/factory'
+import { SingleTableSetFactory, CompositeTableSetFactory } from './composer/factory'
+import { ReporterType } from './type'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -29,44 +27,55 @@ export async function run(): Promise<void> {
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
 
+    const { owner, repo } = github.context.repo
+    const { runId, actor } = github.context
+
     // TODO: this is a temporary logic just to make modification easier
     const test = config['test']
     if (test === undefined) {
       throw new Error('`test` is required')
     }
-    const lint = config['lint']
 
-    const testDirs = test.directories
-    const lintDirs = lint?.directories ?? []
-    const testReportXml = test.fileName
-    const lintReportXml = lint?.fileName ?? ''
-    const { owner, repo } = github.context.repo
-    const { runId, actor } = github.context
+    const tableSetsInput = [
+      {
+        type: ReporterType.Gotestsum,
+        directories: test.directories,
+        fileName: test.fileName
+      }
+    ]
+
+    const lint = config['lint']
+    if (lint !== undefined) {
+      tableSetsInput.push({
+        type: ReporterType.GolangCILint,
+        directories: lint?.directories ?? [],
+        fileName: lint?.fileName ?? ''
+      })
+    }
 
     core.info(`* make a junit report`)
-    const singleFactory = new SingleJUnitReporterFactoryImpl(
+    const singleJUnitReporterFactory = new SingleJUnitReporterFactoryImpl(
       fs.promises.readFile
     )
-    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
+    const singleTableSetFactory = new SingleTableSetFactory(
+      singleJUnitReporterFactory
+    )
+    const composite = new CompositeTableSetFactory(singleTableSetFactory)
     const githubContext = {
       owner,
       repo,
       sha
     }
 
-    const [tests, lints] = await multiFactory.fromXml(
+    const tableSets = await composite.fromXml(
       githubContext,
-      testDirs,
-      lintDirs,
-      testReportXml,
-      lintReportXml
+      tableSetsInput
     )
 
-    const composer = new TableComposer(tests, lints)
-    const result = composer.result()
-    const summary = composer.summary(githubContext)
-    const failures = composer.failures(githubContext)
-    const annotations = composer.annotations()
+    if (tableSets === undefined) {
+      core.info('skip making a report because no table sets was created')
+      return
+    }
 
     const body = makeMarkdownReport(
       {
@@ -77,11 +86,11 @@ export async function run(): Promise<void> {
         pullNumber,
         actor
       },
-      result,
-      summary,
-      failures
+      tableSets.result,
+      tableSets.summary.toString(),
+      tableSets.failures.toString(),
     )
-    annotations.forEach(annotation => core.info(annotation))
+    tableSets.annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
