@@ -1,19 +1,20 @@
-import {
-  FailureRecord,
-  GolangCILintSummaryReport,
-  FailureReport
-} from '../report/type'
-import { GotestsumSummaryReport } from '../report/type'
 import { Table } from '../table/typed'
-import { UntypedTable } from '../table/untyped'
+import {
+  FailureReport,
+  GolangCILintSummaryReport,
+  GotestsumSummaryReport,
+  FailureRecord,
+  GotestsumSummaryRecord,
+  GolangCILintSummaryRecord
+} from '../report/type'
 
 export interface TableComposer {
   toGotestsumTable(
     reports: GotestsumSummaryReport[]
-  ): UntypedTable
+  ): Table<GotestsumSummaryRecord>
   toGolangCILintTable(
     reports: GolangCILintSummaryReport[]
-  ): UntypedTable
+  ): Table<GolangCILintSummaryRecord>
   toFailuresTable(
     reports: FailureReport[],
     limit?: number
@@ -23,38 +24,54 @@ export interface TableComposer {
 export class TableComposerImpl implements TableComposer {
   toGotestsumTable(
     reports: GotestsumSummaryReport[]
-  ): UntypedTable {
-    return new UntypedTable(
+  ): Table<GotestsumSummaryRecord> {
+    return new Table(
       {
         index: 'Module',
-        values: ['Version', 'Test', 'Passed', 'Failed', 'Time']
+        values: {
+          version: 'Version',
+          result: 'Result',
+          passed: 'Passed',
+          failed: 'Failed',
+          time: 'Time'
+        }
       },
       {
         index: ':-----',
-        values: ['------:', ':---', '-----:', '-----:', '---:']
+        values: {
+          version: '------:',
+          result: ':---',
+          passed: '-----:',
+          failed: '-----:',
+          time: '---:'
+        }
       },
       reports.map(report => ({
         index: report.index,
-        values: [report.record.version, report.record.result, report.record.passed, report.record.failed, report.record.time]
+        values: report.record
       }))
     )
   }
 
   toGolangCILintTable(
     reports: GolangCILintSummaryReport[]
-  ): UntypedTable {
-    return new UntypedTable(
+  ): Table<GolangCILintSummaryRecord> {
+    return new Table(
       {
         index: 'Module',
-        values: ['Lint']
+        values: {
+          result: 'Result'
+        }
       },
       {
         index: ':-----',
-        values: [':---']
+        values: {
+          result: ':---'
+        }
       },
       reports.map(report => ({
         index: report.index,
-        values: [report.record.result]
+        values: report.record
       }))
     )
   }
