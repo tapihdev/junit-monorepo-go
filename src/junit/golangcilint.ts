@@ -12,6 +12,13 @@ export class GolangCILintReporterImpl implements GolangCILintReporter {
     private readonly _junit: JUnitReport
   ) {}
 
+  get result(): Result {
+    // Passed if there are no test suites, because golangci-lint reports only failures
+    return this._junit.testsuites.testsuite === undefined
+      ? Result.Passed
+      : Result.Failed
+  }
+
   get summary(): GolangCILintSummaryReportImpl {
     return new GolangCILintSummaryReportImpl(
       this.context,
@@ -69,13 +76,6 @@ export class GolangCILintReporterImpl implements GolangCILintReporter {
           message
         )
       })
-  }
-
-  private get result(): Result {
-    // Passed if there are no test suites, because golangci-lint reports only failures
-    return this._junit.testsuites.testsuite === undefined
-      ? Result.Passed
-      : Result.Failed
   }
 
   private get tests(): number {

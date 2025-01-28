@@ -17,6 +17,25 @@ export class GotestsumReporterImpl implements GotestsumReporter {
     private readonly _junit: JUnitReport
   ) {}
 
+  get result(): Result {
+    if (this._junit.testsuites.$ === undefined) {
+      return Result.Unknown
+    }
+
+    if (this._junit.testsuites.$.failures !== '0') {
+      return Result.Failed
+    }
+
+    if (
+      this._junit.testsuites.$.skipped !== undefined &&
+      this._junit.testsuites.$.skipped !== '0'
+    ) {
+      return Result.Skipped
+    }
+
+    return Result.Passed
+  }
+
   get summary(): GotestsumSummaryReportImpl {
     return new GotestsumSummaryReportImpl(
       this.context,
@@ -73,25 +92,6 @@ export class GotestsumReporterImpl implements GotestsumReporter {
         })
       })
       .flat()
-  }
-
-  private get result(): Result {
-    if (this._junit.testsuites.$ === undefined) {
-      return Result.Unknown
-    }
-
-    if (this._junit.testsuites.$.failures !== '0') {
-      return Result.Failed
-    }
-
-    if (
-      this._junit.testsuites.$.skipped !== undefined &&
-      this._junit.testsuites.$.skipped !== '0'
-    ) {
-      return Result.Skipped
-    }
-
-    return Result.Passed
   }
 
   private get tests(): number {

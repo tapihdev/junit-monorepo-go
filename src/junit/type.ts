@@ -4,8 +4,10 @@ import {
   FailureReport,
   SummaryReport
 } from 'src/report/type'
+import { Result } from '../type'
 
 export interface Reportable<T extends SummaryReport> {
+  readonly result: Result
   readonly path: string
   readonly summary: T
   readonly failures: FailureReport[]
