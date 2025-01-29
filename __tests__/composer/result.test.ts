@@ -1,7 +1,7 @@
-import { Result } from '../../src/type'
-import { ResultComposer } from '../../src/composer/result'
+import { Result } from "../../src/type"
+import { toResult } from "../../src/composer/result"
 
-describe('Result', () => {
+describe('toResult', () => {
   const testCases = [
     {
       name: 'should return success if empty',
@@ -21,8 +21,7 @@ describe('Result', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const composer = new ResultComposer()
-    const result = composer.toResult(input)
+    const result = toResult(input)
     expect(result).toEqual(expected)
   })
 })

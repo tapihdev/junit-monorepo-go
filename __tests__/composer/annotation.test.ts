@@ -1,7 +1,7 @@
-import { AnnotationComposer } from '../../src/composer/annotation'
-import { FailureReport } from '../../src/report/type'
+import { toAnnotations } from "../../src/composer/annotation"
+import { FailureReport } from "../../src/report/type"
 
-describe('Annotation', () => {
+describe('ReportAggregator#toAnnotations', () => {
   const failureReportMock = jest.fn<FailureReport, []>(() => ({
     index: 'path/to/app/foo.go:12',
     record: {
@@ -48,8 +48,8 @@ describe('Annotation', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new AnnotationComposer()
-    const result = view.toArray(input.failures)
+    const result = toAnnotations(input.failures)
     expect(result).toEqual(expected)
   })
 })
+
