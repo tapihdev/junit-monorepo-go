@@ -11,15 +11,6 @@ import { ReporterType, GitHubContext } from '../type'
 import { GolangCILintReporterImpl } from './golangcilint'
 import { GotestsumReporterImpl } from './gotestsum'
 
-export interface SingleJUnitReporterFactory {
-  fromXml(
-    context: GitHubContext,
-    type: ReporterType,
-    directory: string,
-    fileName: string
-  ): Promise<AnyReporter>
-}
-
 export type FileReader = typeof fs.promises.readFile
 
 // NOTE: xml2js returns an empty string instead of an empty object
@@ -27,9 +18,7 @@ type JUnitReportUnsafe = {
   testsuites: TestSuites | ''
 }
 
-export class SingleJUnitReporterFactoryImpl
-  implements SingleJUnitReporterFactory
-{
+export class JUnitReporterFactory {
   constructor(private readonly reader: FileReader) {}
 
   async fromXml(

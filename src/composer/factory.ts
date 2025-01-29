@@ -3,8 +3,8 @@ import { TableComposerImpl } from './table';
 import { AnnotationComposer } from './annotation';
 import { ResultComposer } from './result';
 import { ReporterType, GitHubContext } from '../type';
-import { SingleJUnitReporterFactory } from '../junit/factory';
-import { GolangCILintSummaryReport, GotestsumSummaryReport, GolangCILintSummaryRecord, GotestsumSummaryRecord, FailureRecord } from '../report/type';
+import { JUnitReporterFactory } from '../junit/factory';
+import { GolangCILintSummaryReport, GotestsumSummaryReport } from '../report/type';
 import { UntypedTable } from '../table/untyped';
 
 type XmlFileGroup = {
@@ -20,16 +20,16 @@ type TableSet = {
   annotations: string[]
 }
 
-export class SingleTableSetFactory {
+export class TableSetFactory {
   private _tableComposer: TableComposerImpl = new TableComposerImpl();
   private _annotationComposer: AnnotationComposer = new AnnotationComposer();
   private _resultComposer: ResultComposer = new ResultComposer();
 
   constructor(
-    private _factory: SingleJUnitReporterFactory,
+    private _factory: JUnitReporterFactory,
   ) {}
 
-  async fromXml(
+  async single(
     context: GitHubContext,
     xmlFileGroup: XmlFileGroup,
   ): Promise<TableSet> {
@@ -55,16 +55,8 @@ export class SingleTableSetFactory {
       annotations: this._annotationComposer.toArray(failures)
     }
   }
-}
 
-export class CompositeTableSetFactory {
-  private _resultComposer: ResultComposer = new ResultComposer();
-
-  constructor(
-    private _factory: SingleTableSetFactory,
-  ) {}
-
-  async fromXml(
+  async multi(
     context: GitHubContext,
     xmlFileGroups: XmlFileGroup[],
   ): Promise<TableSet | undefined> {
@@ -73,7 +65,7 @@ export class CompositeTableSetFactory {
     }
     const reportsSets = await Promise.all(
       xmlFileGroups.map(
-        async (xmlPathSet) => (await this._factory.fromXml(
+        async (xmlPathSet) => (await this.single(
           context,
           xmlPathSet,
         ))

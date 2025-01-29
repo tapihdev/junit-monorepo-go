@@ -10,8 +10,8 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
-import { SingleJUnitReporterFactoryImpl } from './junit/factory'
-import { SingleTableSetFactory, CompositeTableSetFactory } from './composer/factory'
+import { JUnitReporterFactory } from './junit/factory'
+import { TableSetFactory } from './composer/factory'
 import { ReporterType } from './type'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
@@ -54,21 +54,15 @@ export async function run(): Promise<void> {
     }
 
     core.info(`* make a junit report`)
-    const singleJUnitReporterFactory = new SingleJUnitReporterFactoryImpl(
+    const composite = new TableSetFactory(new JUnitReporterFactory(
       fs.promises.readFile
-    )
-    const singleTableSetFactory = new SingleTableSetFactory(
-      singleJUnitReporterFactory
-    )
-    const composite = new CompositeTableSetFactory(singleTableSetFactory)
-    const githubContext = {
-      owner,
-      repo,
-      sha
-    }
-
-    const tableSets = await composite.fromXml(
-      githubContext,
+    ))
+    const tableSets = await composite.multi(
+      {
+        owner,
+        repo,
+        sha
+      },
       tableSetsInput
     )
 

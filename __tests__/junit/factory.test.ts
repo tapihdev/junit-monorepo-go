@@ -1,8 +1,7 @@
 import fs from 'fs'
 
 import {
-  SingleJUnitReporterFactoryImpl,
-  MultiJunitReportersFactoryImpl
+  JUnitReporterFactory,
 } from '../../src/junit/factory'
 import { ReporterType } from '../../src/type'
 import { Result } from '../../src/type'
@@ -254,7 +253,7 @@ describe('JUnitReporterFactoryImpl', () => {
       const fileReaderMock = jest
         .spyOn(fs.promises, 'readFile')
         .mockResolvedValue(input.xml)
-      const factory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
+      const factory = new JUnitReporterFactory(fs.promises.readFile)
       await factory.fromXml(
         context,
         ReporterType.Gotestsum,
@@ -394,7 +393,7 @@ Details: Bar]]></failure>
       const fileReaderMock = jest
         .spyOn(fs.promises, 'readFile')
         .mockResolvedValue(input.xml)
-      const factory = new SingleJUnitReporterFactoryImpl(fs.promises.readFile)
+      const factory = new JUnitReporterFactory(fs.promises.readFile)
       await factory.fromXml(
         context,
         ReporterType.GolangCILint,
@@ -410,98 +409,5 @@ Details: Bar]]></failure>
         expected.parsed
       )
     })
-  })
-})
-
-// TODO: use mock
-describe('MultiJunitReportersFactory', () => {
-  const context = {
-    owner: 'owner',
-    repo: 'repo',
-    sha: 'sha'
-  }
-  const testCases = [
-    {
-      name: 'should create empty arrays',
-      input: {
-        testDirectories: [],
-        lintDirectories: [],
-        testReportXml: 'test.xml',
-        lintReportXml: 'lint.xml'
-      },
-      expected: {
-        tests: 0,
-        lints: 0,
-        called: 0
-      }
-    },
-    {
-      name: 'should create tests and lints',
-      input: {
-        testDirectories: ['path/to'],
-        lintDirectories: ['path/to'],
-        testReportXml: 'test.xml',
-        lintReportXml: 'lint.xml'
-      },
-      expected: {
-        tests: 1,
-        lints: 1,
-        called: 2
-      }
-    },
-    {
-      name: 'should create tests',
-      input: {
-        testDirectories: ['path/to'],
-        lintDirectories: [],
-        testReportXml: 'test.xml',
-        lintReportXml: 'lint.xml'
-      },
-      expected: {
-        tests: 1,
-        lints: 0,
-        called: 1
-      }
-    },
-    {
-      name: 'should create lints',
-      input: {
-        testDirectories: [],
-        lintDirectories: ['path/to'],
-        testReportXml: 'test.xml',
-        lintReportXml: 'lint.xml'
-      },
-      expected: {
-        tests: 0,
-        lints: 1,
-        called: 1
-      }
-    }
-  ]
-
-  it.each(testCases)('%s', async ({ input, expected }) => {
-    const fromXmlMock = jest
-      .spyOn(SingleJUnitReporterFactoryImpl.prototype, 'fromXml')
-      .mockResolvedValue({
-        path: 'path/to/junit.xml',
-        summary: {
-          result: Result.Passed
-        },
-        failures: []
-      })
-    const singleFactory = new SingleJUnitReporterFactoryImpl(
-      fs.promises.readFile
-    )
-    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
-    const report = await multiFactory.fromXml(
-      context,
-      input.testDirectories,
-      input.lintDirectories,
-      input.testReportXml,
-      input.lintReportXml
-    )
-    expect(report[0].length).toEqual(expected.tests)
-    expect(report[1].length).toEqual(expected.lints)
-    expect(fromXmlMock).toHaveBeenCalledTimes(expected.called)
   })
 })
