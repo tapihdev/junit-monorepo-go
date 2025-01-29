@@ -8,7 +8,15 @@ export class UntypedTable {
     readonly header: UntypedRow,
     readonly separator: UntypedRow,
     readonly records: UntypedRow[]
-  ) {}
+  ) {
+    if (this.header.values.length !== this.separator.values.length) {
+      throw new Error('header and separator must have the same length')
+    }
+
+    if (this.records.some(r => r.values.length !== this.header.values.length)) {
+      throw new Error('records must have the same length as header')
+    }
+  }
 
   get rows(): number {
     return this.records.length
@@ -45,6 +53,10 @@ export class UntypedTable {
   }
 
   toString(): string {
+    if (this.rows === 0) {
+      return ''
+    }
+
     return [
       `| ${this.header.index} | ${this.header.values.join(' | ')} |`,
       `| ${this.separator.index} | ${this.separator.values.join(' | ')} |`,
