@@ -22,7 +22,7 @@ describe('Failure', () => {
       },
       expected: {
         index:
-          '[foo.go:12](https://github.com/owner/repo/blob/sha/path/to/go/app/foo.go#L12)',
+          '[path/to/go/app/foo.go:12](https://github.com/owner/repo/blob/sha/path/to/go/app/foo.go#L12)',
         record: {
           type: ReporterType.GolangCILint,
           test: 'errcheck',

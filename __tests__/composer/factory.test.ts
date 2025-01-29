@@ -64,12 +64,12 @@ describe('TableSetFactory', () => {
           annotations: ['error'],
           result: Result.Passed,
           summary: {
-            columns: ['Module', 'result'],
-            rows: ['module1'],
+            columns: 2,
+            rows: 1,
           },
           failures: {
-            columns: ['Test', 'type', 'message'],
-            rows: ['TestName'],
+            columns: 3,
+            rows: 1,
           }
         }
       },
@@ -95,12 +95,12 @@ describe('TableSetFactory', () => {
           annotations: [],
           result: Result.Passed,
           summary: {
-            columns: ['Module', 'version', 'result', 'passed', 'failed', 'time'],
-            rows: ['module1'],
+            columns: 6,
+            rows: 1,
           },
           failures: {
-            columns: ['Test', 'type', 'message'],
-            rows: ['TestName'],
+            columns: 3,
+            rows: 1,
           }
         }
       }

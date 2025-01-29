@@ -24,17 +24,13 @@ describe('GolangCILintTable', () => {
         header: {
           index: 'Module',
           values: {
-            type: 'Type',
-            test: 'Test',
-            message: 'Message'
+            result: 'Result'
           }
         },
         separator: {
           index: ':-----',
           values: {
-            type: ':---',
-            test: ':---',
-            message: ':---'
+            result: ':---'
           }
         },
         records: 0
@@ -49,17 +45,13 @@ describe('GolangCILintTable', () => {
         header: {
           index: 'Module',
           values: {
-            type: 'Type',
-            test: 'Test',
-            message: 'Message'
+            result: 'Result'
           }
         },
         separator: {
           index: ':-----',
           values: {
-            type: ':---',
-            test: ':---',
-            message: ':---'
+            result: ':---'
           }
         },
         records: 1
@@ -74,17 +66,13 @@ describe('GolangCILintTable', () => {
         header: {
           index: 'Module',
           values: {
-            type: 'Type',
-            test: 'Test',
-            message: 'Message'
+            result: 'Result'
           }
         },
         separator: {
           index: ':-----',
           values: {
-            type: ':---',
-            test: ':---',
-            message: ':---'
+            result: ':---'
           }
         },
         records: 2

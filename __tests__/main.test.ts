@@ -13,7 +13,7 @@ import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
 import fs from 'fs'
 import { TableSetFactory } from '../src/composer/factory'
-import { Result } from '../src/type'
+import { ReporterType, Result } from '../src/type'
 import { UntypedTable } from '../src/table/untyped'
 
 // Mock the action's main function
@@ -85,9 +85,9 @@ describe('action', () => {
 
 #### Result: \`Passed\`🙆‍♀️
 
-| H | V11 | V12 |
+| H | F1 | F2 |
 | - | - | - |
-| R1 | V21 | V22 |
+| R1 | V11 | V12 |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/pull/123/commits/sha) pushed by @actor.*
@@ -135,28 +135,36 @@ lint:
 
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      2,
-      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(3, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(2, 'a')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'b')
     expect(infoMock).toHaveBeenNthCalledWith(
       4,
+      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(5, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(
+      6,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
     expect(tableSetFactoryMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
       sha: 'sha',
     },
-    Result.Passed,
-    `
-| H | V11 | V12 |
-| - | - | - |
-| R1 | V21 | V22 |
-`.slice(1, -1),
-    ''
+    [
+      {
+        type: ReporterType.Gotestsum,
+        directories: ["go/app1", "go/app2"],
+        fileName: "test.xml",
+      },
+      {
+        type: ReporterType.GolangCILint,
+        directories: ["go/app1", "go/app3"],
+        fileName: "lint.xml",
+      }
+]
+
   )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
@@ -177,9 +185,9 @@ lint:
 
 #### Result: \`Passed\`🙆‍♀️
 
-| H | V11 | V12 |
+| H | F1 | F2 |
 | - | - | - |
-| R1 | V21 | V22 |
+| R1 | V11 | V12 |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/commit/sha) pushed by @actor.*
@@ -227,24 +235,31 @@ lint:
 
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
+    expect(infoMock).toHaveBeenNthCalledWith(2, 'a')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'b')
     expect(infoMock).toHaveBeenNthCalledWith(
-      2,
+      4,
       '* post summary to summary page'
     )
+    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
     expect(tableSetFactoryMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
       sha: 'sha',
     },
-    Result.Passed,
-    `
-| H | V11 | V12 |
-| - | - | - |
-| R1 | V21 | V22 |
-`.slice(1, -1),
-    ''
+    [
+          {
+            type: ReporterType.Gotestsum,
+            directories: ["go/app1", "go/app2"],
+            fileName: "test.xml",
+          },
+          {
+            type: ReporterType.GolangCILint,
+            directories: ["go/app1", "go/app3"],
+            fileName: "lint.xml",
+          }
+    ]
   )
-    expect(infoMock).toHaveBeenNthCalledWith(3, '* set output')
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)

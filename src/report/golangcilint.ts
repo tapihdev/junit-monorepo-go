@@ -9,19 +9,19 @@ export class GolangCILintSummaryReportImpl
   implements GolangCILintSummaryReport
 {
   constructor(
-    readonly context: GitHubContext,
-    readonly moduleDir: string,
-    readonly result: Result
+    private readonly _context: GitHubContext,
+    private readonly _moduleDir: string,
+    private readonly _result: Result
   ) {}
 
   get index(): Index {
-    const { owner, repo, sha } = this.context
-    return `[${this.moduleDir}](https://github.com/${owner}/${repo}/blob/${sha}/${this.moduleDir})`
+    const { owner, repo, sha } = this._context
+    return `[${this._moduleDir}](https://github.com/${owner}/${repo}/blob/${sha}/${this._moduleDir})`
   }
 
   get record(): GolangCILintSummaryRecord {
     return {
-      result: this.result === Result.Failed ? '❌Failed' : '✅Passed'
+      result: this._result === Result.Failed ? '❌Failed' : '✅Passed'
     }
   }
 }

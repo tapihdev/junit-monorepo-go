@@ -3,7 +3,7 @@ import {
   GolangCILintSummaryReport,
   FailureReport,
   SummaryReport
-} from 'src/report/type'
+} from '../report/type'
 import { Result } from '../type'
 
 export interface Reportable<T extends SummaryReport> {

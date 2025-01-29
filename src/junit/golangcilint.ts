@@ -2,8 +2,8 @@ import * as path from 'path'
 
 import { JUnitReport, GolangCILintReporter } from './type'
 import { ReporterType, Result, GitHubContext } from '../type'
-import { GolangCILintSummaryReportImpl } from 'src/report/golangcilint'
-import { FailureReportImpl } from 'src/report/failure'
+import { GolangCILintSummaryReportImpl } from '../report/golangcilint'
+import { FailureReportImpl } from '../report/failure'
 
 export class GolangCILintReporterImpl implements GolangCILintReporter {
   constructor(

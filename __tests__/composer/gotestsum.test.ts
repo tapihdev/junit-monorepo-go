@@ -27,7 +27,7 @@ describe('GotestsumTable', () => {
           index: 'Module',
           values: {
             version: 'Version',
-            result: 'Test',
+            result: 'Result',
             passed: 'Passed',
             failed: 'Failed',
             time: 'Time'
@@ -56,22 +56,20 @@ describe('GotestsumTable', () => {
           index: 'Module',
           values: {
             version: 'Version',
-            testResult: 'Test',
-            testPassed: 'Passed',
-            testFailed: 'Failed',
-            testElapsed: 'Time',
-            lintResult: 'Lint'
+            result: 'Result',
+            passed: 'Passed',
+            failed: 'Failed',
+            time: 'Time'
           }
         },
         separator: {
           index: ':-----',
           values: {
             version: '------:',
-            testResult: ':---',
-            testPassed: '-----:',
-            testFailed: '-----:',
-            testElapsed: '---:',
-            lintResult: ':---'
+            result: ':---',
+            passed: '-----:',
+            failed: '-----:',
+            time: '---:'
           }
         },
         records: 1
@@ -87,22 +85,20 @@ describe('GotestsumTable', () => {
           index: 'Module',
           values: {
             version: 'Version',
-            testResult: 'Test',
-            testPassed: 'Passed',
-            testFailed: 'Failed',
-            testElapsed: 'Time',
-            lintResult: 'Lint'
+            result: 'Result',
+            passed: 'Passed',
+            failed: 'Failed',
+            time: 'Time'
           }
         },
         separator: {
           index: ':-----',
           values: {
             version: '------:',
-            testResult: ':---',
-            testPassed: '-----:',
-            testFailed: '-----:',
-            testElapsed: '---:',
-            lintResult: ':---'
+            result: ':---',
+            passed: '-----:',
+            failed: '-----:',
+            time: '---:'
           }
         },
         records: 2

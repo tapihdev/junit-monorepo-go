@@ -29,19 +29,19 @@ describe('TableComposerImpl#toFailuresTable', () => {
       },
       expected: {
         header: {
-          index: 'Module',
+          index: 'File',
           values: {
             type: 'Type',
-            test: 'Test',
+            test: 'Case',
             message: 'Message'
           }
         },
         separator: {
-          index: ':-----',
+          index: ':---',
           values: {
             type: ':---',
             test: ':---',
-            message: ':---'
+            message: ':------'
           }
         },
         records: 1
@@ -59,19 +59,19 @@ describe('TableComposerImpl#toFailuresTable', () => {
       },
       expected: {
         header: {
-          index: 'Module',
+          index: 'File',
           values: {
             type: 'Type',
-            test: 'Test',
+            test: 'Case',
             message: 'Message'
           }
         },
         separator: {
-          index: ':-----',
+          index: ':---',
           values: {
             type: ':---',
             test: ':---',
-            message: ':---'
+            message: ':------'
           }
         },
         records: 2

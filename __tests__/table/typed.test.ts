@@ -157,7 +157,7 @@ describe('Table#concat', () => {
           table2: []
       },
         expected: {
-          rows: 2,
+          rows: 0,
           columns: 2,
         }
     }

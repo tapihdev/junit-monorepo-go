@@ -1,7 +1,7 @@
 import { JUnitReport, GotestsumReporter } from './type'
 import { ReporterType, Result, GitHubContext } from '../type'
-import { GotestsumSummaryReportImpl } from 'src/report/gotestsum'
-import { FailureReportImpl } from 'src/report/failure'
+import { GotestsumSummaryReportImpl } from '../report/gotestsum'
+import { FailureReportImpl } from '../report/failure'
 
 export class GotestsumReporterImpl implements GotestsumReporter {
   // gotestsum reports failures in the following format:
