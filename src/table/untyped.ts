@@ -58,9 +58,9 @@ export class UntypedTable {
     }
 
     return [
-      `| ${this.header.index} | ${this.header.values.join(' | ')} |`,
-      `| ${this.separator.index} | ${this.separator.values.join(' | ')} |`,
-      ...this.records.map(r => `| ${r.index} | ${r.values.join(' | ')} |`)
+      `| ${this.header.index} | ${this.header.values.map(v => v || '-').join(' | ')} |`,
+      `| ${this.separator.index} | ${this.separator.values.map(v => v || '-').join(' | ')} |`,
+      ...this.records.map(r => `| ${r.index} | ${r.values.map(v => v || '-').join(' | ')} |`)
     ].join('\n')
   }
 }

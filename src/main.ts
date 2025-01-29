@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
 
+import { Result } from './type'
 import {
   getGitHubToken,
   getConfig,
@@ -66,11 +67,6 @@ export async function run(): Promise<void> {
       tableSetsInput
     )
 
-    if (tableSets === undefined) {
-      core.info('skip making a report because no table sets was created')
-      return
-    }
-
     const body = makeMarkdownReport(
       {
         owner,
@@ -80,11 +76,11 @@ export async function run(): Promise<void> {
         pullNumber,
         actor
       },
-      tableSets.result,
-      tableSets.summary.toString(),
-      tableSets.failures.toString(),
+      tableSets?.result ?? Result.Passed,
+      tableSets?.summary.toString() ?? '',
+      tableSets?.failures.toString() ?? '',
     )
-    tableSets.annotations.forEach(annotation => core.info(annotation))
+    tableSets?.annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)

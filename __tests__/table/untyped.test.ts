@@ -116,14 +116,14 @@ describe('UntypedTable#toString', () => {
             values: [
               {
                 index: "R1",
-                values: ["V11", "V12"]
+                values: ["V11", undefined]
               }
             ]
         },
         expected: `
 | H | F1 | F2 |
 | - | - | - |
-| R1 | V11 | V12 |
+| R1 | V11 | - |
 `.slice(1, -1)
       },
   ]
