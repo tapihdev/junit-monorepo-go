@@ -20,10 +20,10 @@ export class Table<T extends Record<string, string | undefined>> {
     return Object.keys(this.header.values).length
   }
 
-  concat(other: Table<T>): Table<T> {
+  concat(others: Table<T>[]): Table<T> {
     return new Table(this.header, this.separator, [
       ...this.records,
-      ...other.records
+      ...others.flatMap(o => o.records)
     ])
   }
 

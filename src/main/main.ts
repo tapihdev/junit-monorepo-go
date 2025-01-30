@@ -79,7 +79,7 @@ export async function run(): Promise<void> {
       },
       tableSets?.result ?? Result.Passed,
       tableSets?.summary.toString() ?? '',
-      tableSets?.failures.toString() ?? ''
+      tableSets?.failures.toUntyped().toString() ?? ''
     )
     tableSets?.annotations.forEach(annotation => core.info(annotation))
 

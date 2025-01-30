@@ -14,6 +14,7 @@ import { Client as GitHubClient } from '../../src/main/github'
 import { TableSetFactory } from '../../src/table/factory'
 import { ReporterType, Result } from '../../src/type'
 import { UntypedTable } from '../../src/table/base/untyped'
+import { FailureTable } from '../../src/table/failure'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -68,17 +69,7 @@ describe('action', () => {
             }
           ]
         ),
-        failures: new UntypedTable(
-          {
-            index: 'h',
-            values: ['f1', 'f2']
-          },
-          {
-            index: '-',
-            values: ['-', '-']
-          },
-          []
-        ),
+        failures: new FailureTable([]).toTable(),
         annotations: ['a', 'b']
       })
   })

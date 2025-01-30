@@ -67,7 +67,7 @@ describe('Table#concat', () => {
     {
       name: 'should concat tables',
       input: {
-        table1: [
+        main: [
           {
             index: 'R1',
             values: {
@@ -83,14 +83,16 @@ describe('Table#concat', () => {
             }
           }
         ],
-        table2: [
-          {
-            index: 'R3',
-            values: {
-              f1: 'V31',
-              f2: 'V32'
+        others: [
+          [
+            {
+              index: 'R3',
+              values: {
+                f1: 'V31',
+                f2: 'V32'
+              }
             }
-          }
+          ]
         ]
       },
       expected: {
@@ -101,7 +103,7 @@ describe('Table#concat', () => {
     {
       name: 'should concat table with empty table',
       input: {
-        table1: [
+        main: [
           {
             index: 'R1',
             values: {
@@ -117,7 +119,7 @@ describe('Table#concat', () => {
             }
           }
         ],
-        table2: []
+        others: []
       },
       expected: {
         rows: 2,
@@ -127,22 +129,24 @@ describe('Table#concat', () => {
     {
       name: 'should concat empty table with table',
       input: {
-        table1: [],
-        table2: [
-          {
-            index: 'R1',
-            values: {
-              f1: 'V11',
-              f2: 'V12'
+        main: [],
+        others: [
+          [
+            {
+              index: 'R1',
+              values: {
+                f1: 'V11',
+                f2: 'V12'
+              }
+            },
+            {
+              index: 'R2',
+              values: {
+                f1: 'V21',
+                f2: 'V22'
+              }
             }
-          },
-          {
-            index: 'R2',
-            values: {
-              f1: 'V21',
-              f2: 'V22'
-            }
-          }
+          ]
         ]
       },
       expected: {
@@ -153,8 +157,8 @@ describe('Table#concat', () => {
     {
       name: 'should concat empty table with empty table',
       input: {
-        table1: [],
-        table2: []
+        main: [],
+        others: []
       },
       expected: {
         rows: 0,
@@ -164,9 +168,9 @@ describe('Table#concat', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const base = new Table<TestRecord>(header, separator, input.table1)
+    const base = new Table<TestRecord>(header, separator, input.main)
     const concatenated = base.concat(
-      new Table<TestRecord>(header, separator, input.table2)
+      input.others.map(o => new Table<TestRecord>(header, separator, o))
     )
     expect(concatenated.columns).toEqual(expected.columns)
     expect(concatenated.rows).toEqual(expected.rows)
