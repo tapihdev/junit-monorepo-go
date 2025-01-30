@@ -2,10 +2,7 @@ import * as fs from 'fs'
 import path from 'path'
 import { parseStringPromise } from 'xml2js'
 
-import {
-  JUnitReport,
-  TestSuites,
-} from './type'
+import { JUnitReport, TestSuites } from './type'
 
 export type FileReader = typeof fs.promises.readFile
 
@@ -17,9 +14,7 @@ type JUnitReportUnsafe = {
 export class JUnitXmlReader {
   constructor(private readonly reader: FileReader) {}
 
-  async safeParse(    directory: string,
-    fileName: string
-): Promise<JUnitReport> {
+  async safeParse(directory: string, fileName: string): Promise<JUnitReport> {
     const content = await this.reader(path.join(directory, fileName), {
       encoding: 'utf8'
     })
@@ -33,4 +28,3 @@ export class JUnitXmlReader {
     return parsedUnsafe as JUnitReport
   }
 }
-

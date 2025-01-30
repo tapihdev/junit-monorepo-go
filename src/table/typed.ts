@@ -1,4 +1,4 @@
-import { UntypedTable } from "./untyped"
+import { UntypedTable } from './untyped'
 
 export type Row<T extends Record<string, string | undefined>> = {
   readonly index: string
@@ -21,11 +21,10 @@ export class Table<T extends Record<string, string | undefined>> {
   }
 
   concat(other: Table<T>): Table<T> {
-    return new Table(
-      this.header,
-      this.separator,
-      [...this.records, ...other.records]
-    )
+    return new Table(this.header, this.separator, [
+      ...this.records,
+      ...other.records
+    ])
   }
 
   toUntyped(): UntypedTable {
@@ -45,4 +44,3 @@ export class Table<T extends Record<string, string | undefined>> {
     )
   }
 }
-

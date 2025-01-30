@@ -57,12 +57,8 @@ export async function run(): Promise<void> {
 
     core.info(`* make a junit report`)
     const junixXmlReader = new JUnitXmlReader(fs.promises.readFile)
-    const jUnitReporterFactory = new JUnitReporterFactory(
-      junixXmlReader
-    )
-    const tableSetFactory = new TableSetFactory(
-      jUnitReporterFactory
-    )
+    const jUnitReporterFactory = new JUnitReporterFactory(junixXmlReader)
+    const tableSetFactory = new TableSetFactory(jUnitReporterFactory)
     const tableSets = await tableSetFactory.multi(
       {
         owner,
@@ -83,7 +79,7 @@ export async function run(): Promise<void> {
       },
       tableSets?.result ?? Result.Passed,
       tableSets?.summary.toString() ?? '',
-      tableSets?.failures.toString() ?? '',
+      tableSets?.failures.toString() ?? ''
     )
     tableSets?.annotations.forEach(annotation => core.info(annotation))
 

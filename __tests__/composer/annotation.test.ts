@@ -1,5 +1,5 @@
-import { toAnnotations } from "../../src/composer/annotation"
-import { FailureReport } from "../../src/report/type"
+import { toAnnotations } from '../../src/composer/annotation'
+import { FailureReport } from '../../src/report/type'
 
 describe('ReportAggregator#toAnnotations', () => {
   const failureReportMock = jest.fn<FailureReport, []>(() => ({
@@ -52,4 +52,3 @@ describe('ReportAggregator#toAnnotations', () => {
     expect(result).toEqual(expected)
   })
 })
-

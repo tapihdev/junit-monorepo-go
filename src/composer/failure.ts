@@ -1,8 +1,5 @@
 import { Table } from '../table/typed'
-import {
-  FailureReport,
-  FailureRecord,
-} from '../report/type'
+import { FailureReport, FailureRecord } from '../report/type'
 
 export class FailureTable {
   private _table: Table<FailureRecord>
@@ -45,10 +42,6 @@ export class FailureTable {
         }
       })
     }
-    return new Table(
-      this._table.header,
-      this._table.separator,
-      limited
-    )
+    return new Table(this._table.header, this._table.separator, limited)
   }
 }

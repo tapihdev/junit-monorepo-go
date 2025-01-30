@@ -1,8 +1,5 @@
 import { Table } from '../table/typed'
-import {
-  GotestsumSummaryReport,
-  GotestsumSummaryRecord,
-} from '../report/type'
+import { GotestsumSummaryReport, GotestsumSummaryRecord } from '../report/type'
 
 export class GotestsumTable {
   private _table: Table<GotestsumSummaryRecord>

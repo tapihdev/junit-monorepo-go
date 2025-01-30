@@ -1,7 +1,5 @@
 import { GotestsumTable } from '../../src/composer/gotestsum'
-import {
-  GotestsumSummaryReport
-} from '../../src/report/type'
+import { GotestsumSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 
 describe('GotestsumTable', () => {

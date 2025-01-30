@@ -1,4 +1,4 @@
-import { Table } from "../../src/table/typed"
+import { Table } from '../../src/table/typed'
 
 type TestRecord = {
   f1: string | undefined
@@ -6,18 +6,18 @@ type TestRecord = {
 }
 
 const header = {
-  index: "H",
+  index: 'H',
   values: {
-    f1: "F1",
-    f2: "F2",
+    f1: 'F1',
+    f2: 'F2'
   }
 }
 
 const separator = {
-  index: "-",
+  index: '-',
   values: {
-    f1: "-",
-    f2: "-",
+    f1: '-',
+    f2: '-'
   }
 }
 
@@ -27,30 +27,30 @@ describe('Table#shape', () => {
       name: 'should return a table',
       input: [
         {
-          index: "R1",
+          index: 'R1',
           values: {
-            f1: "V11",
-            f2: "V12",
+            f1: 'V11',
+            f2: 'V12'
           }
         },
         {
-          index: "R2",
+          index: 'R2',
           values: {
-            f1: "V21",
-            f2: "V22",
+            f1: 'V21',
+            f2: 'V22'
           }
         },
         {
-          index: "R3",
+          index: 'R3',
           values: {
-            f1: "V31",
-            f2: "V32",
+            f1: 'V31',
+            f2: 'V32'
           }
         }
       ],
       expected: {
         rows: 3,
-        columns: 2,
+        columns: 2
       }
     }
   ]
@@ -63,111 +63,113 @@ describe('Table#shape', () => {
 })
 
 describe('Table#concat', () => {
-    const testCases = [
-      {
-        name: 'should concat tables',
-        input: {
-          table1: [
-            {
-              index: "R1",
+  const testCases = [
+    {
+      name: 'should concat tables',
+      input: {
+        table1: [
+          {
+            index: 'R1',
             values: {
-              f1: "V11",
-              f2: "V12",
+              f1: 'V11',
+              f2: 'V12'
             }
           },
           {
-            index: "R2",
+            index: 'R2',
             values: {
-              f1: "V21",
-              f2: "V22",
+              f1: 'V21',
+              f2: 'V22'
             }
           }
         ],
         table2: [
           {
-            index: "R3",
+            index: 'R3',
             values: {
-              f1: "V31",
-              f2: "V32",
+              f1: 'V31',
+              f2: 'V32'
             }
           }
         ]
       },
-        expected: {
-          rows: 3,
-          columns: 2,
-        }
-      },
-      {
-        name: 'should concat table with empty table',
-        input: {
-          table1: [
-            {
-              index: "R1",
+      expected: {
+        rows: 3,
+        columns: 2
+      }
+    },
+    {
+      name: 'should concat table with empty table',
+      input: {
+        table1: [
+          {
+            index: 'R1',
             values: {
-              f1: "V11",
-              f2: "V12",
+              f1: 'V11',
+              f2: 'V12'
             }
           },
           {
-            index: "R2",
+            index: 'R2',
             values: {
-              f1: "V21",
-              f2: "V22",
+              f1: 'V21',
+              f2: 'V22'
             }
           }
         ],
         table2: []
       },
-        expected: {
-          rows: 2,
-          columns: 2,
-        }
-      },
-      {
-        name: 'should concat empty table with table',
-        input: {
-          table1: [],
-          table2: [
-            {
-              index: "R1",
+      expected: {
+        rows: 2,
+        columns: 2
+      }
+    },
+    {
+      name: 'should concat empty table with table',
+      input: {
+        table1: [],
+        table2: [
+          {
+            index: 'R1',
             values: {
-              f1: "V11",
-              f2: "V12",
+              f1: 'V11',
+              f2: 'V12'
             }
           },
           {
-            index: "R2",
+            index: 'R2',
             values: {
-              f1: "V21",
-              f2: "V22",
+              f1: 'V21',
+              f2: 'V22'
             }
           }
-        ],
+        ]
       },
-        expected: {
-          rows: 2,
-          columns: 2,
-        }
+      expected: {
+        rows: 2,
+        columns: 2
+      }
+    },
+    {
+      name: 'should concat empty table with empty table',
+      input: {
+        table1: [],
+        table2: []
       },
-      {
-        name: 'should concat empty table with empty table',
-        input: {
-          table1: [],
-          table2: []
-      },
-        expected: {
-          rows: 0,
-          columns: 2,
-        }
+      expected: {
+        rows: 0,
+        columns: 2
+      }
     }
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-      const base = new Table<TestRecord>(header, separator, input.table1)
-      const concatenated = base.concat(new Table<TestRecord>(header, separator, input.table2))
-      expect(concatenated.columns).toEqual(expected.columns)
-      expect(concatenated.rows).toEqual(expected.rows)
+    const base = new Table<TestRecord>(header, separator, input.table1)
+    const concatenated = base.concat(
+      new Table<TestRecord>(header, separator, input.table2)
+    )
+    expect(concatenated.columns).toEqual(expected.columns)
+    expect(concatenated.rows).toEqual(expected.rows)
   })
 })
 
@@ -177,23 +179,23 @@ describe('Table#toUntyped', () => {
       name: 'should return an untyped table',
       input: [
         {
-          index: "R1",
+          index: 'R1',
           values: {
-            f1: "V11",
-            f2: "V12",
+            f1: 'V11',
+            f2: 'V12'
           }
         },
         {
-          index: "R2",
+          index: 'R2',
           values: {
-            f1: "V21",
-            f2: "V22",
+            f1: 'V21',
+            f2: 'V22'
           }
-        },
+        }
       ],
       expected: {
         columns: 2,
-        rows: 2,
+        rows: 2
       }
     }
   ]

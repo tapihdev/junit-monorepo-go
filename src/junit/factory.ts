@@ -1,6 +1,4 @@
-import {
-  AnyReporter
-} from './type'
+import { AnyReporter } from './type'
 import { ReporterType, GitHubContext } from '../type'
 import { GolangCILintReporterImpl } from './golangcilint'
 import { GotestsumReporterImpl } from './gotestsum'
@@ -25,4 +23,3 @@ export class JUnitReporterFactory {
     }
   }
 }
-

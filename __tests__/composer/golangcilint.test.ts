@@ -1,7 +1,5 @@
 import { GolangCILintTable } from '../../src/composer/golangcilint'
-import {
-  GolangCILintSummaryReport,
-} from '../../src/report/type'
+import { GolangCILintSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 
 describe('GolangCILintTable', () => {

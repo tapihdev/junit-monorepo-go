@@ -30,13 +30,21 @@ export class UntypedTable {
   join(others: UntypedTable[]): UntypedTable {
     const header = {
       index: this.header.index,
-      values: [...this.header.values, ...others.map(o => o.header.values).flat()]
+      values: [
+        ...this.header.values,
+        ...others.map(o => o.header.values).flat()
+      ]
     }
     const separator = {
       index: this.separator.index,
-      values: [...this.separator.values, ...others.map(o => o.separator.values).flat()]
+      values: [
+        ...this.separator.values,
+        ...others.map(o => o.separator.values).flat()
+      ]
     }
-    const maps = others.map(o => new Map<string, UntypedRow>(o.records.map(r => [r.index, r])))
+    const maps = others.map(
+      o => new Map<string, UntypedRow>(o.records.map(r => [r.index, r]))
+    )
     const merged = this.records.map(record => {
       const v = others.map(o => new Array(o.columns).fill(undefined))
       maps.forEach((m, i) => {
@@ -61,7 +69,9 @@ export class UntypedTable {
     return [
       `| ${this.header.index} | ${this.header.values.map(v => v || '-').join(' | ')} |`,
       `| ${this.separator.index} | ${this.separator.values.map(v => v || '-').join(' | ')} |`,
-      ...this.records.map(r => `| ${r.index} | ${r.values.map(v => v || '-').join(' | ')} |`)
+      ...this.records.map(
+        r => `| ${r.index} | ${r.values.map(v => v || '-').join(' | ')} |`
+      )
     ].join('\n')
   }
 }

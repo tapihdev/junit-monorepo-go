@@ -7,9 +7,7 @@ import {
 export class GolangCILintTable {
   private _table: Table<GolangCILintSummaryRecord>
 
-  constructor(
-    reports: GolangCILintSummaryReport[]
-  ) {
+  constructor(reports: GolangCILintSummaryReport[]) {
     this._table = new Table(
       {
         index: 'Module',

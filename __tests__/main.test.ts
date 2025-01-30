@@ -48,34 +48,39 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
 
-    tableSetFactoryMock = jest.spyOn(TableSetFactory.prototype, 'multi').mockResolvedValue({
-      result: Result.Passed,
-      summary: new UntypedTable({
-        index: 'H',
-        values: ['F1', 'F2'],
-      },
-      {
-        index: '-',
-        values: ['-', '-'],
-      },
-      [
-        {
-          index: 'R1',
-          values: ['V11', 'V12'],
-        },
-      ],
-    ),
-    failures: new UntypedTable({
-      index: 'h',
-      values: ['f1', 'f2'],
-    },
-    {
-      index: '-',
-      values: ['-', '-'],
-    },
-    []),
-    annotations: ["a", "b"],
-    })
+    tableSetFactoryMock = jest
+      .spyOn(TableSetFactory.prototype, 'multi')
+      .mockResolvedValue({
+        result: Result.Passed,
+        summary: new UntypedTable(
+          {
+            index: 'H',
+            values: ['F1', 'F2']
+          },
+          {
+            index: '-',
+            values: ['-', '-']
+          },
+          [
+            {
+              index: 'R1',
+              values: ['V11', 'V12']
+            }
+          ]
+        ),
+        failures: new UntypedTable(
+          {
+            index: 'h',
+            values: ['f1', 'f2']
+          },
+          {
+            index: '-',
+            values: ['-', '-']
+          },
+          []
+        ),
+        annotations: ['a', 'b']
+      })
   })
 
   it('should post comment and summary', async () => {
@@ -146,25 +151,26 @@ lint:
       '* post summary to summary page'
     )
     expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
-    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(1, {
-      owner: 'owner',
-      repo: 'repo',
-      sha: 'sha',
-    },
-    [
+    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(
+      1,
       {
-        type: ReporterType.Gotestsum,
-        directories: ["go/app1", "go/app2"],
-        fileName: "test.xml",
+        owner: 'owner',
+        repo: 'repo',
+        sha: 'sha'
       },
-      {
-        type: ReporterType.GolangCILint,
-        directories: ["go/app1", "go/app3"],
-        fileName: "lint.xml",
-      }
-]
-
-  )
+      [
+        {
+          type: ReporterType.Gotestsum,
+          directories: ['go/app1', 'go/app2'],
+          fileName: 'test.xml'
+        },
+        {
+          type: ReporterType.GolangCILint,
+          directories: ['go/app1', 'go/app3'],
+          fileName: 'lint.xml'
+        }
+      ]
+    )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
@@ -241,24 +247,26 @@ lint:
       '* post summary to summary page'
     )
     expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
-    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(1, {
-      owner: 'owner',
-      repo: 'repo',
-      sha: 'sha',
-    },
-    [
-          {
-            type: ReporterType.Gotestsum,
-            directories: ["go/app1", "go/app2"],
-            fileName: "test.xml",
-          },
-          {
-            type: ReporterType.GolangCILint,
-            directories: ["go/app1", "go/app3"],
-            fileName: "lint.xml",
-          }
-    ]
-  )
+    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        sha: 'sha'
+      },
+      [
+        {
+          type: ReporterType.Gotestsum,
+          directories: ['go/app1', 'go/app2'],
+          fileName: 'test.xml'
+        },
+        {
+          type: ReporterType.GolangCILint,
+          directories: ['go/app1', 'go/app3'],
+          fileName: 'lint.xml'
+        }
+      ]
+    )
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)
