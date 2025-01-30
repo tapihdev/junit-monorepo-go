@@ -2,16 +2,36 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import YAML from 'yaml'
 
-import { Config, ConfigSchema } from './config.generated'
+import { ConfigSchema } from './config.generated'
+import { XmlFileGroup } from '../table/factory'
+import { ReporterType } from '../type'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
 }
 
-export function getConfig(): Config {
+export function getConfig(): XmlFileGroup[] {
   const raw = core.getInput('config', { required: true })
   try {
-    return ConfigSchema.parse(YAML.parse(raw))
+    const config = ConfigSchema.parse(YAML.parse(raw))
+    return Object.values(config).map(c => {
+      let reporterType: ReporterType
+      switch (c.type) {
+        case 'gotestsum':
+          reporterType = ReporterType.Gotestsum
+          break
+        case 'golangci-lint':
+          reporterType = ReporterType.GolangCILint
+          break
+        default:
+          throw new Error(`Invalid reporter type: ${c.type}`)
+      }
+      return {
+        type: reporterType,
+        directories: c.directories,
+        fileName: c.fileName
+      }
+    })
   } catch (error) {
     throw new Error(`Invalid config: ${error}`)
   }

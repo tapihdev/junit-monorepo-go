@@ -14,7 +14,7 @@ import { toResult } from './result'
 import { toAnnotations } from './annotation'
 import { Table } from './base/typed'
 
-type XmlFileGroup = {
+export type XmlFileGroup = {
   type: ReporterType
   directories: string[]
   fileName: string
