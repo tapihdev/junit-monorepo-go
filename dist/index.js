@@ -41416,6 +41416,10 @@ exports.JUnitReporterFactory = void 0;
 const type_1 = __nccwpck_require__(4619);
 const golangcilint_1 = __nccwpck_require__(549);
 const gotestsum_1 = __nccwpck_require__(5765);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const assertNever = (_) => {
+    throw new Error('exhaustiveness check');
+};
 class JUnitReporterFactory {
     reader;
     constructor(reader) {
@@ -41428,6 +41432,8 @@ class JUnitReporterFactory {
                 return new golangcilint_1.GolangCILintReporterImpl(context, directory, parsed);
             case type_1.ReporterType.Gotestsum:
                 return new gotestsum_1.GotestsumReporterImpl(context, directory, parsed);
+            default:
+                return assertNever(type);
         }
     }
 }
