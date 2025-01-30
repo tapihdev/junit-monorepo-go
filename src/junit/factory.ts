@@ -4,6 +4,11 @@ import { GolangCILintReporterImpl } from './golangcilint'
 import { GotestsumReporterImpl } from './gotestsum'
 import { JUnitXmlReader } from './reader'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const assertNever = (_: never): never => {
+  throw new Error('exhaustiveness check')
+}
+
 export class JUnitReporterFactory {
   constructor(private readonly reader: JUnitXmlReader) {}
 
@@ -20,6 +25,8 @@ export class JUnitReporterFactory {
         return new GolangCILintReporterImpl(context, directory, parsed)
       case ReporterType.Gotestsum:
         return new GotestsumReporterImpl(context, directory, parsed)
+      default:
+        return assertNever(type)
     }
   }
 }
