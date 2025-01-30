@@ -122,7 +122,8 @@ jobs:
               - go/app1
               - go/app2
             lint:
-              title: '[Lint](./golangci.toml)'
+              title: Lint
+              file: golangci.toml
               type: golangci-lint
               fileName: lint.xml
               directories:
@@ -131,6 +132,9 @@ jobs:
 ```
 
 ### Inputs
+
+> [!IMPORTANT] Please keep in mind that left join is performed on the test and
+> lint reports configured in the `config`
 
 | **Input**             | **Required** | **Description**                                                                                                          |
 | --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------ |
