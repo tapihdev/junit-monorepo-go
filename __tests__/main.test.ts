@@ -11,7 +11,6 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import fs from 'fs'
 import { TableSetFactory } from '../src/composer/factory'
 import { ReporterType, Result } from '../src/type'
 import { UntypedTable } from '../src/table/untyped'
