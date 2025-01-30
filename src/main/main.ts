@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
 
-import { Result } from './type'
+import { Result } from '../type'
 import {
   getGitHubToken,
   getConfig,
@@ -11,10 +11,10 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
-import { JUnitReporterFactory } from './junit/factory'
-import { TableSetFactory } from './composer/factory'
-import { ReporterType } from './type'
-import { JUnitXmlReader } from './junit/reader'
+import { JUnitReporterFactory } from '../junit/factory'
+import { TableSetFactory } from '../composer/factory'
+import { ReporterType } from '../type'
+import { JUnitXmlReader } from '../junit/reader'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
