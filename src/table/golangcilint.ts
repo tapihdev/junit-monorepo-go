@@ -1,4 +1,5 @@
 import { Table } from './base/typed'
+import { Align } from './base/type'
 import {
   GolangCILintSummaryReport,
   GolangCILintSummaryRecord
@@ -16,9 +17,9 @@ export class GolangCILintTable {
         }
       },
       {
-        index: ':-----',
+        index: Align.Left,
         values: {
-          result: ':---'
+          result: Align.Left
         }
       },
       reports.map(report => ({

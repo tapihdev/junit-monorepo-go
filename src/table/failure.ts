@@ -1,4 +1,5 @@
 import { Table } from './base/typed'
+import { Align } from './base/type'
 import { FailureReport, FailureRecord } from '../report/type'
 
 export class FailureTable {
@@ -15,11 +16,11 @@ export class FailureTable {
         }
       },
       {
-        index: ':---',
+        index: Align.Left,
         values: {
-          type: ':---',
-          test: ':---',
-          message: ':------'
+          type: Align.Left,
+          test: Align.Left,
+          message: Align.Left
         }
       },
       reports.map(report => ({

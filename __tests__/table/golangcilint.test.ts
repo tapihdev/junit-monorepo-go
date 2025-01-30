@@ -1,6 +1,7 @@
 import { GolangCILintTable } from '../../src/table/golangcilint'
 import { GolangCILintSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
+import { Align } from '../../src/table/base/type'
 
 describe('GolangCILintTable', () => {
   const golangCILintSummaryMock = jest.fn<GolangCILintSummaryReport, []>(
@@ -11,6 +12,18 @@ describe('GolangCILintTable', () => {
       }
     })
   )
+  const header = {
+    index: 'Module',
+    values: {
+      result: 'Result'
+    }
+  }
+  const separator = {
+    index: Align.Left,
+    values: {
+      result: Align.Left
+    }
+  }
 
   const testCases = [
     {
@@ -19,18 +32,8 @@ describe('GolangCILintTable', () => {
         reports: []
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            result: 'Result'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            result: ':---'
-          }
-        },
+        header,
+        separator,
         records: 0
       }
     },
@@ -40,18 +43,8 @@ describe('GolangCILintTable', () => {
         reports: [golangCILintSummaryMock()]
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            result: 'Result'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            result: ':---'
-          }
-        },
+        header,
+        separator,
         records: 1
       }
     },
@@ -61,18 +54,8 @@ describe('GolangCILintTable', () => {
         reports: [golangCILintSummaryMock(), golangCILintSummaryMock()]
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            result: 'Result'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            result: ':---'
-          }
-        },
+        header,
+        separator,
         records: 2
       }
     }
