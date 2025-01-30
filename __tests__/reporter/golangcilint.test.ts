@@ -1,5 +1,5 @@
-import { JUnitReport } from '../../src/junit/type'
-import { GolangCILintReporterImpl } from '../../src/junit/golangcilint'
+import { JUnitReport } from '../../src/reporter/type'
+import { GolangCILintReporterImpl } from '../../src/reporter/golangcilint'
 import { ReporterType, Result } from '../../src/type'
 
 describe('golangcilint', () => {

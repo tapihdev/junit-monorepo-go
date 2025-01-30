@@ -1,5 +1,5 @@
-import { JUnitReport } from '../../src/junit/type'
-import { GotestsumReporterImpl } from '../../src/junit/gotestsum'
+import { JUnitReport } from '../../src/reporter/type'
+import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
 import { ReporterType, Result } from '../../src/type'
 
 describe('gotestsum', () => {

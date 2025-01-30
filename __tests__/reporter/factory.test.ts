@@ -1,10 +1,10 @@
 import fs from 'fs'
 
-import { JUnitReporterFactory } from '../../src/junit/factory'
+import { JUnitReporterFactory } from '../../src/reporter/factory'
 import { ReporterType } from '../../src/type'
-import { GolangCILintReporterImpl } from '../../src/junit/golangcilint'
-import { GotestsumReporterImpl } from '../../src/junit/gotestsum'
-import { JUnitXmlReader } from '../../src/junit/reader'
+import { GolangCILintReporterImpl } from '../../src/reporter/golangcilint'
+import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
+import { JUnitXmlReader } from '../../src/reporter/reader'
 
 describe('JUnitReporterFactoryImpl', () => {
   const junixXmlReaderMock = jest

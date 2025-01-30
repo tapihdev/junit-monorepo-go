@@ -1,11 +1,11 @@
 import { Result } from '../type'
 import { ReporterType, GitHubContext } from '../type'
-import { JUnitReporterFactory } from '../junit/factory'
+import { JUnitReporterFactory } from '../reporter/factory'
 import {
   GolangCILintSummaryReport,
   GotestsumSummaryReport
 } from '../report/type'
-import { UntypedTable } from '../table/untyped'
+import { UntypedTable } from './base/untyped'
 import { GolangCILintTable } from './golangcilint'
 import { GotestsumTable } from './gotestsum'
 import { FailureTable } from './failure'

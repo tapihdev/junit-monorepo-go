@@ -1,4 +1,4 @@
-import { Table } from '../../src/table/typed'
+import { Table } from '../../../src/table/base/typed'
 
 type TestRecord = {
   f1: string | undefined

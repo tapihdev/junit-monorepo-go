@@ -1,4 +1,4 @@
-import { GolangCILintTable } from '../../src/composer/golangcilint'
+import { GolangCILintTable } from '../../src/table/golangcilint'
 import { GolangCILintSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 

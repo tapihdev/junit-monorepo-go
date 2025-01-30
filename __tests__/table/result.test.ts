@@ -1,5 +1,5 @@
 import { Result } from '../../src/type'
-import { toResult } from '../../src/composer/result'
+import { toResult } from '../../src/table/result'
 
 describe('toResult', () => {
   const testCases = [

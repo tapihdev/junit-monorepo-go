@@ -11,9 +11,9 @@ import * as github from '@actions/github'
 
 import * as main from '../../src/main/main'
 import { Client as GitHubClient } from '../../src/main/github'
-import { TableSetFactory } from '../../src/composer/factory'
+import { TableSetFactory } from '../../src/table/factory'
 import { ReporterType, Result } from '../../src/type'
-import { UntypedTable } from '../../src/table/untyped'
+import { UntypedTable } from '../../src/table/base/untyped'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')

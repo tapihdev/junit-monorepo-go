@@ -1,4 +1,4 @@
-import { toAnnotations } from '../../src/composer/annotation'
+import { toAnnotations } from '../../src/table/annotation'
 import { FailureReport } from '../../src/report/type'
 
 describe('ReportAggregator#toAnnotations', () => {

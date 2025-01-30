@@ -1,4 +1,4 @@
-import { UntypedTable } from '../../src/table/untyped'
+import { UntypedTable } from '../../../src/table/base/untyped'
 
 describe('UntypedTable#new', () => {
   const testCases = [
