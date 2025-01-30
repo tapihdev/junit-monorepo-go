@@ -1,6 +1,7 @@
 import { FailureTable } from '../../src/table/failure'
 import { FailureReport } from '../../src/report/type'
 import { ReporterType } from '../../src/type'
+import { Align } from '../../src/table/base/type'
 
 describe('TableComposerImpl#toFailuresTable', () => {
   const failureReportMock = jest.fn<FailureReport, []>(() => ({
@@ -17,6 +18,22 @@ describe('TableComposerImpl#toFailuresTable', () => {
       }
     }
   }))
+  const header = {
+    index: 'File',
+    values: {
+      type: 'Type',
+      test: 'Case',
+      message: 'Message'
+    }
+  }
+  const separator = {
+    index: Align.Left,
+    values: {
+      type: Align.Left,
+      test: Align.Left,
+      message: Align.Left
+    }
+  }
 
   const testCases = [
     {
@@ -26,22 +43,8 @@ describe('TableComposerImpl#toFailuresTable', () => {
         failures: [failureReportMock()]
       },
       expected: {
-        header: {
-          index: 'File',
-          values: {
-            type: 'Type',
-            test: 'Case',
-            message: 'Message'
-          }
-        },
-        separator: {
-          index: ':---',
-          values: {
-            type: ':---',
-            test: ':---',
-            message: ':------'
-          }
-        },
+        header,
+        separator,
         records: 1
       }
     },
@@ -56,22 +59,8 @@ describe('TableComposerImpl#toFailuresTable', () => {
         ]
       },
       expected: {
-        header: {
-          index: 'File',
-          values: {
-            type: 'Type',
-            test: 'Case',
-            message: 'Message'
-          }
-        },
-        separator: {
-          index: ':---',
-          values: {
-            type: ':---',
-            test: ':---',
-            message: ':------'
-          }
-        },
+        header,
+        separator,
         records: 2
       }
     }

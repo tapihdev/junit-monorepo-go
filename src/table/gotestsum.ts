@@ -1,4 +1,5 @@
 import { Table } from './base/typed'
+import { Align } from './base/type'
 import { GotestsumSummaryReport, GotestsumSummaryRecord } from '../report/type'
 
 export class GotestsumTable {
@@ -17,13 +18,13 @@ export class GotestsumTable {
         }
       },
       {
-        index: ':-----',
+        index: Align.Left,
         values: {
-          version: '------:',
-          result: ':---',
-          passed: '-----:',
-          failed: '-----:',
-          time: '---:'
+          version: Align.Right,
+          result: Align.Left,
+          passed: Align.Right,
+          failed: Align.Right,
+          time: Align.Right
         }
       },
       reports.map(report => ({

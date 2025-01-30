@@ -1,6 +1,7 @@
 import { GotestsumTable } from '../../src/table/gotestsum'
 import { GotestsumSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
+import { Align } from '../../src/table/base/type'
 
 describe('GotestsumTable', () => {
   const gotestsumSummaryMock = jest.fn<GotestsumSummaryReport, []>(() => ({
@@ -13,6 +14,26 @@ describe('GotestsumTable', () => {
       time: '1.1s'
     }
   }))
+  const header = {
+    index: 'Module',
+    values: {
+      version: 'Version',
+      result: 'Result',
+      passed: 'Passed',
+      failed: 'Failed',
+      time: 'Time'
+    }
+  }
+  const separator = {
+    index: Align.Left,
+    values: {
+      version: Align.Right,
+      result: Align.Left,
+      passed: Align.Right,
+      failed: Align.Right,
+      time: Align.Right
+    }
+  }
 
   const testCases = [
     {
@@ -21,26 +42,8 @@ describe('GotestsumTable', () => {
         reports: []
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            version: 'Version',
-            result: 'Result',
-            passed: 'Passed',
-            failed: 'Failed',
-            time: 'Time'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            version: '------:',
-            result: ':---',
-            passed: '-----:',
-            failed: '-----:',
-            time: '---:'
-          }
-        },
+        header,
+        separator,
         records: 0
       }
     },
@@ -50,26 +53,8 @@ describe('GotestsumTable', () => {
         reports: [gotestsumSummaryMock()]
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            version: 'Version',
-            result: 'Result',
-            passed: 'Passed',
-            failed: 'Failed',
-            time: 'Time'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            version: '------:',
-            result: ':---',
-            passed: '-----:',
-            failed: '-----:',
-            time: '---:'
-          }
-        },
+        header,
+        separator,
         records: 1
       }
     },
@@ -79,26 +64,8 @@ describe('GotestsumTable', () => {
         reports: [gotestsumSummaryMock(), gotestsumSummaryMock()]
       },
       expected: {
-        header: {
-          index: 'Module',
-          values: {
-            version: 'Version',
-            result: 'Result',
-            passed: 'Passed',
-            failed: 'Failed',
-            time: 'Time'
-          }
-        },
-        separator: {
-          index: ':-----',
-          values: {
-            version: '------:',
-            result: ':---',
-            passed: '-----:',
-            failed: '-----:',
-            time: '---:'
-          }
-        },
+        header,
+        separator,
         records: 2
       }
     }

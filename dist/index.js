@@ -41885,6 +41885,24 @@ function toAnnotations(failures) {
 
 /***/ }),
 
+/***/ 3658:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Align = void 0;
+var Align;
+(function (Align) {
+    Align["Left"] = ":---";
+    Align["Center"] = ":---:";
+    Align["Right"] = "---:";
+    Align["None"] = "---";
+})(Align || (exports.Align = Align = {}));
+
+
+/***/ }),
+
 /***/ 1068:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -42068,6 +42086,7 @@ exports.TableSetFactory = TableSetFactory;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.FailureTable = void 0;
 const typed_1 = __nccwpck_require__(1068);
+const type_1 = __nccwpck_require__(3658);
 class FailureTable {
     _table;
     constructor(reports) {
@@ -42079,11 +42098,11 @@ class FailureTable {
                 message: 'Message'
             }
         }, {
-            index: ':---',
+            index: type_1.Align.Left,
             values: {
-                type: ':---',
-                test: ':---',
-                message: ':------'
+                type: type_1.Align.Left,
+                test: type_1.Align.Left,
+                message: type_1.Align.Left
             }
         }, reports.map(report => ({
             index: report.index,
@@ -42119,6 +42138,7 @@ exports.FailureTable = FailureTable;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GolangCILintTable = void 0;
 const typed_1 = __nccwpck_require__(1068);
+const type_1 = __nccwpck_require__(3658);
 class GolangCILintTable {
     _table;
     constructor(reports) {
@@ -42128,9 +42148,9 @@ class GolangCILintTable {
                 result: 'Result'
             }
         }, {
-            index: ':-----',
+            index: type_1.Align.Left,
             values: {
-                result: ':---'
+                result: type_1.Align.Left
             }
         }, reports.map(report => ({
             index: report.index,
@@ -42154,6 +42174,7 @@ exports.GolangCILintTable = GolangCILintTable;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GotestsumTable = void 0;
 const typed_1 = __nccwpck_require__(1068);
+const type_1 = __nccwpck_require__(3658);
 class GotestsumTable {
     _table;
     constructor(reports) {
@@ -42167,13 +42188,13 @@ class GotestsumTable {
                 time: 'Time'
             }
         }, {
-            index: ':-----',
+            index: type_1.Align.Left,
             values: {
-                version: '------:',
-                result: ':---',
-                passed: '-----:',
-                failed: '-----:',
-                time: '---:'
+                version: type_1.Align.Right,
+                result: type_1.Align.Left,
+                passed: type_1.Align.Right,
+                failed: type_1.Align.Right,
+                time: type_1.Align.Right
             }
         }, reports.map(report => ({
             index: report.index,
