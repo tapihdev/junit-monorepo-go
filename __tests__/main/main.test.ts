@@ -151,11 +151,13 @@ lint:
       },
       [
         {
+          title: 'Test',
           type: ReporterType.Gotestsum,
           directories: ['go/app1', 'go/app2'],
           fileName: 'test.xml'
         },
         {
+          title: '[Lint](./golangci.toml)',
           type: ReporterType.GolangCILint,
           directories: ['go/app1', 'go/app3'],
           fileName: 'lint.xml'
@@ -247,11 +249,13 @@ lint:
       },
       [
         {
+          title: 'Test',
           type: ReporterType.Gotestsum,
           directories: ['go/app1', 'go/app2'],
           fileName: 'test.xml'
         },
         {
+          title: '[Lint](./golangci.toml)',
           type: ReporterType.GolangCILint,
           directories: ['go/app1', 'go/app3'],
           fileName: 'lint.xml'

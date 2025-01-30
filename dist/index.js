@@ -41164,13 +41164,33 @@ const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const yaml_1 = __importDefault(__nccwpck_require__(8815));
 const config_generated_1 = __nccwpck_require__(3892);
+const type_1 = __nccwpck_require__(4619);
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
 function getConfig() {
     const raw = core.getInput('config', { required: true });
     try {
-        return config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
+        const config = config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
+        return Object.values(config).map(c => {
+            let reporterType;
+            switch (c.type) {
+                case 'gotestsum':
+                    reporterType = type_1.ReporterType.Gotestsum;
+                    break;
+                case 'golangci-lint':
+                    reporterType = type_1.ReporterType.GolangCILint;
+                    break;
+                default:
+                    throw new Error(`Invalid reporter type: ${c.type}`);
+            }
+            return {
+                title: c.title,
+                type: reporterType,
+                directories: c.directories,
+                fileName: c.fileName
+            };
+        });
     }
     catch (error) {
         throw new Error(`Invalid config: ${error}`);
@@ -41243,7 +41263,6 @@ const github_1 = __nccwpck_require__(5834);
 const markdown_1 = __nccwpck_require__(9372);
 const factory_1 = __nccwpck_require__(5223);
 const factory_2 = __nccwpck_require__(6750);
-const type_2 = __nccwpck_require__(4619);
 const reader_1 = __nccwpck_require__(3066);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
@@ -41258,26 +41277,6 @@ async function run() {
         const sha = (0, input_1.getSha)();
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
-        // TODO: this is a temporary logic just to make modification easier
-        const test = config['test'];
-        if (test === undefined) {
-            throw new Error('`test` is required');
-        }
-        const tableSetsInput = [
-            {
-                type: type_2.ReporterType.Gotestsum,
-                directories: test.directories,
-                fileName: test.fileName
-            }
-        ];
-        const lint = config['lint'];
-        if (lint !== undefined) {
-            tableSetsInput.push({
-                type: type_2.ReporterType.GolangCILint,
-                directories: lint?.directories ?? [],
-                fileName: lint?.fileName ?? ''
-            });
-        }
         core.info(`* make a junit report`);
         const junixXmlReader = new reader_1.JUnitXmlReader(fs.promises.readFile);
         const jUnitReporterFactory = new factory_1.JUnitReporterFactory(junixXmlReader);
@@ -41286,7 +41285,7 @@ async function run() {
             owner,
             repo,
             sha
-        }, tableSetsInput);
+        }, config);
         const body = (0, markdown_1.makeMarkdownReport)({
             owner,
             repo,
@@ -42046,17 +42045,32 @@ class TableSetFactory {
     }
     async single(context, xmlFileGroup) {
         const reporters = await Promise.all(xmlFileGroup.directories.map(async (d) => await this._factory.fromXml(context, xmlFileGroup.type, d, xmlFileGroup.fileName)));
-        const summaries = reporters.map(r => r.summary);
         const failures = reporters.map(r => r.failures).flat();
-        const summaryTable = xmlFileGroup.type === type_1.ReporterType.GolangCILint
-            ? new golangcilint_1.GolangCILintTable(summaries)
-            : new gotestsum_1.GotestsumTable(summaries);
         return {
             result: (0, result_1.toResult)(reporters.map(r => r.result)),
-            summary: summaryTable.toTable().toUntyped(),
+            summary: this.createSummaryTable(xmlFileGroup.type, xmlFileGroup.title, reporters.map(r => r.summary)),
             failures: new failure_1.FailureTable(failures).toTable(),
             annotations: (0, annotation_1.toAnnotations)(failures)
         };
+    }
+    createSummaryTable(type, title, summaries) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const assertNever = (_) => {
+            throw new Error('exhaustiveness check');
+        };
+        switch (type) {
+            case type_1.ReporterType.GolangCILint:
+                return new golangcilint_1.GolangCILintTable(title, summaries)
+                    .toTable()
+                    .toUntyped();
+            case type_1.ReporterType.Gotestsum:
+                return new gotestsum_1.GotestsumTable(title, summaries)
+                    .toTable()
+                    .toUntyped();
+            default:
+                assertNever(type);
+                throw new Error('unreachable');
+        }
     }
     async multi(context, xmlFileGroups) {
         if (xmlFileGroups.length === 0) {
@@ -42141,11 +42155,11 @@ const typed_1 = __nccwpck_require__(1068);
 const type_1 = __nccwpck_require__(3658);
 class GolangCILintTable {
     _table;
-    constructor(reports) {
+    constructor(title, reports) {
         this._table = new typed_1.Table({
             index: 'Module',
             values: {
-                result: 'Result'
+                result: title
             }
         }, {
             index: type_1.Align.Left,
@@ -42177,12 +42191,12 @@ const typed_1 = __nccwpck_require__(1068);
 const type_1 = __nccwpck_require__(3658);
 class GotestsumTable {
     _table;
-    constructor(reports) {
+    constructor(title, reports) {
         this._table = new typed_1.Table({
             index: 'Module',
             values: {
                 version: 'Version',
-                result: 'Result',
+                result: title,
                 passed: 'Passed',
                 failed: 'Failed',
                 time: 'Time'

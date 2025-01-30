@@ -23,38 +23,38 @@ describe('input', () => {
       {
         input:
           'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
-        expected: {
-          test: {
+        expected: [
+          {
             title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
             fileName: 'test.xml'
           }
-        }
+        ]
       },
       {
         input:
           'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
-        expected: {
-          test: {
+        expected: [
+          {
             title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
             fileName: 'test.xml'
           }
-        }
+        ]
       },
       {
         input:
           'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
-        expected: {
-          test: {
+        expected: [
+          {
             title: 'Lint',
             type: 'golangci-lint',
             directories: ['go/app1', 'go/app2'],
             fileName: 'lint.xml'
           }
-        }
+        ]
       }
     ]
     for (const { input, expected } of testCases) {

@@ -112,6 +112,12 @@ jobs:
               - .github/testdata/go/app1
               - .github/testdata/go/app2
               - .github/testdata/go/app3
+            lint:
+              title: '[Lint](./README.md)'
+              type: golangci-lint
+              fileName: lint.xml
+              directories:
+              - .github/testdata/go/app3
 
       - name: Update Comment
         id: update
@@ -128,6 +134,12 @@ jobs:
               directories:
               - .github/testdata/go/app1
               - .github/testdata/go/app2
+              - .github/testdata/go/app3
+            lint:
+              title: '[Lint](./README.md)'
+              type: golangci-lint
+              fileName: lint.xml
+              directories:
               - .github/testdata/go/app3
 
       - name: Print Output

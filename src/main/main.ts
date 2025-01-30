@@ -13,7 +13,6 @@ import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
 import { JUnitReporterFactory } from '../reporter/factory'
 import { TableSetFactory } from '../table/factory'
-import { ReporterType } from '../type'
 import { JUnitXmlReader } from '../reporter/reader'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
@@ -32,29 +31,6 @@ export async function run(): Promise<void> {
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
 
-    // TODO: this is a temporary logic just to make modification easier
-    const test = config['test']
-    if (test === undefined) {
-      throw new Error('`test` is required')
-    }
-
-    const tableSetsInput = [
-      {
-        type: ReporterType.Gotestsum,
-        directories: test.directories,
-        fileName: test.fileName
-      }
-    ]
-
-    const lint = config['lint']
-    if (lint !== undefined) {
-      tableSetsInput.push({
-        type: ReporterType.GolangCILint,
-        directories: lint?.directories ?? [],
-        fileName: lint?.fileName ?? ''
-      })
-    }
-
     core.info(`* make a junit report`)
     const junixXmlReader = new JUnitXmlReader(fs.promises.readFile)
     const jUnitReporterFactory = new JUnitReporterFactory(junixXmlReader)
@@ -65,7 +41,7 @@ export async function run(): Promise<void> {
         repo,
         sha
       },
-      tableSetsInput
+      config
     )
 
     const body = makeMarkdownReport(
