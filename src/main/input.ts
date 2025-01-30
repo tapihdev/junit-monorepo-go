@@ -27,6 +27,7 @@ export function getConfig(): XmlFileGroup[] {
           throw new Error(`Invalid reporter type: ${c.type}`)
       }
       return {
+        title: c.title,
         type: reporterType,
         directories: c.directories,
         fileName: c.fileName

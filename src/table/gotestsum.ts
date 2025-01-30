@@ -1,17 +1,18 @@
 import { Table } from './base/typed'
 import { Align } from './base/type'
 import { GotestsumSummaryReport, GotestsumSummaryRecord } from '../report/type'
+import { title } from 'process'
 
 export class GotestsumTable {
   private _table: Table<GotestsumSummaryRecord>
 
-  constructor(reports: GotestsumSummaryReport[]) {
+  constructor(title: string, reports: GotestsumSummaryReport[]) {
     this._table = new Table(
       {
         index: 'Module',
         values: {
           version: 'Version',
-          result: 'Result',
+          result: title,
           passed: 'Passed',
           failed: 'Failed',
           time: 'Time'

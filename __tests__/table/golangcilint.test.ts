@@ -12,12 +12,6 @@ describe('GolangCILintTable', () => {
       }
     })
   )
-  const header = {
-    index: 'Module',
-    values: {
-      result: 'Result'
-    }
-  }
   const separator = {
     index: Align.Left,
     values: {
@@ -29,10 +23,16 @@ describe('GolangCILintTable', () => {
     {
       name: 'should render a table with no reports',
       input: {
+        title: 'aaa',
         reports: []
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            result: 'aaa'
+          }
+        },
         separator,
         records: 0
       }
@@ -40,10 +40,16 @@ describe('GolangCILintTable', () => {
     {
       name: 'should render a table with one report',
       input: {
+        title: 'bbb',
         reports: [golangCILintSummaryMock()]
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            result: 'bbb'
+          }
+        },
         separator,
         records: 1
       }
@@ -51,10 +57,16 @@ describe('GolangCILintTable', () => {
     {
       name: 'should render a table with two reports',
       input: {
+        title: 'ccc',
         reports: [golangCILintSummaryMock(), golangCILintSummaryMock()]
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            result: 'ccc'
+          }
+        },
         separator,
         records: 2
       }
@@ -62,7 +74,7 @@ describe('GolangCILintTable', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new GolangCILintTable(input.reports)
+    const view = new GolangCILintTable(input.title, input.reports)
     const result = view.toTable()
     expect(result.header).toEqual(expected.header)
     expect(result.separator).toEqual(expected.separator)

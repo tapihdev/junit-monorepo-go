@@ -2,6 +2,7 @@ import { GotestsumTable } from '../../src/table/gotestsum'
 import { GotestsumSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 import { Align } from '../../src/table/base/type'
+import { title } from 'process'
 
 describe('GotestsumTable', () => {
   const gotestsumSummaryMock = jest.fn<GotestsumSummaryReport, []>(() => ({
@@ -14,16 +15,6 @@ describe('GotestsumTable', () => {
       time: '1.1s'
     }
   }))
-  const header = {
-    index: 'Module',
-    values: {
-      version: 'Version',
-      result: 'Result',
-      passed: 'Passed',
-      failed: 'Failed',
-      time: 'Time'
-    }
-  }
   const separator = {
     index: Align.Left,
     values: {
@@ -39,10 +30,20 @@ describe('GotestsumTable', () => {
     {
       name: 'should render a table with no reports',
       input: {
+        title: 'aaa',
         reports: []
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            version: 'Version',
+            result: 'aaa',
+            passed: 'Passed',
+            failed: 'Failed',
+            time: 'Time'
+          }
+        },
         separator,
         records: 0
       }
@@ -50,10 +51,20 @@ describe('GotestsumTable', () => {
     {
       name: 'should render a table with one report',
       input: {
+        title: 'bbb',
         reports: [gotestsumSummaryMock()]
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            version: 'Version',
+            result: 'bbb',
+            passed: 'Passed',
+            failed: 'Failed',
+            time: 'Time'
+          }
+        },
         separator,
         records: 1
       }
@@ -61,10 +72,20 @@ describe('GotestsumTable', () => {
     {
       name: 'should render a table with two reports',
       input: {
+        title: 'ccc',
         reports: [gotestsumSummaryMock(), gotestsumSummaryMock()]
       },
       expected: {
-        header,
+        header: {
+          index: 'Module',
+          values: {
+            version: 'Version',
+            result: 'ccc',
+            passed: 'Passed',
+            failed: 'Failed',
+            time: 'Time'
+          }
+        },
         separator,
         records: 2
       }
@@ -72,7 +93,7 @@ describe('GotestsumTable', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new GotestsumTable(input.reports)
+    const view = new GotestsumTable(input.title, input.reports)
     const result = view.toTable()
     expect(result.header).toEqual(expected.header)
     expect(result.separator).toEqual(expected.separator)

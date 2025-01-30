@@ -3,6 +3,7 @@ import { ReporterType, GitHubContext } from '../type'
 import { JUnitReporterFactory } from '../reporter/factory'
 import {
   FailureRecord,
+  AnyReport,
   GolangCILintSummaryReport,
   GotestsumSummaryReport
 } from '../report/type'
@@ -15,6 +16,7 @@ import { toAnnotations } from './annotation'
 import { Table } from './base/typed'
 
 export type XmlFileGroup = {
+  title: string
   type: ReporterType
   directories: string[]
   fileName: string
@@ -46,18 +48,44 @@ export class TableSetFactory {
       )
     )
 
-    const summaries = reporters.map(r => r.summary)
     const failures = reporters.map(r => r.failures).flat()
-    const summaryTable =
-      xmlFileGroup.type === ReporterType.GolangCILint
-        ? new GolangCILintTable(summaries as GolangCILintSummaryReport[])
-        : new GotestsumTable(summaries as GotestsumSummaryReport[])
-
     return {
       result: toResult(reporters.map(r => r.result)),
-      summary: summaryTable.toTable().toUntyped(),
+      summary: this.createSummaryTable(
+        xmlFileGroup.type,
+        xmlFileGroup.title,
+        reporters.map(r => r.summary)
+      ),
       failures: new FailureTable(failures).toTable(),
       annotations: toAnnotations(failures)
+    }
+  }
+
+  private createSummaryTable(
+    type: ReporterType,
+    title: string,
+    summaries: AnyReport[]
+  ): UntypedTable {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const assertNever = (_: never): never => {
+      throw new Error('exhaustiveness check')
+    }
+
+    switch (type) {
+      case ReporterType.GolangCILint:
+        return new GolangCILintTable(
+          title,
+          summaries as GolangCILintSummaryReport[]
+        )
+          .toTable()
+          .toUntyped()
+      case ReporterType.Gotestsum:
+        return new GotestsumTable(title, summaries as GotestsumSummaryReport[])
+          .toTable()
+          .toUntyped()
+      default:
+        assertNever(type)
+        throw new Error('unreachable')
     }
   }
 

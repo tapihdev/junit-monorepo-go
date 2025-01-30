@@ -41185,6 +41185,7 @@ function getConfig() {
                     throw new Error(`Invalid reporter type: ${c.type}`);
             }
             return {
+                title: c.title,
                 type: reporterType,
                 directories: c.directories,
                 fileName: c.fileName
@@ -42044,17 +42045,32 @@ class TableSetFactory {
     }
     async single(context, xmlFileGroup) {
         const reporters = await Promise.all(xmlFileGroup.directories.map(async (d) => await this._factory.fromXml(context, xmlFileGroup.type, d, xmlFileGroup.fileName)));
-        const summaries = reporters.map(r => r.summary);
         const failures = reporters.map(r => r.failures).flat();
-        const summaryTable = xmlFileGroup.type === type_1.ReporterType.GolangCILint
-            ? new golangcilint_1.GolangCILintTable(summaries)
-            : new gotestsum_1.GotestsumTable(summaries);
         return {
             result: (0, result_1.toResult)(reporters.map(r => r.result)),
-            summary: summaryTable.toTable().toUntyped(),
+            summary: this.createSummaryTable(xmlFileGroup.type, xmlFileGroup.title, reporters.map(r => r.summary)),
             failures: new failure_1.FailureTable(failures).toTable(),
             annotations: (0, annotation_1.toAnnotations)(failures)
         };
+    }
+    createSummaryTable(type, title, summaries) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const assertNever = (_) => {
+            throw new Error('exhaustiveness check');
+        };
+        switch (type) {
+            case type_1.ReporterType.GolangCILint:
+                return new golangcilint_1.GolangCILintTable(title, summaries)
+                    .toTable()
+                    .toUntyped();
+            case type_1.ReporterType.Gotestsum:
+                return new gotestsum_1.GotestsumTable(title, summaries)
+                    .toTable()
+                    .toUntyped();
+            default:
+                assertNever(type);
+                throw new Error('unreachable');
+        }
     }
     async multi(context, xmlFileGroups) {
         if (xmlFileGroups.length === 0) {
@@ -42139,11 +42155,11 @@ const typed_1 = __nccwpck_require__(1068);
 const type_1 = __nccwpck_require__(3658);
 class GolangCILintTable {
     _table;
-    constructor(reports) {
+    constructor(title, reports) {
         this._table = new typed_1.Table({
             index: 'Module',
             values: {
-                result: 'Result'
+                result: title
             }
         }, {
             index: type_1.Align.Left,
@@ -42175,12 +42191,12 @@ const typed_1 = __nccwpck_require__(1068);
 const type_1 = __nccwpck_require__(3658);
 class GotestsumTable {
     _table;
-    constructor(reports) {
+    constructor(title, reports) {
         this._table = new typed_1.Table({
             index: 'Module',
             values: {
                 version: 'Version',
-                result: 'Result',
+                result: title,
                 passed: 'Passed',
                 failed: 'Failed',
                 time: 'Time'

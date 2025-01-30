@@ -25,7 +25,7 @@ describe('input', () => {
           'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
         expected: [
           {
-            // title: 'Test',
+            title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
             fileName: 'test.xml'
@@ -37,7 +37,7 @@ describe('input', () => {
           'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
         expected: [
           {
-            // title: 'Test',
+            title: 'Test',
             type: 'gotestsum',
             directories: ['go/app1', 'go/app2'],
             fileName: 'test.xml'
@@ -49,7 +49,7 @@ describe('input', () => {
           'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
         expected: [
           {
-            // title: 'Lint',
+            title: 'Lint',
             type: 'golangci-lint',
             directories: ['go/app1', 'go/app2'],
             fileName: 'lint.xml'
