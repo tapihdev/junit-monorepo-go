@@ -24,12 +24,15 @@ const mark = '<!-- commented by junit-monorepo-go -->'
 export async function run(): Promise<void> {
   try {
     const token = getGitHubToken()
-    const config = getConfig()
-    const pullNumber = getPullRequestNumber()
-    const sha = getSha()
-
     const { owner, repo } = github.context.repo
     const { runId, actor } = github.context
+    const sha = getSha()
+    const pullNumber = getPullRequestNumber()
+    const config = getConfig({
+      owner,
+      repo,
+      sha
+    })
 
     core.info(`* make a junit report`)
     const junixXmlReader = new JUnitXmlReader(fs.promises.readFile)

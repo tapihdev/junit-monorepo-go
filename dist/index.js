@@ -41061,6 +41061,10 @@ exports.ConfigSchema = zod_1.z.record(zod_1.z
         .describe('Directories to search for JUnit reports.'),
     fileName: zod_1.z.string().describe('File name of JUnit report.'),
     title: zod_1.z.string().describe('Title of column.'),
+    file: zod_1.z
+        .string()
+        .describe('Optional. File path to any file in the repository. (e.g. .golangci.toml)')
+        .optional(),
     type: zod_1.z
         .enum(['gotestsum', 'golangci-lint'])
         .describe('Type of JUnit reporter.')
@@ -41168,8 +41172,10 @@ const type_1 = __nccwpck_require__(4619);
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
-function getConfig() {
+function getConfig(context) {
     const raw = core.getInput('config', { required: true });
+    const { owner, repo, sha } = context;
+    const current = `https://github.com/${owner}/${repo}/blob/${sha}/`;
     try {
         const config = config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
         return Object.values(config).map(c => {
@@ -41185,7 +41191,7 @@ function getConfig() {
                     throw new Error(`Invalid reporter type: ${c.type}`);
             }
             return {
-                title: c.title,
+                title: c.file ? `[${c.title}](${new URL(c.file, current)})` : c.title,
                 type: reporterType,
                 directories: c.directories,
                 fileName: c.fileName
@@ -41272,11 +41278,15 @@ const mark = '<!-- commented by junit-monorepo-go -->';
 async function run() {
     try {
         const token = (0, input_1.getGitHubToken)();
-        const config = (0, input_1.getConfig)();
-        const pullNumber = (0, input_1.getPullRequestNumber)();
-        const sha = (0, input_1.getSha)();
         const { owner, repo } = github.context.repo;
         const { runId, actor } = github.context;
+        const sha = (0, input_1.getSha)();
+        const pullNumber = (0, input_1.getPullRequestNumber)();
+        const config = (0, input_1.getConfig)({
+            owner,
+            repo,
+            sha
+        });
         core.info(`* make a junit report`);
         const junixXmlReader = new reader_1.JUnitXmlReader(fs.promises.readFile);
         const jUnitReporterFactory = new factory_1.JUnitReporterFactory(junixXmlReader);

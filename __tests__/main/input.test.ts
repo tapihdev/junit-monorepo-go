@@ -5,6 +5,12 @@ import * as inputFunc from '../../src/main/input'
 
 let getInputMock: jest.SpiedFunction<typeof core.getInput>
 
+const context = {
+  owner: 'owner',
+  repo: 'repo',
+  sha: 'sha'
+}
+
 describe('input', () => {
   beforeEach(() => {
     getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
@@ -21,6 +27,7 @@ describe('input', () => {
   it('should handle config', () => {
     const testCases = [
       {
+        name: 'should return a gotestsum config',
         input:
           'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
         expected: [
@@ -33,18 +40,7 @@ describe('input', () => {
         ]
       },
       {
-        input:
-          'test: { "title": "Test", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
-        expected: [
-          {
-            title: 'Test',
-            type: 'gotestsum',
-            directories: ['go/app1', 'go/app2'],
-            fileName: 'test.xml'
-          }
-        ]
-      },
-      {
+        name: 'should return a golangci-lint config',
         input:
           'test: { "title": "Lint", "type": "golangci-lint", "directories": ["go/app1", "go/app2"], "fileName": "lint.xml" }',
         expected: [
@@ -55,11 +51,24 @@ describe('input', () => {
             fileName: 'lint.xml'
           }
         ]
+      },
+      {
+        name: 'should return a gotestsum config with a file link',
+        input:
+          'test: { "title": "Test", "file": "README.md", "type": "gotestsum", "directories": ["go/app1", "go/app2"], "fileName": "test.xml" }',
+        expected: [
+          {
+            title: '[Test](https://github.com/owner/repo/blob/sha/README.md)',
+            type: 'gotestsum',
+            directories: ['go/app1', 'go/app2'],
+            fileName: 'test.xml'
+          }
+        ]
       }
     ]
     for (const { input, expected } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(inputFunc.getConfig()).toEqual(expected)
+      expect(inputFunc.getConfig(context)).toEqual(expected)
     }
   })
 
@@ -80,7 +89,7 @@ describe('input', () => {
     ]
     for (const { input } of testCases) {
       getInputMock.mockReturnValue(input)
-      expect(() => inputFunc.getConfig()).toThrow()
+      expect(() => inputFunc.getConfig(context)).toThrow()
     }
   })
 

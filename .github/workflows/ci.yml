@@ -105,7 +105,8 @@ jobs:
           sha: ${{ github.event.pull_request.head.sha }}
           config: |
             test:
-              title: '[Test](./README.md)'
+              title: Test
+              file: README.md
               type: gotestsum
               fileName: test.xml
               directories:
@@ -113,7 +114,8 @@ jobs:
               - .github/testdata/go/app2
               - .github/testdata/go/app3
             lint:
-              title: '[Lint](./README.md)'
+              title: Lint
+              file: README.md
               type: golangci-lint
               fileName: lint.xml
               directories:
@@ -128,7 +130,8 @@ jobs:
           sha: ${{ github.event.pull_request.head.sha }}
           config: |
             test:
-              title: '[Test](./README.md)'
+              title: Test
+              file: README.md
               type: gotestsum
               fileName: test.xml
               directories:
@@ -136,7 +139,8 @@ jobs:
               - .github/testdata/go/app2
               - .github/testdata/go/app3
             lint:
-              title: '[Lint](./README.md)'
+              title: Lint
+              file: README.md
               type: golangci-lint
               fileName: lint.xml
               directories:

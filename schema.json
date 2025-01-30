@@ -17,6 +17,11 @@
         "description": "Title of column.",
         "type": "string"
       },
+      "file": {
+        "description": "Optional. File path to any file in the repository. (e.g. .golangci.toml)",
+        "type": "string",
+        "required": false
+      },
       "type": {
         "description": "Type of JUnit reporter.",
         "enum": ["gotestsum", "golangci-lint"],

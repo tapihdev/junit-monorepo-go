@@ -102,7 +102,8 @@ test:
   - go/app1
   - go/app2
 lint:
-  title: '[Lint](./golangci.toml)'
+  title: Lint
+  file: golangci.toml
   type: golangci-lint
   fileName: lint.xml
   directories:
@@ -157,7 +158,7 @@ lint:
           fileName: 'test.xml'
         },
         {
-          title: '[Lint](./golangci.toml)',
+          title: '[Lint](https://github.com/owner/repo/blob/sha/golangci.toml)',
           type: ReporterType.GolangCILint,
           directories: ['go/app1', 'go/app3'],
           fileName: 'lint.xml'
@@ -205,7 +206,8 @@ test:
   - go/app1
   - go/app2
 lint:
-  title: '[Lint](./golangci.toml)'
+  title: Lint
+  file: golangci.toml
   type: golangci-lint
   fileName: lint.xml
   directories:
@@ -255,7 +257,7 @@ lint:
           fileName: 'test.xml'
         },
         {
-          title: '[Lint](./golangci.toml)',
+          title: '[Lint](https://github.com/owner/repo/blob/sha/golangci.toml)',
           type: ReporterType.GolangCILint,
           directories: ['go/app1', 'go/app3'],
           fileName: 'lint.xml'
