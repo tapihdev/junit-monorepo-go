@@ -41258,154 +41258,6 @@ function toResult(results) {
 
 /***/ }),
 
-/***/ 4846:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ConfigSchema = void 0;
-const zod_1 = __nccwpck_require__(4809);
-exports.ConfigSchema = zod_1.z.record(zod_1.z
-    .object({
-    directories: zod_1.z
-        .array(zod_1.z.string())
-        .describe('Directories to search for JUnit reports.'),
-    fileName: zod_1.z.string().describe('File name of JUnit report.'),
-    title: zod_1.z.string().describe('Title of column.'),
-    type: zod_1.z
-        .enum(['gotestsum', 'golangci-lint'])
-        .describe('Type of JUnit reporter.')
-})
-    .strict());
-
-
-/***/ }),
-
-/***/ 9248:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Client = void 0;
-class Client {
-    octokit;
-    constructor(octokit) {
-        this.octokit = octokit;
-    }
-    async upsertComment(params) {
-        const { owner, repo, pullNumber, mark, body } = params;
-        const markedBody = `${mark}\n${body}`;
-        const allComments = await this.octokit.paginate(this.octokit.rest.issues.listComments, {
-            owner,
-            repo,
-            issue_number: pullNumber
-        });
-        const pastComments = allComments.filter(c => c.body?.startsWith(mark) ?? false);
-        if (pastComments.length > 0) {
-            const reponse = await this.octokit.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: pastComments[0].id,
-                body: markedBody
-            });
-            return { updated: true, id: reponse.data.id };
-        }
-        const response = await this.octokit.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: pullNumber,
-            body: markedBody
-        });
-        return { updated: false, id: response.data.id };
-    }
-}
-exports.Client = Client;
-
-
-/***/ }),
-
-/***/ 3599:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getGitHubToken = getGitHubToken;
-exports.getConfig = getConfig;
-exports.getPullRequestNumber = getPullRequestNumber;
-exports.getSha = getSha;
-const core = __importStar(__nccwpck_require__(7484));
-const github = __importStar(__nccwpck_require__(3228));
-const yaml_1 = __importDefault(__nccwpck_require__(8815));
-const config_generated_1 = __nccwpck_require__(4846);
-function getGitHubToken() {
-    return core.getInput('github-token', { required: true });
-}
-function getConfig() {
-    const raw = core.getInput('config', { required: true });
-    try {
-        return config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
-    }
-    catch (error) {
-        throw new Error(`Invalid config: ${error}`);
-    }
-}
-function getPullRequestNumber() {
-    const raw = core.getInput('pull-request-number', { required: false });
-    if (raw === '') {
-        return github.context.payload.pull_request?.number;
-    }
-    if (raw.match(/^\d+$/) === null) {
-        throw new Error('`pull-request-number` must be a number');
-    }
-    return Number(raw);
-}
-function getSha() {
-    const raw = core.getInput('sha', { required: false });
-    return raw === '' ? github.context.sha : raw;
-}
-
-
-/***/ }),
-
 /***/ 7534:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -41718,7 +41570,155 @@ exports.JUnitXmlReader = JUnitXmlReader;
 
 /***/ }),
 
-/***/ 1730:
+/***/ 3892:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConfigSchema = void 0;
+const zod_1 = __nccwpck_require__(4809);
+exports.ConfigSchema = zod_1.z.record(zod_1.z
+    .object({
+    directories: zod_1.z
+        .array(zod_1.z.string())
+        .describe('Directories to search for JUnit reports.'),
+    fileName: zod_1.z.string().describe('File name of JUnit report.'),
+    title: zod_1.z.string().describe('Title of column.'),
+    type: zod_1.z
+        .enum(['gotestsum', 'golangci-lint'])
+        .describe('Type of JUnit reporter.')
+})
+    .strict());
+
+
+/***/ }),
+
+/***/ 5834:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Client = void 0;
+class Client {
+    octokit;
+    constructor(octokit) {
+        this.octokit = octokit;
+    }
+    async upsertComment(params) {
+        const { owner, repo, pullNumber, mark, body } = params;
+        const markedBody = `${mark}\n${body}`;
+        const allComments = await this.octokit.paginate(this.octokit.rest.issues.listComments, {
+            owner,
+            repo,
+            issue_number: pullNumber
+        });
+        const pastComments = allComments.filter(c => c.body?.startsWith(mark) ?? false);
+        if (pastComments.length > 0) {
+            const reponse = await this.octokit.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: pastComments[0].id,
+                body: markedBody
+            });
+            return { updated: true, id: reponse.data.id };
+        }
+        const response = await this.octokit.rest.issues.createComment({
+            owner,
+            repo,
+            issue_number: pullNumber,
+            body: markedBody
+        });
+        return { updated: false, id: response.data.id };
+    }
+}
+exports.Client = Client;
+
+
+/***/ }),
+
+/***/ 6929:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getGitHubToken = getGitHubToken;
+exports.getConfig = getConfig;
+exports.getPullRequestNumber = getPullRequestNumber;
+exports.getSha = getSha;
+const core = __importStar(__nccwpck_require__(7484));
+const github = __importStar(__nccwpck_require__(3228));
+const yaml_1 = __importDefault(__nccwpck_require__(8815));
+const config_generated_1 = __nccwpck_require__(3892);
+function getGitHubToken() {
+    return core.getInput('github-token', { required: true });
+}
+function getConfig() {
+    const raw = core.getInput('config', { required: true });
+    try {
+        return config_generated_1.ConfigSchema.parse(yaml_1.default.parse(raw));
+    }
+    catch (error) {
+        throw new Error(`Invalid config: ${error}`);
+    }
+}
+function getPullRequestNumber() {
+    const raw = core.getInput('pull-request-number', { required: false });
+    if (raw === '') {
+        return github.context.payload.pull_request?.number;
+    }
+    if (raw.match(/^\d+$/) === null) {
+        throw new Error('`pull-request-number` must be a number');
+    }
+    return Number(raw);
+}
+function getSha() {
+    const raw = core.getInput('sha', { required: false });
+    return raw === '' ? github.context.sha : raw;
+}
+
+
+/***/ }),
+
+/***/ 5216:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -41762,9 +41762,9 @@ const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const fs = __importStar(__nccwpck_require__(9896));
 const type_1 = __nccwpck_require__(4619);
-const input_1 = __nccwpck_require__(3599);
-const github_1 = __nccwpck_require__(9248);
-const markdown_1 = __nccwpck_require__(3758);
+const input_1 = __nccwpck_require__(6929);
+const github_1 = __nccwpck_require__(5834);
+const markdown_1 = __nccwpck_require__(9372);
 const factory_1 = __nccwpck_require__(7534);
 const factory_2 = __nccwpck_require__(9492);
 const type_2 = __nccwpck_require__(4619);
@@ -41852,7 +41852,7 @@ async function run() {
 
 /***/ }),
 
-/***/ 3758:
+/***/ 9372:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -52732,7 +52732,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /**
  * The entrypoint for the action.
  */
-const main_1 = __nccwpck_require__(1730);
+const main_1 = __nccwpck_require__(5216);
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (0, main_1.run)();
 

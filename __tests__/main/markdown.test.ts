@@ -1,5 +1,5 @@
-import { Result } from '../src/type'
-import { makeMarkdownReport } from '../src/markdown'
+import { Result } from '../../src/type'
+import { makeMarkdownReport } from '../../src/main/markdown'
 
 describe('Repository#Markdown', () => {
   const testCases = [
