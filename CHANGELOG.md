@@ -1,5 +1,28 @@
 # Changelog
 
+## [v0.5.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.4.0...v0.5.0) - 2025-01-30
+- feat: use YAML for config by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/88
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/90
+- refactor: read all JUnit first by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/91
+- refactor: extract code block for creating tables by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/92
+- refactor: junit directory by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/93
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/94
+- refactor: add view layer by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/95
+- refactor: remove module and create composer by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/96
+- refactor: move reporter type to root by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/97
+- feat: merge failed tables by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/98
+- fix: tests concerning failure table merge by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/99
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/100
+- refactor: rewrite all by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/102
+- chore: assert never by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/103
+- refactor: replace undefined on creating table by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/104
+- refactor: organize directories by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/105
+- refactor: organize directories again by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/106
+- refactor: Align enum by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/107
+- fix: concat failure table by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/109
+- feat: dynamic config by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/108
+- feat: add file field by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/110
+
 ## [v0.4.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.3.2...v0.4.0) - 2025-01-05
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/82
 - feat: make sha optional by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/84
