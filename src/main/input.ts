@@ -4,14 +4,16 @@ import YAML from 'yaml'
 
 import { ConfigSchema } from './config.generated'
 import { XmlFileGroup } from '../table/factory'
-import { ReporterType } from '../type'
+import { GitHubContext, ReporterType } from '../type'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })
 }
 
-export function getConfig(): XmlFileGroup[] {
+export function getConfig(context: GitHubContext): XmlFileGroup[] {
   const raw = core.getInput('config', { required: true })
+  const { owner, repo, sha } = context
+  const current = `https://github.com/${owner}/${repo}/blob/${sha}/`
   try {
     const config = ConfigSchema.parse(YAML.parse(raw))
     return Object.values(config).map(c => {
@@ -27,7 +29,7 @@ export function getConfig(): XmlFileGroup[] {
           throw new Error(`Invalid reporter type: ${c.type}`)
       }
       return {
-        title: c.title,
+        title: c.file ? `[${c.title}](${new URL(c.file, current)})` : c.title,
         type: reporterType,
         directories: c.directories,
         fileName: c.fileName
