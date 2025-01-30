@@ -42070,11 +42070,11 @@ class GotestsumSummaryReportImpl {
     }
     get record() {
         return {
-            version: this.version ?? '-',
+            version: this.version,
             result: this.result === type_1.Result.Failed ? '❌Failed' : '✅Passed',
             passed: this.passed.toString(),
             failed: this.failed.toString(),
-            time: this.time?.toFixed(1).concat('s') ?? '-'
+            time: this.time?.toFixed(1).concat('s')
         };
     }
 }

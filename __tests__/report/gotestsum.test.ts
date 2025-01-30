@@ -69,11 +69,11 @@ describe('GotestsumSummary', () => {
         index:
           '[path/to/go](https://github.com/owner/repo/blob/sha/path/to/go)',
         record: {
-          version: '-',
+          version: undefined,
           result: '❌Failed',
           passed: '0',
           failed: '0',
-          time: '-'
+          time: undefined
         }
       }
     }
