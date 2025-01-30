@@ -14,6 +14,7 @@ import { makeMarkdownReport } from './markdown'
 import { JUnitReporterFactory } from './junit/factory'
 import { TableSetFactory } from './composer/factory'
 import { ReporterType } from './type'
+import { JUnitXmlReader } from './junit/reader'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -55,10 +56,14 @@ export async function run(): Promise<void> {
     }
 
     core.info(`* make a junit report`)
-    const composite = new TableSetFactory(new JUnitReporterFactory(
-      fs.promises.readFile
-    ))
-    const tableSets = await composite.multi(
+    const junixXmlReader = new JUnitXmlReader(fs.promises.readFile)
+    const jUnitReporterFactory = new JUnitReporterFactory(
+      junixXmlReader
+    )
+    const tableSetFactory = new TableSetFactory(
+      jUnitReporterFactory
+    )
+    const tableSets = await tableSetFactory.multi(
       {
         owner,
         repo,

@@ -7,8 +7,8 @@ import {
 import { Result } from '../type'
 
 export interface Reportable<T extends SummaryReport> {
-  readonly result: Result
   readonly path: string
+  readonly result: Result
   readonly summary: T
   readonly failures: FailureReport[]
 }

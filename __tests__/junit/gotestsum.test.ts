@@ -51,6 +51,12 @@ describe('gotestsum', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Passed,
           passed: 0,
           failed: 0,
@@ -79,6 +85,12 @@ describe('gotestsum', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Passed,
           passed: 0,
           failed: 0,
@@ -108,6 +120,12 @@ describe('gotestsum', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Passed,
           passed: 0,
           failed: 0,
@@ -192,6 +210,12 @@ describe('gotestsum', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Failed,
           passed: 2,
           failed: 2,
@@ -200,6 +224,12 @@ describe('gotestsum', () => {
         },
         failures: [
           {
+            context: {
+              owner: 'owner',
+              repo: 'repo',
+              sha: 'sha'
+            },
+            moduleDir: 'path/to',
             subDir: 'foo/bar',
             file: 'baz_test.go',
             line: 1,
@@ -261,6 +291,12 @@ describe('gotestsum', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Failed,
           passed: 0,
           failed: 2,

@@ -14,7 +14,7 @@ type JUnitReportUnsafe = {
   testsuites: TestSuites | ''
 }
 
-export class JUnitXmlLoader {
+export class JUnitXmlReader {
   constructor(private readonly reader: FileReader) {}
 
   async safeParse(    directory: string,

@@ -31,7 +31,7 @@ export class TableSetFactory {
     context: GitHubContext,
     xmlFileGroup: XmlFileGroup,
   ): Promise<TableSet> {
-    const reports = await Promise.all(
+    const reporters = await Promise.all(
       xmlFileGroup.directories.map(
         async (d) => (await this._factory.fromXml(
           context,
@@ -42,12 +42,12 @@ export class TableSetFactory {
       )
     )
 
-    const summaries = reports.map(r => r.summary)
-    const failures = reports.map(r => r.failures).flat()
+    const summaries = reporters.map(r => r.summary)
+    const failures = reporters.map(r => r.failures).flat()
     const summaryTable = xmlFileGroup.type === ReporterType.GolangCILint ? new GolangCILintTable(summaries as GolangCILintSummaryReport[]) : new GotestsumTable(summaries as GotestsumSummaryReport[])
 
     return {
-      result: toResult(reports.map(r => r.result)),
+      result: toResult(reporters.map(r => r.result)),
       summary: summaryTable.toTable().toUntyped(),
       failures: new FailureTable(failures).toTable().toUntyped(),
       annotations: toAnnotations(failures)

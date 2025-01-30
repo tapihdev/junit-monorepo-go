@@ -21,6 +21,12 @@ describe('golangcilint', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Passed
         },
         failures: []
@@ -91,10 +97,22 @@ describe('golangcilint', () => {
       expected: {
         path: 'path/to',
         summary: {
+          context: {
+            owner: 'owner',
+            repo: 'repo',
+            sha: 'sha'
+          },
+          moduleDir: 'path/to',
           result: Result.Failed
         },
         failures: [
           {
+            context: {
+              owner: 'owner',
+              repo: 'repo',
+              sha: 'sha'
+            },
+            moduleDir: 'path/to',
             subDir: 'go/app',
             file: 'foo_test.go',
             line: 12,
@@ -103,6 +121,12 @@ describe('golangcilint', () => {
             type: ReporterType.GolangCILint
           },
           {
+            context: {
+              owner: 'owner',
+              repo: 'repo',
+              sha: 'sha'
+            },
+            moduleDir: 'path/to',
             subDir: 'go/app',
             file: 'bar_test.go',
             line: 56,
