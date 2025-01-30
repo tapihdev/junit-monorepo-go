@@ -19,11 +19,11 @@ export class GotestsumSummaryReportImpl implements GotestsumSummaryReport {
 
   get record(): GotestsumSummaryRecord {
     return {
-      version: this.version ?? '-',
+      version: this.version,
       result: this.result === Result.Failed ? '❌Failed' : '✅Passed',
       passed: this.passed.toString(),
       failed: this.failed.toString(),
-      time: this.time?.toFixed(1).concat('s') ?? '-'
+      time: this.time?.toFixed(1).concat('s')
     }
   }
 }

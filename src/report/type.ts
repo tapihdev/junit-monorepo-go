@@ -31,11 +31,11 @@ export type AnyRecord =
   | AnnotationRecord
 
 export type GotestsumSummaryRecord = {
-  version: string
+  version?: string
   result: string
   passed: string
   failed: string
-  time: string
+  time?: string
 }
 
 export type GolangCILintSummaryRecord = {
