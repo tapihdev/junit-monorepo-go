@@ -1,38 +1,22 @@
-import { ReporterType, Result } from '../type'
+import {
+  GotestsumSummaryReport,
+  GolangCILintSummaryReport,
+  FailureReport,
+  SummaryReport
+} from '../report/type'
+import { Result } from '../type'
 
-// Reportable represents a JUnit report with a summary and a list of failed cases
-export interface Reportable<T extends Summary> {
+export interface Reportable<T extends SummaryReport> {
   readonly path: string
+  readonly result: Result
   readonly summary: T
-  readonly failures: Failure[]
+  readonly failures: FailureReport[]
 }
 
-export type Reporter = GotestsumReport | GolangCILintReport
-export type GotestsumReport = Reportable<GotestsumSummary>
-export type GolangCILintReport = Reportable<GolangCILintSummary>
+export type AnyReporter = GotestsumReporter | GolangCILintReporter
 
-// Summary represents a summary of a JUnit report
-export type Summary = GotestsumSummary | GolangCILintSummary
-export type GotestsumSummary = {
-  result: Result
-  passed: number
-  failed: number
-  time?: number
-  version?: string
-}
-export type GolangCILintSummary = {
-  result: Result
-}
-
-// Failure represents a failed test case
-export type Failure = {
-  subDir: string
-  file: string
-  line: number
-  test: string
-  message: string
-  type: ReporterType
-}
+export type GotestsumReporter = Reportable<GotestsumSummaryReport>
+export type GolangCILintReporter = Reportable<GolangCILintSummaryReport>
 
 // Raw schema of a JUnit report
 export type JUnitReport = {

@@ -1,26 +1,33 @@
 import * as path from 'path'
 
-import {
-  JUnitReport,
-  GolangCILintReport,
-  GolangCILintSummary,
-  Failure
-} from './type'
-import { ReporterType, Result } from '../type'
+import { JUnitReport, GolangCILintReporter } from './type'
+import { ReporterType, Result, GitHubContext } from '../type'
+import { GolangCILintSummaryReportImpl } from '../report/golangcilint'
+import { FailureReportImpl } from '../report/failure'
 
-export class GolangCILintReportImpl implements GolangCILintReport {
+export class GolangCILintReporterImpl implements GolangCILintReporter {
   constructor(
+    readonly context: GitHubContext,
     readonly path: string,
     private readonly _junit: JUnitReport
   ) {}
 
-  get summary(): GolangCILintSummary {
-    return {
-      result: this.result
-    }
+  get result(): Result {
+    // Passed if there are no test suites, because golangci-lint reports only failures
+    return this._junit.testsuites.testsuite === undefined
+      ? Result.Passed
+      : Result.Failed
   }
 
-  get failures(): Failure[] {
+  get summary(): GolangCILintSummaryReportImpl {
+    return new GolangCILintSummaryReportImpl(
+      this.context,
+      this.path,
+      this.result
+    )
+  }
+
+  get failures(): FailureReportImpl[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -58,22 +65,17 @@ export class GolangCILintReportImpl implements GolangCILintReport {
         const [fullPath, line] = testcase.$.classname.split(':')
         const file = path.basename(fullPath)
         const subDir = path.dirname(fullPath)
-        return {
+        return new FailureReportImpl(
+          this.context,
+          ReporterType.GolangCILint,
+          this.path,
           subDir,
           file,
-          line: parseInt(line),
-          test: testcase.$.name,
-          message,
-          type: ReporterType.GolangCILint
-        }
+          parseInt(line),
+          testcase.$.name,
+          message
+        )
       })
-  }
-
-  private get result(): Result {
-    // Passed if there are no test suites, because golangci-lint reports only failures
-    return this._junit.testsuites.testsuite === undefined
-      ? Result.Passed
-      : Result.Failed
   }
 
   private get tests(): number {

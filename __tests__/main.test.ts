@@ -11,7 +11,9 @@ import * as github from '@actions/github'
 
 import * as main from '../src/main'
 import { Client as GitHubClient } from '../src/github'
-import fs from 'fs'
+import { TableSetFactory } from '../src/composer/factory'
+import { ReporterType, Result } from '../src/type'
+import { UntypedTable } from '../src/table/untyped'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
@@ -26,7 +28,7 @@ let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
 let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 let upsertCommentMock: jest.SpiedFunction<GitHubClient['upsertComment']>
-let readerMock: jest.SpiedFunction<(typeof fs.promises)['readFile']>
+let tableSetFactoryMock: jest.SpiedFunction<TableSetFactory['multi']>
 
 describe('action', () => {
   beforeEach(() => {
@@ -46,10 +48,39 @@ describe('action', () => {
       .spyOn(GitHubClient.prototype, 'upsertComment')
       .mockResolvedValue({ updated: false, id: 123 })
 
-    readerMock = jest.spyOn(fs.promises, 'readFile').mockResolvedValue(`
-        <?xml version="1.0" encoding="UTF-8"?>
-        <testsuites></testsuites>
-        `)
+    tableSetFactoryMock = jest
+      .spyOn(TableSetFactory.prototype, 'multi')
+      .mockResolvedValue({
+        result: Result.Passed,
+        summary: new UntypedTable(
+          {
+            index: 'H',
+            values: ['F1', 'F2']
+          },
+          {
+            index: '-',
+            values: ['-', '-']
+          },
+          [
+            {
+              index: 'R1',
+              values: ['V11', 'V12']
+            }
+          ]
+        ),
+        failures: new UntypedTable(
+          {
+            index: 'h',
+            values: ['f1', 'f2']
+          },
+          {
+            index: '-',
+            values: ['-', '-']
+          },
+          []
+        ),
+        annotations: ['a', 'b']
+      })
   })
 
   it('should post comment and summary', async () => {
@@ -58,11 +89,9 @@ describe('action', () => {
 
 #### Result: \`Passed\`🙆‍♀️
 
-| Module | Version | Test | Passed | Failed | Time | Lint |
-| :----- | ------: | :--- | -----: | -----: | ---: | :--- |
-| [go/app1](https://github.com/owner/repo/blob/sha/go/app1) | - | ✅Passed | 0 | 0 | - | ✅Passed |
-| [go/app2](https://github.com/owner/repo/blob/sha/go/app2) | - | ✅Passed | 0 | 0 | - | - |
-| [go/app3](https://github.com/owner/repo/blob/sha/go/app3) | - | - | - | - | - | ✅Passed |
+| H | F1 | F2 |
+| - | - | - |
+| R1 | V11 | V12 |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/pull/123/commits/sha) pushed by @actor.*
@@ -110,28 +139,38 @@ lint:
 
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
-    expect(infoMock).toHaveBeenNthCalledWith(
-      2,
-      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
-    )
-    expect(infoMock).toHaveBeenNthCalledWith(3, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(2, 'a')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'b')
     expect(infoMock).toHaveBeenNthCalledWith(
       4,
+      '* upsert comment matching <!-- commented by junit-monorepo-go -->'
+    )
+    expect(infoMock).toHaveBeenNthCalledWith(5, 'created comment: 123')
+    expect(infoMock).toHaveBeenNthCalledWith(
+      6,
       '* post summary to summary page'
     )
-    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
-    expect(readerMock).toHaveBeenNthCalledWith(1, 'go/app1/test.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(2, 'go/app2/test.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(3, 'go/app1/lint.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(4, 'go/app3/lint.xml', {
-      encoding: 'utf8'
-    })
+    expect(infoMock).toHaveBeenNthCalledWith(7, '* set output')
+    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        sha: 'sha'
+      },
+      [
+        {
+          type: ReporterType.Gotestsum,
+          directories: ['go/app1', 'go/app2'],
+          fileName: 'test.xml'
+        },
+        {
+          type: ReporterType.GolangCILint,
+          directories: ['go/app1', 'go/app3'],
+          fileName: 'lint.xml'
+        }
+      ]
+    )
     expect(upsertCommentMock).toHaveBeenNthCalledWith(1, {
       owner: 'owner',
       repo: 'repo',
@@ -151,11 +190,9 @@ lint:
 
 #### Result: \`Passed\`🙆‍♀️
 
-| Module | Version | Test | Passed | Failed | Time | Lint |
-| :----- | ------: | :--- | -----: | -----: | ---: | :--- |
-| [go/app1](https://github.com/owner/repo/blob/sha/go/app1) | - | ✅Passed | 0 | 0 | - | ✅Passed |
-| [go/app2](https://github.com/owner/repo/blob/sha/go/app2) | - | ✅Passed | 0 | 0 | - | - |
-| [go/app3](https://github.com/owner/repo/blob/sha/go/app3) | - | - | - | - | - | ✅Passed |
+| H | F1 | F2 |
+| - | - | - |
+| R1 | V11 | V12 |
 
 ---
 *This comment is created for the commit [sha](https://github.com/owner/repo/commit/sha) pushed by @actor.*
@@ -203,23 +240,33 @@ lint:
 
     // Verify that all of the core library functions were called correctly
     expect(infoMock).toHaveBeenNthCalledWith(1, '* make a junit report')
+    expect(infoMock).toHaveBeenNthCalledWith(2, 'a')
+    expect(infoMock).toHaveBeenNthCalledWith(3, 'b')
     expect(infoMock).toHaveBeenNthCalledWith(
-      2,
+      4,
       '* post summary to summary page'
     )
-    expect(readerMock).toHaveBeenNthCalledWith(1, 'go/app1/test.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(2, 'go/app2/test.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(3, 'go/app1/lint.xml', {
-      encoding: 'utf8'
-    })
-    expect(readerMock).toHaveBeenNthCalledWith(4, 'go/app3/lint.xml', {
-      encoding: 'utf8'
-    })
-    expect(infoMock).toHaveBeenNthCalledWith(3, '* set output')
+    expect(infoMock).toHaveBeenNthCalledWith(5, '* set output')
+    expect(tableSetFactoryMock).toHaveBeenNthCalledWith(
+      1,
+      {
+        owner: 'owner',
+        repo: 'repo',
+        sha: 'sha'
+      },
+      [
+        {
+          type: ReporterType.Gotestsum,
+          directories: ['go/app1', 'go/app2'],
+          fileName: 'test.xml'
+        },
+        {
+          type: ReporterType.GolangCILint,
+          directories: ['go/app1', 'go/app3'],
+          fileName: 'lint.xml'
+        }
+      ]
+    )
     expect(summaryAddRawMock).toHaveBeenNthCalledWith(1, body)
     expect(summaryWriteMock).toHaveBeenNthCalledWith(1)
     expect(setOutputMock).toHaveBeenNthCalledWith(1, 'body', body)

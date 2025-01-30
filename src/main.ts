@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
 
+import { Result } from './type'
 import {
   getGitHubToken,
   getConfig,
@@ -10,12 +11,10 @@ import {
 } from './input'
 import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
-import { TableComposer } from './composer'
-
-import {
-  SingleJUnitReporterFactoryImpl,
-  MultiJunitReportersFactoryImpl
-} from './junit/factory'
+import { JUnitReporterFactory } from './junit/factory'
+import { TableSetFactory } from './composer/factory'
+import { ReporterType } from './type'
+import { JUnitXmlReader } from './junit/reader'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
 
@@ -30,42 +29,44 @@ export async function run(): Promise<void> {
     const pullNumber = getPullRequestNumber()
     const sha = getSha()
 
+    const { owner, repo } = github.context.repo
+    const { runId, actor } = github.context
+
     // TODO: this is a temporary logic just to make modification easier
     const test = config['test']
     if (test === undefined) {
       throw new Error('`test` is required')
     }
-    const lint = config['lint']
 
-    const testDirs = test.directories
-    const lintDirs = lint?.directories ?? []
-    const testReportXml = test.fileName
-    const lintReportXml = lint?.fileName ?? ''
-    const { owner, repo } = github.context.repo
-    const { runId, actor } = github.context
+    const tableSetsInput = [
+      {
+        type: ReporterType.Gotestsum,
+        directories: test.directories,
+        fileName: test.fileName
+      }
+    ]
+
+    const lint = config['lint']
+    if (lint !== undefined) {
+      tableSetsInput.push({
+        type: ReporterType.GolangCILint,
+        directories: lint?.directories ?? [],
+        fileName: lint?.fileName ?? ''
+      })
+    }
 
     core.info(`* make a junit report`)
-    const singleFactory = new SingleJUnitReporterFactoryImpl(
-      fs.promises.readFile
+    const junixXmlReader = new JUnitXmlReader(fs.promises.readFile)
+    const jUnitReporterFactory = new JUnitReporterFactory(junixXmlReader)
+    const tableSetFactory = new TableSetFactory(jUnitReporterFactory)
+    const tableSets = await tableSetFactory.multi(
+      {
+        owner,
+        repo,
+        sha
+      },
+      tableSetsInput
     )
-    const multiFactory = new MultiJunitReportersFactoryImpl(singleFactory)
-    const [tests, lints] = await multiFactory.fromXml(
-      testDirs,
-      lintDirs,
-      testReportXml,
-      lintReportXml
-    )
-
-    const githubContext = {
-      owner,
-      repo,
-      sha
-    }
-    const composer = new TableComposer(tests, lints)
-    const result = composer.result()
-    const summary = composer.summary(githubContext)
-    const failures = composer.failures(githubContext)
-    const annotations = composer.annotations()
 
     const body = makeMarkdownReport(
       {
@@ -76,11 +77,11 @@ export async function run(): Promise<void> {
         pullNumber,
         actor
       },
-      result,
-      summary,
-      failures
+      tableSets?.result ?? Result.Passed,
+      tableSets?.summary.toString() ?? '',
+      tableSets?.failures.toString() ?? ''
     )
-    annotations.forEach(annotation => core.info(annotation))
+    tableSets?.annotations.forEach(annotation => core.info(annotation))
 
     if (pullNumber !== undefined) {
       core.info(`* upsert comment matching ${mark}`)
