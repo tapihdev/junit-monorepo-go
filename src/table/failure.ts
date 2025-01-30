@@ -1,4 +1,4 @@
-import { Table } from '../table/typed'
+import { Table } from './base/typed'
 import { FailureReport, FailureRecord } from '../report/type'
 
 export class FailureTable {

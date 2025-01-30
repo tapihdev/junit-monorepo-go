@@ -1,4 +1,4 @@
-import { GotestsumTable } from '../../src/composer/gotestsum'
+import { GotestsumTable } from '../../src/table/gotestsum'
 import { GotestsumSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 

@@ -1,4 +1,4 @@
-import { FailureTable } from '../../src/composer/failure'
+import { FailureTable } from '../../src/table/failure'
 import { FailureReport } from '../../src/report/type'
 import { ReporterType } from '../../src/type'
 
