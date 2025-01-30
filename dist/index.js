@@ -41294,7 +41294,7 @@ async function run() {
             runId,
             pullNumber,
             actor
-        }, tableSets?.result ?? type_1.Result.Passed, tableSets?.summary.toString() ?? '', tableSets?.failures.toString() ?? '');
+        }, tableSets?.result ?? type_1.Result.Passed, tableSets?.summary.toString() ?? '', tableSets?.failures.toUntyped().toString() ?? '');
         tableSets?.annotations.forEach(annotation => core.info(annotation));
         if (pullNumber !== undefined) {
             core.info(`* upsert comment matching ${mark}`);
@@ -41926,10 +41926,10 @@ class Table {
     get columns() {
         return Object.keys(this.header.values).length;
     }
-    concat(other) {
+    concat(others) {
         return new Table(this.header, this.separator, [
             ...this.records,
-            ...other.records
+            ...others.flatMap(o => o.records)
         ]);
     }
     toUntyped() {
@@ -42054,7 +42054,7 @@ class TableSetFactory {
         return {
             result: (0, result_1.toResult)(reporters.map(r => r.result)),
             summary: summaryTable.toTable().toUntyped(),
-            failures: new failure_1.FailureTable(failures).toTable().toUntyped(),
+            failures: new failure_1.FailureTable(failures).toTable(),
             annotations: (0, annotation_1.toAnnotations)(failures)
         };
     }
@@ -42068,7 +42068,7 @@ class TableSetFactory {
         return {
             result: (0, result_1.toResult)(reportsSets.map(r => r.result)),
             summary: main.summary.join(others.map(r => r.summary)),
-            failures: main.failures.join(others.map(r => r.failures)),
+            failures: main.failures.concat(others.map(r => r.failures)),
             annotations: reportsSets.flatMap(r => r.annotations)
         };
     }

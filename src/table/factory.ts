@@ -2,6 +2,7 @@ import { Result } from '../type'
 import { ReporterType, GitHubContext } from '../type'
 import { JUnitReporterFactory } from '../reporter/factory'
 import {
+  FailureRecord,
   GolangCILintSummaryReport,
   GotestsumSummaryReport
 } from '../report/type'
@@ -11,6 +12,7 @@ import { GotestsumTable } from './gotestsum'
 import { FailureTable } from './failure'
 import { toResult } from './result'
 import { toAnnotations } from './annotation'
+import { Table } from './base/typed'
 
 type XmlFileGroup = {
   type: ReporterType
@@ -21,7 +23,7 @@ type XmlFileGroup = {
 type TableSet = {
   result: Result
   summary: UntypedTable
-  failures: UntypedTable
+  failures: Table<FailureRecord>
   annotations: string[]
 }
 
@@ -54,7 +56,7 @@ export class TableSetFactory {
     return {
       result: toResult(reporters.map(r => r.result)),
       summary: summaryTable.toTable().toUntyped(),
-      failures: new FailureTable(failures).toTable().toUntyped(),
+      failures: new FailureTable(failures).toTable(),
       annotations: toAnnotations(failures)
     }
   }
@@ -78,7 +80,7 @@ export class TableSetFactory {
     return {
       result: toResult(reportsSets.map(r => r.result)),
       summary: main.summary.join(others.map(r => r.summary)),
-      failures: main.failures.join(others.map(r => r.failures)),
+      failures: main.failures.concat(others.map(r => r.failures)),
       annotations: reportsSets.flatMap(r => r.annotations)
     }
   }
