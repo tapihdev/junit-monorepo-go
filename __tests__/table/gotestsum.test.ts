@@ -2,7 +2,6 @@ import { GotestsumTable } from '../../src/table/gotestsum'
 import { GotestsumSummaryReport } from '../../src/report/type'
 import { Result } from '../../src/type'
 import { Align } from '../../src/table/base/type'
-import { title } from 'process'
 
 describe('GotestsumTable', () => {
   const gotestsumSummaryMock = jest.fn<GotestsumSummaryReport, []>(() => ({

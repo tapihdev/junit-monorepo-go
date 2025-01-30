@@ -1,7 +1,6 @@
 import { Table } from './base/typed'
 import { Align } from './base/type'
 import { GotestsumSummaryReport, GotestsumSummaryRecord } from '../report/type'
-import { title } from 'process'
 
 export class GotestsumTable {
   private _table: Table<GotestsumSummaryRecord>

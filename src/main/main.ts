@@ -13,7 +13,6 @@ import { Client as GitHubClient } from './github'
 import { makeMarkdownReport } from './markdown'
 import { JUnitReporterFactory } from '../reporter/factory'
 import { TableSetFactory } from '../table/factory'
-import { ReporterType } from '../type'
 import { JUnitXmlReader } from '../reporter/reader'
 
 const mark = '<!-- commented by junit-monorepo-go -->'
