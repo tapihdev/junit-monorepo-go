@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.5.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.0...v0.5.1) - 2025-01-31
+- doc: update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/111
+- chore(deps): update node.js to v22.13.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/120
+- chore(deps): update pnpm to v9.15.4 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/121
+
 ## [v0.5.0](https://github.com/tapihdev/junit-monorepo-go/compare/v0.4.0...v0.5.0) - 2025-01-30
 - feat: use YAML for config by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/88
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/90
