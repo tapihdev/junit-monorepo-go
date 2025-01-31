@@ -18,7 +18,7 @@ jobs:
       contents: read
     steps:
       - name: Fetch GitHub App Token
-        uses: actions/create-github-app-token@5d869da34e18e7287c1daad50e0b8ea0f506ce69 # v1
+        uses: actions/create-github-app-token@136412a57a7081aa63c935a2cc2918f76c34f514 # v1
         id: token
         with:
           app-id: ${{ vars.APP_ID_TAGPR }}
