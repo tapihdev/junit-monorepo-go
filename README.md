@@ -19,8 +19,8 @@ commenting CI results to PRs and Actons summary pages.
 This action assumes that there are multiple Go modules in the monorepo with a
 go.mod file for each module. JUnit test reports are generated with
 [gotestsum](https://github.com/gotestyourself/gotestsum) and
-[golangci-lint](https://github.com/golangci/golangci-lint) and stored in the
-root of each module.
+[golangci-lint](https://github.com/golangci/golangci-lint) and should be stored
+in the root of each module.
 
 ```
 go
@@ -91,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: junit-${{ steps.test.outputs.name }}
-          # ** preserves the directory structure
+          # NOTE: ** preserves the directory structure
           path: |
             **/test.xml
             **/lint.xml
@@ -133,8 +133,10 @@ jobs:
 
 ### Inputs
 
-> [!IMPORTANT] Please keep in mind that left join is performed on the test and
-> lint reports configured in the `config`
+> [!IMPORTANT]
+>
+> Please keep in mind that left join is performed on the test and lint reports
+> configured in the `config`
 
 | **Input**             | **Required** | **Description**                                                                                                          |
 | --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------ |
