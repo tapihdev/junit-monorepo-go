@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.2](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.1...v0.5.2) - 2025-02-02
+- doc: Update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/122
+- refactor: directory structure and do not use impl by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/124
+
 ## [v0.5.1](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.0...v0.5.1) - 2025-01-31
 - doc: update README.md by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/111
 - chore(deps): update node.js to v22.13.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/120
