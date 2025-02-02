@@ -1,6 +1,6 @@
 import * as github from '@actions/github'
 
-import { Client as GitHubClient } from '../../src/main/github'
+import { Client as GitHubClient } from '../src/github'
 
 const listCommentsMock = jest.fn()
 const updateCommentMock = jest.fn()

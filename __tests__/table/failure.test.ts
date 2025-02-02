@@ -1,6 +1,6 @@
 import { FailureTable } from '../../src/table/failure'
 import { FailureReport } from '../../src/report/type'
-import { ReporterType } from '../../src/type'
+import { ReporterType } from '../../src/common/type'
 import { Align } from '../../src/table/base/type'
 
 describe('TableComposerImpl#toFailuresTable', () => {

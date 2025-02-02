@@ -1,6 +1,6 @@
 import { JUnitReport } from '../../src/reporter/type'
 import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
-import { ReporterType, Result } from '../../src/type'
+import { ReporterType, Result } from '../../src/common/type'
 
 describe('gotestsum', () => {
   const context = {

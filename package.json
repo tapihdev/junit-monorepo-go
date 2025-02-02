@@ -30,11 +30,11 @@
     "format:write": "npx prettier --write .",
     "format:check": "npx prettier --check .",
     "lint": "npx eslint . -c ./.github/linters/.eslintrc.yml",
-    "package": "npx ncc build src/main/index.ts -o dist --source-map --license licenses.txt",
+    "package": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt",
     "package:watch": "npm run package -- --watch",
     "test": "npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
-    "generate:zod": "npx json-schema-to-zod -i schema.json -n ConfigSchema -t Config | npx prettier --parser typescript | tee src/main/config.generated.ts",
+    "generate:zod": "npx json-schema-to-zod -i schema.json -n ConfigSchema -t Config | npx prettier --parser typescript | tee src/config.generated.ts",
     "generate": "npm run generate:zod"
   },
   "license": "MIT",

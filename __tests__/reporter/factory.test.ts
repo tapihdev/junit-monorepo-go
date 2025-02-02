@@ -1,7 +1,7 @@
 import fs from 'fs'
 
 import { JUnitReporterFactory } from '../../src/reporter/factory'
-import { ReporterType } from '../../src/type'
+import { ReporterType } from '../../src/common/type'
 import { GolangCILintReporterImpl } from '../../src/reporter/golangcilint'
 import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
 import { JUnitXmlReader } from '../../src/reporter/reader'

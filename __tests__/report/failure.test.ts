@@ -1,5 +1,5 @@
 import { FailureReportImpl } from '../../src/report/failure'
-import { ReporterType } from '../../src/type'
+import { ReporterType } from '../../src/common/type'
 
 describe('Failure', () => {
   const context = {

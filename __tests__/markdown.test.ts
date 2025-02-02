@@ -1,5 +1,5 @@
-import { Result } from '../../src/common/type'
-import { makeMarkdownReport } from '../../src/main/markdown'
+import { Result } from '../src/common/type'
+import { makeMarkdownReport } from '../src/markdown'
 
 describe('Repository#Markdown', () => {
   const testCases = [
