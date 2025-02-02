@@ -1,5 +1,5 @@
-import { FailureReportImpl } from '../../src/report/failure'
-import { ReporterType } from '../../src/type'
+import { FailureReport } from '../../src/report/failure'
+import { ReporterType } from '../../src/common/type'
 
 describe('Failure', () => {
   const context = {
@@ -38,7 +38,7 @@ describe('Failure', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const failure = new FailureReportImpl(
+    const failure = new FailureReport(
       input.context,
       input.type,
       input.moduleDir,

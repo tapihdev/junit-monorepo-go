@@ -1,14 +1,14 @@
 import { Table } from './base/typed'
 import { Align } from './base/type'
 import {
-  GolangCILintSummaryReport,
+  ReportableGolangCILintSummary,
   GolangCILintSummaryRecord
 } from '../report/type'
 
 export class GolangCILintTable {
   private _table: Table<GolangCILintSummaryRecord>
 
-  constructor(title: string, reports: GolangCILintSummaryReport[]) {
+  constructor(title: string, reports: ReportableGolangCILintSummary[]) {
     this._table = new Table(
       {
         index: 'Module',

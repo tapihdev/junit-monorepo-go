@@ -9,12 +9,12 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import * as main from '../../src/main/main'
-import { Client as GitHubClient } from '../../src/main/github'
-import { TableSetFactory } from '../../src/table/factory'
-import { ReporterType, Result } from '../../src/type'
-import { UntypedTable } from '../../src/table/base/untyped'
-import { FailureTable } from '../../src/table/failure'
+import * as main from '../src/main'
+import { Client as GitHubClient } from '../src/github'
+import { TableSetFactory } from '../src/table/factory'
+import { ReporterType, Result } from '../src/common/type'
+import { UntypedTable } from '../src/table/base/untyped'
+import { FailureTable } from '../src/table/failure'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')

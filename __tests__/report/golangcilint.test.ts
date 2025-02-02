@@ -1,7 +1,7 @@
-import { Result } from '../../src/type'
-import { GolangCILintSummaryReportImpl } from '../../src/report/golangcilint'
+import { Result } from '../../src/common/type'
+import { GolangCILintSummaryReport } from '../../src/report/golangcilint'
 
-describe('GolangCILintSummaryImpl', () => {
+describe('GolangCILintSummaryReport', () => {
   const context = {
     owner: 'owner',
     repo: 'repo',
@@ -41,7 +41,7 @@ describe('GolangCILintSummaryImpl', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const summary = new GolangCILintSummaryReportImpl(
+    const summary = new GolangCILintSummaryReport(
       input.context,
       input.moduleDir,
       input.result

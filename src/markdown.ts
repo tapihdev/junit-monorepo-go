@@ -1,4 +1,4 @@
-import { Result } from '../type'
+import { Result } from './common/type'
 
 export type GitHubActionsContext = {
   owner: string

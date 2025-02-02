@@ -1,6 +1,6 @@
-import { JUnitReport } from '../../src/reporter/type'
-import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
-import { ReporterType, Result } from '../../src/type'
+import { JUnitReport } from '../../src/parse/type'
+import { GotestsumParser } from '../../src/parse/gotestsum'
+import { ReporterType, Result } from '../../src/common/type'
 
 describe('gotestsum', () => {
   const context = {
@@ -309,11 +309,7 @@ describe('gotestsum', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const report = new GotestsumReporterImpl(
-      input.context,
-      input.path,
-      input.report
-    )
+    const report = new GotestsumParser(input.context, input.path, input.report)
     expect(report.path).toBe(expected.path)
     expect(report.summary).toEqual(expected.summary)
     expect(report.failures).toEqual(expected.failures)

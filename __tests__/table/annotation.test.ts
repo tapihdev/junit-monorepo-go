@@ -1,8 +1,8 @@
 import { toAnnotations } from '../../src/table/annotation'
-import { FailureReport } from '../../src/report/type'
+import { ReportableFailure } from '../../src/report/type'
 
 describe('ReportAggregator#toAnnotations', () => {
-  const failureReportMock = jest.fn<FailureReport, []>(() => ({
+  const failureReportMock = jest.fn<ReportableFailure, []>(() => ({
     index: 'path/to/app/foo.go:12',
     record: {
       type: 'test',

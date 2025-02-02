@@ -1,7 +1,11 @@
-import { Result, GitHubContext } from '../type'
-import { Index, GotestsumSummaryReport, GotestsumSummaryRecord } from './type'
+import { Result, GitHubContext } from '../common/type'
+import {
+  Index,
+  ReportableGotestsumSummary,
+  GotestsumSummaryRecord
+} from './type'
 
-export class GotestsumSummaryReportImpl implements GotestsumSummaryReport {
+export class GotestsumSummaryReport implements ReportableGotestsumSummary {
   constructor(
     readonly context: GitHubContext,
     readonly moduleDir: string,

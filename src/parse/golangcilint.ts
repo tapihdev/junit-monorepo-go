@@ -1,11 +1,11 @@
 import * as path from 'path'
 
-import { JUnitReport, GolangCILintReporter } from './type'
-import { ReporterType, Result, GitHubContext } from '../type'
-import { GolangCILintSummaryReportImpl } from '../report/golangcilint'
-import { FailureReportImpl } from '../report/failure'
+import { JUnitReport, ParsableGolangCILint } from './type'
+import { ReporterType, Result, GitHubContext } from '../common/type'
+import { GolangCILintSummaryReport } from '../report/golangcilint'
+import { FailureReport } from '../report/failure'
 
-export class GolangCILintReporterImpl implements GolangCILintReporter {
+export class GolangCILintParser implements ParsableGolangCILint {
   constructor(
     readonly context: GitHubContext,
     readonly path: string,
@@ -19,15 +19,11 @@ export class GolangCILintReporterImpl implements GolangCILintReporter {
       : Result.Failed
   }
 
-  get summary(): GolangCILintSummaryReportImpl {
-    return new GolangCILintSummaryReportImpl(
-      this.context,
-      this.path,
-      this.result
-    )
+  get summary(): GolangCILintSummaryReport {
+    return new GolangCILintSummaryReport(this.context, this.path, this.result)
   }
 
-  get failures(): FailureReportImpl[] {
+  get failures(): FailureReport[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -65,7 +61,7 @@ export class GolangCILintReporterImpl implements GolangCILintReporter {
         const [fullPath, line] = testcase.$.classname.split(':')
         const file = path.basename(fullPath)
         const subDir = path.dirname(fullPath)
-        return new FailureReportImpl(
+        return new FailureReport(
           this.context,
           ReporterType.GolangCILint,
           this.path,

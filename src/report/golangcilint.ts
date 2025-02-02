@@ -1,12 +1,12 @@
-import { Result, GitHubContext } from '../type'
+import { Result, GitHubContext } from '../common/type'
 import {
   Index,
-  GolangCILintSummaryReport,
+  ReportableGolangCILintSummary,
   GolangCILintSummaryRecord
 } from './type'
 
-export class GolangCILintSummaryReportImpl
-  implements GolangCILintSummaryReport
+export class GolangCILintSummaryReport
+  implements ReportableGolangCILintSummary
 {
   constructor(
     readonly context: GitHubContext,

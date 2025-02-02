@@ -1,10 +1,10 @@
 import { GolangCILintTable } from '../../src/table/golangcilint'
-import { GolangCILintSummaryReport } from '../../src/report/type'
-import { Result } from '../../src/type'
+import { ReportableGolangCILintSummary } from '../../src/report/type'
+import { Result } from '../../src/common/type'
 import { Align } from '../../src/table/base/type'
 
 describe('GolangCILintTable', () => {
-  const golangCILintSummaryMock = jest.fn<GolangCILintSummaryReport, []>(
+  const golangCILintSummaryMock = jest.fn<ReportableGolangCILintSummary, []>(
     () => ({
       index: 'path/to/app/foo.go',
       record: {

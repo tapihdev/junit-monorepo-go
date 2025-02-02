@@ -41046,7 +41046,30 @@ exports.NEVER = parseUtil_1.INVALID;
 
 /***/ }),
 
-/***/ 3892:
+/***/ 1477:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReporterType = exports.Result = void 0;
+var Result;
+(function (Result) {
+    Result["Passed"] = "passed";
+    Result["Failed"] = "failed";
+    Result["Skipped"] = "skipped";
+    Result["Unknown"] = "unknown";
+})(Result || (exports.Result = Result = {}));
+var ReporterType;
+(function (ReporterType) {
+    ReporterType["GolangCILint"] = "golangci-lint";
+    ReporterType["Gotestsum"] = "gotestsum";
+})(ReporterType || (exports.ReporterType = ReporterType = {}));
+
+
+/***/ }),
+
+/***/ 4846:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -41074,7 +41097,7 @@ exports.ConfigSchema = zod_1.z.record(zod_1.z
 
 /***/ }),
 
-/***/ 5834:
+/***/ 9248:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -41118,7 +41141,7 @@ exports.Client = Client;
 
 /***/ }),
 
-/***/ 6929:
+/***/ 3599:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -41167,8 +41190,8 @@ exports.getSha = getSha;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const yaml_1 = __importDefault(__nccwpck_require__(8815));
-const config_generated_1 = __nccwpck_require__(3892);
-const type_1 = __nccwpck_require__(4619);
+const config_generated_1 = __nccwpck_require__(4846);
+const type_1 = __nccwpck_require__(1477);
 function getGitHubToken() {
     return core.getInput('github-token', { required: true });
 }
@@ -41220,7 +41243,7 @@ function getSha() {
 
 /***/ }),
 
-/***/ 5216:
+/***/ 1730:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -41263,13 +41286,13 @@ exports.run = run;
 const core = __importStar(__nccwpck_require__(7484));
 const github = __importStar(__nccwpck_require__(3228));
 const fs = __importStar(__nccwpck_require__(9896));
-const type_1 = __nccwpck_require__(4619);
-const input_1 = __nccwpck_require__(6929);
-const github_1 = __nccwpck_require__(5834);
-const markdown_1 = __nccwpck_require__(9372);
-const factory_1 = __nccwpck_require__(5223);
+const type_1 = __nccwpck_require__(1477);
+const input_1 = __nccwpck_require__(3599);
+const github_1 = __nccwpck_require__(9248);
+const markdown_1 = __nccwpck_require__(3758);
+const factory_1 = __nccwpck_require__(9825);
 const factory_2 = __nccwpck_require__(6750);
-const reader_1 = __nccwpck_require__(3066);
+const reader_1 = __nccwpck_require__(8744);
 const mark = '<!-- commented by junit-monorepo-go -->';
 /**
  * The main function for the action.
@@ -41337,14 +41360,14 @@ async function run() {
 
 /***/ }),
 
-/***/ 9372:
+/***/ 3758:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.makeMarkdownReport = makeMarkdownReport;
-const type_1 = __nccwpck_require__(4619);
+const type_1 = __nccwpck_require__(1477);
 function makeMarkdownReport(context, result, moduleTable, failureTable) {
     const { owner, repo, sha, pullNumber, runId, actor } = context;
     const commitUrl = pullNumber === undefined
@@ -41377,14 +41400,326 @@ ${failureTable}
 
 /***/ }),
 
+/***/ 9825:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JUnitReporterFactory = void 0;
+const type_1 = __nccwpck_require__(1477);
+const golangcilint_1 = __nccwpck_require__(5092);
+const gotestsum_1 = __nccwpck_require__(6730);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const assertNever = (_) => {
+    throw new Error('exhaustiveness check');
+};
+class JUnitReporterFactory {
+    reader;
+    constructor(reader) {
+        this.reader = reader;
+    }
+    async fromXml(context, type, directory, fileName) {
+        const parsed = await this.reader.safeParse(directory, fileName);
+        switch (type) {
+            case type_1.ReporterType.GolangCILint:
+                return new golangcilint_1.GolangCILintParser(context, directory, parsed);
+            case type_1.ReporterType.Gotestsum:
+                return new gotestsum_1.GotestsumParser(context, directory, parsed);
+            default:
+                return assertNever(type);
+        }
+    }
+}
+exports.JUnitReporterFactory = JUnitReporterFactory;
+
+
+/***/ }),
+
+/***/ 5092:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GolangCILintParser = void 0;
+const path = __importStar(__nccwpck_require__(6928));
+const type_1 = __nccwpck_require__(1477);
+const golangcilint_1 = __nccwpck_require__(7239);
+const failure_1 = __nccwpck_require__(3304);
+class GolangCILintParser {
+    context;
+    path;
+    _junit;
+    constructor(context, path, _junit) {
+        this.context = context;
+        this.path = path;
+        this._junit = _junit;
+    }
+    get result() {
+        // Passed if there are no test suites, because golangci-lint reports only failures
+        return this._junit.testsuites.testsuite === undefined
+            ? type_1.Result.Passed
+            : type_1.Result.Failed;
+    }
+    get summary() {
+        return new golangcilint_1.GolangCILintSummaryReport(this.context, this.path, this.result);
+    }
+    get failures() {
+        if (this._junit.testsuites.testsuite === undefined) {
+            return [];
+        }
+        return this._junit.testsuites.testsuite
+            .map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ??
+            [])
+            .flat()
+            .map(testcase => {
+            if (testcase.failure === undefined || testcase.failure.length === 0) {
+                // This should never happen because golangci-lint testcases must have a failure
+                throw new Error('golangci-lint test case has no failure');
+            }
+            if (testcase.failure.length > 1) {
+                // This should never happen because golangci-lint testcases must have only one failure
+                throw new Error('golangci-lint test case has multiple failures');
+            }
+            // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
+            // Output: Error: Foo: Bar
+            const message = testcase.failure[0].$.message
+                .split(': ')
+                .slice(1)
+                .join(': ')
+                .trim();
+            // Input:
+            //   classname: path/to/file.go:line:column
+            // Output:
+            //   file: file.go
+            //   subDir: path/to
+            //   line: line
+            const [fullPath, line] = testcase.$.classname.split(':');
+            const file = path.basename(fullPath);
+            const subDir = path.dirname(fullPath);
+            return new failure_1.FailureReport(this.context, type_1.ReporterType.GolangCILint, this.path, subDir, file, parseInt(line), testcase.$.name, message);
+        });
+    }
+    get tests() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
+    }
+    // This should always be 0 because golangci-lint reports only failures
+    get passed() {
+        return this.tests - this.failed;
+    }
+    get failed() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.failures), 0) ?? 0);
+    }
+    get skipped() {
+        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.skipped ?? '0'), 0) ?? 0);
+    }
+    get time() {
+        return undefined;
+    }
+    get version() {
+        return undefined;
+    }
+}
+exports.GolangCILintParser = GolangCILintParser;
+
+
+/***/ }),
+
+/***/ 6730:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.GotestsumParser = void 0;
+const type_1 = __nccwpck_require__(1477);
+const gotestsum_1 = __nccwpck_require__(4195);
+const failure_1 = __nccwpck_require__(3304);
+class GotestsumParser {
+    context;
+    path;
+    _junit;
+    // gotestsum reports failures in the following format:
+    // 1. === RUN   Test&#xA;    baz_test.go:1: error;
+    // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
+    // This line filters out the second format.
+    static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/;
+    static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
+    constructor(context, path, _junit) {
+        this.context = context;
+        this.path = path;
+        this._junit = _junit;
+    }
+    get result() {
+        if (this._junit.testsuites.$ === undefined) {
+            return type_1.Result.Unknown;
+        }
+        if (this._junit.testsuites.$.failures !== '0') {
+            return type_1.Result.Failed;
+        }
+        if (this._junit.testsuites.$.skipped !== undefined &&
+            this._junit.testsuites.$.skipped !== '0') {
+            return type_1.Result.Skipped;
+        }
+        return type_1.Result.Passed;
+    }
+    get summary() {
+        return new gotestsum_1.GotestsumSummaryReport(this.context, this.path, this.result, this.passed, this.failed, this.version, this.time);
+    }
+    get failures() {
+        if (this._junit.testsuites.testsuite === undefined) {
+            return [];
+        }
+        const casesWithFailures = this._junit.testsuites.testsuite
+            .map(suite => suite.testcase ?? [])
+            .flat()
+            .filter(testcase => testcase.failure !== undefined);
+        return casesWithFailures
+            .map(testcase => {
+            const macthedFailures = testcase.failure
+                ?.map(failure => failure._?.match(GotestsumParser.failureRegex) ?? null)
+                .filter(match => match !== null) ?? [];
+            return macthedFailures.map(match => {
+                if (match !== null && match.length !== 3) {
+                    // This should never happen
+                    throw new Error(`message does match the regex but length is not 3: ${match.groups}`);
+                }
+                const subDir = testcase.$.classname;
+                const file = match[1];
+                const line = parseInt(match[2]);
+                const message = match[0];
+                return new failure_1.FailureReport(this.context, type_1.ReporterType.Gotestsum, this.path, subDir, file, line, testcase.$.name, message);
+            });
+        })
+            .flat();
+    }
+    get tests() {
+        return parseInt(this._junit.testsuites.$?.tests ?? '0');
+    }
+    get passed() {
+        return this.tests === 0 ? 0 : this.tests - this.failed;
+    }
+    get failed() {
+        return parseInt(this._junit.testsuites.$?.failures ?? '0');
+    }
+    get skipped() {
+        return parseInt(this._junit.testsuites.$?.skipped ?? '0');
+    }
+    get time() {
+        const time = this._junit.testsuites.$?.time;
+        return time === undefined ? undefined : parseFloat(time);
+    }
+    get version() {
+        if (this._junit.testsuites.testsuite === undefined ||
+            this._junit.testsuites.testsuite.length === 0) {
+            return undefined;
+        }
+        const filtered = this._junit.testsuites.testsuite
+            ?.map(testsuite => testsuite.properties ?? [])
+            .flat()
+            .map(({ property }) => property)
+            .flat()
+            .map(({ $ }) => $)
+            .flat()
+            .filter(({ name }) => name === 'go.version') ?? [];
+        if (filtered.length === 0) {
+            throw new Error('go.version property not found');
+        }
+        const set = new Set(filtered.map(({ value }) => value));
+        if (set.size !== 1) {
+            throw new Error(`multiple go.version properties found: ${set.size}`);
+        }
+        const property = filtered[0];
+        const match = property.value.match(GotestsumParser.goVersoinRegex);
+        if (match === null) {
+            throw new Error(`go.version does not match the regex: ${property.value}`);
+        }
+        if (match !== null && match.length !== 3) {
+            throw new Error(`go.version does match the regex but length is not 3: ${property.value}`);
+        }
+        return match[1];
+    }
+}
+exports.GotestsumParser = GotestsumParser;
+
+
+/***/ }),
+
+/***/ 8744:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JUnitXmlReader = void 0;
+const path_1 = __importDefault(__nccwpck_require__(6928));
+const xml2js_1 = __nccwpck_require__(758);
+class JUnitXmlReader {
+    reader;
+    constructor(reader) {
+        this.reader = reader;
+    }
+    async safeParse(directory, fileName) {
+        const content = await this.reader(path_1.default.join(directory, fileName), {
+            encoding: 'utf8'
+        });
+        const parsedUnsafe = (await (0, xml2js_1.parseStringPromise)(content));
+        if (parsedUnsafe.testsuites === '') {
+            parsedUnsafe.testsuites = {};
+        }
+        return parsedUnsafe;
+    }
+}
+exports.JUnitXmlReader = JUnitXmlReader;
+
+
+/***/ }),
+
 /***/ 3593:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AnnotationReportImpl = void 0;
-class AnnotationReportImpl {
+exports.AnnotationReport = void 0;
+class AnnotationReport {
     filePath;
     line;
     message;
@@ -41402,7 +41737,7 @@ class AnnotationReportImpl {
         };
     }
 }
-exports.AnnotationReportImpl = AnnotationReportImpl;
+exports.AnnotationReport = AnnotationReport;
 
 
 /***/ }),
@@ -41446,10 +41781,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FailureReportImpl = void 0;
+exports.FailureReport = void 0;
 const path = __importStar(__nccwpck_require__(6928));
 const annotation_1 = __nccwpck_require__(3593);
-class FailureReportImpl {
+class FailureReport {
     context;
     type;
     moduleDir;
@@ -41484,10 +41819,10 @@ class FailureReportImpl {
         };
     }
     get annotation() {
-        return new annotation_1.AnnotationReportImpl(path.join(this.moduleDir, this.subDir, this.file), this.line, this.message);
+        return new annotation_1.AnnotationReport(path.join(this.moduleDir, this.subDir, this.file), this.line, this.message);
     }
 }
-exports.FailureReportImpl = FailureReportImpl;
+exports.FailureReport = FailureReport;
 
 
 /***/ }),
@@ -41498,9 +41833,9 @@ exports.FailureReportImpl = FailureReportImpl;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GolangCILintSummaryReportImpl = void 0;
-const type_1 = __nccwpck_require__(4619);
-class GolangCILintSummaryReportImpl {
+exports.GolangCILintSummaryReport = void 0;
+const type_1 = __nccwpck_require__(1477);
+class GolangCILintSummaryReport {
     context;
     moduleDir;
     result;
@@ -41519,7 +41854,7 @@ class GolangCILintSummaryReportImpl {
         };
     }
 }
-exports.GolangCILintSummaryReportImpl = GolangCILintSummaryReportImpl;
+exports.GolangCILintSummaryReport = GolangCILintSummaryReport;
 
 
 /***/ }),
@@ -41530,9 +41865,9 @@ exports.GolangCILintSummaryReportImpl = GolangCILintSummaryReportImpl;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GotestsumSummaryReportImpl = void 0;
-const type_1 = __nccwpck_require__(4619);
-class GotestsumSummaryReportImpl {
+exports.GotestsumSummaryReport = void 0;
+const type_1 = __nccwpck_require__(1477);
+class GotestsumSummaryReport {
     context;
     moduleDir;
     result;
@@ -41563,319 +41898,7 @@ class GotestsumSummaryReportImpl {
         };
     }
 }
-exports.GotestsumSummaryReportImpl = GotestsumSummaryReportImpl;
-
-
-/***/ }),
-
-/***/ 5223:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JUnitReporterFactory = void 0;
-const type_1 = __nccwpck_require__(4619);
-const golangcilint_1 = __nccwpck_require__(5294);
-const gotestsum_1 = __nccwpck_require__(5232);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const assertNever = (_) => {
-    throw new Error('exhaustiveness check');
-};
-class JUnitReporterFactory {
-    reader;
-    constructor(reader) {
-        this.reader = reader;
-    }
-    async fromXml(context, type, directory, fileName) {
-        const parsed = await this.reader.safeParse(directory, fileName);
-        switch (type) {
-            case type_1.ReporterType.GolangCILint:
-                return new golangcilint_1.GolangCILintReporterImpl(context, directory, parsed);
-            case type_1.ReporterType.Gotestsum:
-                return new gotestsum_1.GotestsumReporterImpl(context, directory, parsed);
-            default:
-                return assertNever(type);
-        }
-    }
-}
-exports.JUnitReporterFactory = JUnitReporterFactory;
-
-
-/***/ }),
-
-/***/ 5294:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GolangCILintReporterImpl = void 0;
-const path = __importStar(__nccwpck_require__(6928));
-const type_1 = __nccwpck_require__(4619);
-const golangcilint_1 = __nccwpck_require__(7239);
-const failure_1 = __nccwpck_require__(3304);
-class GolangCILintReporterImpl {
-    context;
-    path;
-    _junit;
-    constructor(context, path, _junit) {
-        this.context = context;
-        this.path = path;
-        this._junit = _junit;
-    }
-    get result() {
-        // Passed if there are no test suites, because golangci-lint reports only failures
-        return this._junit.testsuites.testsuite === undefined
-            ? type_1.Result.Passed
-            : type_1.Result.Failed;
-    }
-    get summary() {
-        return new golangcilint_1.GolangCILintSummaryReportImpl(this.context, this.path, this.result);
-    }
-    get failures() {
-        if (this._junit.testsuites.testsuite === undefined) {
-            return [];
-        }
-        return this._junit.testsuites.testsuite
-            .map(suite => suite.testcase?.filter(testcase => testcase.failure !== undefined) ??
-            [])
-            .flat()
-            .map(testcase => {
-            if (testcase.failure === undefined || testcase.failure.length === 0) {
-                // This should never happen because golangci-lint testcases must have a failure
-                throw new Error('golangci-lint test case has no failure');
-            }
-            if (testcase.failure.length > 1) {
-                // This should never happen because golangci-lint testcases must have only one failure
-                throw new Error('golangci-lint test case has multiple failures');
-            }
-            // Input: go/app/bar_test.go:56:78: Error: Foo: Bar
-            // Output: Error: Foo: Bar
-            const message = testcase.failure[0].$.message
-                .split(': ')
-                .slice(1)
-                .join(': ')
-                .trim();
-            // Input:
-            //   classname: path/to/file.go:line:column
-            // Output:
-            //   file: file.go
-            //   subDir: path/to
-            //   line: line
-            const [fullPath, line] = testcase.$.classname.split(':');
-            const file = path.basename(fullPath);
-            const subDir = path.dirname(fullPath);
-            return new failure_1.FailureReportImpl(this.context, type_1.ReporterType.GolangCILint, this.path, subDir, file, parseInt(line), testcase.$.name, message);
-        });
-    }
-    get tests() {
-        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.tests), 0) ?? 0);
-    }
-    // This should always be 0 because golangci-lint reports only failures
-    get passed() {
-        return this.tests - this.failed;
-    }
-    get failed() {
-        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.failures), 0) ?? 0);
-    }
-    get skipped() {
-        return (this._junit.testsuites.testsuite?.reduce((acc, suite) => acc + parseInt(suite.$.skipped ?? '0'), 0) ?? 0);
-    }
-    get time() {
-        return undefined;
-    }
-    get version() {
-        return undefined;
-    }
-}
-exports.GolangCILintReporterImpl = GolangCILintReporterImpl;
-
-
-/***/ }),
-
-/***/ 5232:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GotestsumReporterImpl = void 0;
-const type_1 = __nccwpck_require__(4619);
-const gotestsum_1 = __nccwpck_require__(4195);
-const failure_1 = __nccwpck_require__(3304);
-class GotestsumReporterImpl {
-    context;
-    path;
-    _junit;
-    // gotestsum reports failures in the following format:
-    // 1. === RUN   Test&#xA;    baz_test.go:1: error;
-    // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
-    // This line filters out the second format.
-    static failureRegex = /.+\s*([\w\d]+_test.go):(\d+):.+/;
-    static goVersoinRegex = /go([\d.]+) ([\w\d/])+/;
-    constructor(context, path, _junit) {
-        this.context = context;
-        this.path = path;
-        this._junit = _junit;
-    }
-    get result() {
-        if (this._junit.testsuites.$ === undefined) {
-            return type_1.Result.Unknown;
-        }
-        if (this._junit.testsuites.$.failures !== '0') {
-            return type_1.Result.Failed;
-        }
-        if (this._junit.testsuites.$.skipped !== undefined &&
-            this._junit.testsuites.$.skipped !== '0') {
-            return type_1.Result.Skipped;
-        }
-        return type_1.Result.Passed;
-    }
-    get summary() {
-        return new gotestsum_1.GotestsumSummaryReportImpl(this.context, this.path, this.result, this.passed, this.failed, this.version, this.time);
-    }
-    get failures() {
-        if (this._junit.testsuites.testsuite === undefined) {
-            return [];
-        }
-        const casesWithFailures = this._junit.testsuites.testsuite
-            .map(suite => suite.testcase ?? [])
-            .flat()
-            .filter(testcase => testcase.failure !== undefined);
-        return casesWithFailures
-            .map(testcase => {
-            const macthedFailures = testcase.failure
-                ?.map(failure => failure._?.match(GotestsumReporterImpl.failureRegex) ?? null)
-                .filter(match => match !== null) ?? [];
-            return macthedFailures.map(match => {
-                if (match !== null && match.length !== 3) {
-                    // This should never happen
-                    throw new Error(`message does match the regex but length is not 3: ${match.groups}`);
-                }
-                const subDir = testcase.$.classname;
-                const file = match[1];
-                const line = parseInt(match[2]);
-                const message = match[0];
-                return new failure_1.FailureReportImpl(this.context, type_1.ReporterType.Gotestsum, this.path, subDir, file, line, testcase.$.name, message);
-            });
-        })
-            .flat();
-    }
-    get tests() {
-        return parseInt(this._junit.testsuites.$?.tests ?? '0');
-    }
-    get passed() {
-        return this.tests === 0 ? 0 : this.tests - this.failed;
-    }
-    get failed() {
-        return parseInt(this._junit.testsuites.$?.failures ?? '0');
-    }
-    get skipped() {
-        return parseInt(this._junit.testsuites.$?.skipped ?? '0');
-    }
-    get time() {
-        const time = this._junit.testsuites.$?.time;
-        return time === undefined ? undefined : parseFloat(time);
-    }
-    get version() {
-        if (this._junit.testsuites.testsuite === undefined ||
-            this._junit.testsuites.testsuite.length === 0) {
-            return undefined;
-        }
-        const filtered = this._junit.testsuites.testsuite
-            ?.map(testsuite => testsuite.properties ?? [])
-            .flat()
-            .map(({ property }) => property)
-            .flat()
-            .map(({ $ }) => $)
-            .flat()
-            .filter(({ name }) => name === 'go.version') ?? [];
-        if (filtered.length === 0) {
-            throw new Error('go.version property not found');
-        }
-        const set = new Set(filtered.map(({ value }) => value));
-        if (set.size !== 1) {
-            throw new Error(`multiple go.version properties found: ${set.size}`);
-        }
-        const property = filtered[0];
-        const match = property.value.match(GotestsumReporterImpl.goVersoinRegex);
-        if (match === null) {
-            throw new Error(`go.version does not match the regex: ${property.value}`);
-        }
-        if (match !== null && match.length !== 3) {
-            throw new Error(`go.version does match the regex but length is not 3: ${property.value}`);
-        }
-        return match[1];
-    }
-}
-exports.GotestsumReporterImpl = GotestsumReporterImpl;
-
-
-/***/ }),
-
-/***/ 3066:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JUnitXmlReader = void 0;
-const path_1 = __importDefault(__nccwpck_require__(6928));
-const xml2js_1 = __nccwpck_require__(758);
-class JUnitXmlReader {
-    reader;
-    constructor(reader) {
-        this.reader = reader;
-    }
-    async safeParse(directory, fileName) {
-        const content = await this.reader(path_1.default.join(directory, fileName), {
-            encoding: 'utf8'
-        });
-        const parsedUnsafe = (await (0, xml2js_1.parseStringPromise)(content));
-        if (parsedUnsafe.testsuites === '') {
-            parsedUnsafe.testsuites = {};
-        }
-        return parsedUnsafe;
-    }
-}
-exports.JUnitXmlReader = JUnitXmlReader;
+exports.GotestsumSummaryReport = GotestsumSummaryReport;
 
 
 /***/ }),
@@ -42042,7 +42065,7 @@ exports.UntypedTable = UntypedTable;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TableSetFactory = void 0;
-const type_1 = __nccwpck_require__(4619);
+const type_1 = __nccwpck_require__(1477);
 const golangcilint_1 = __nccwpck_require__(9781);
 const gotestsum_1 = __nccwpck_require__(5637);
 const failure_1 = __nccwpck_require__(9266);
@@ -42241,35 +42264,12 @@ exports.GotestsumTable = GotestsumTable;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toResult = toResult;
-const type_1 = __nccwpck_require__(4619);
+const type_1 = __nccwpck_require__(1477);
 function toResult(results) {
     return results.some(result => result == type_1.Result.Failed)
         ? type_1.Result.Failed
         : type_1.Result.Passed;
 }
-
-
-/***/ }),
-
-/***/ 4619:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReporterType = exports.Result = void 0;
-var Result;
-(function (Result) {
-    Result["Passed"] = "passed";
-    Result["Failed"] = "failed";
-    Result["Skipped"] = "skipped";
-    Result["Unknown"] = "unknown";
-})(Result || (exports.Result = Result = {}));
-var ReporterType;
-(function (ReporterType) {
-    ReporterType["GolangCILint"] = "golangci-lint";
-    ReporterType["Gotestsum"] = "gotestsum";
-})(ReporterType || (exports.ReporterType = ReporterType = {}));
 
 
 /***/ }),
@@ -52777,7 +52777,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /**
  * The entrypoint for the action.
  */
-const main_1 = __nccwpck_require__(5216);
+const main_1 = __nccwpck_require__(1730);
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (0, main_1.run)();
 
