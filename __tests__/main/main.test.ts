@@ -12,7 +12,7 @@ import * as github from '@actions/github'
 import * as main from '../../src/main/main'
 import { Client as GitHubClient } from '../../src/main/github'
 import { TableSetFactory } from '../../src/table/factory'
-import { ReporterType, Result } from '../../src/type'
+import { ReporterType, Result } from '../../src/common/type'
 import { UntypedTable } from '../../src/table/base/untyped'
 import { FailureTable } from '../../src/table/failure'
 

@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { JUnitReport, GolangCILintReporter } from './type'
-import { ReporterType, Result, GitHubContext } from '../type'
+import { ReporterType, Result, GitHubContext } from '../common/type'
 import { GolangCILintSummaryReportImpl } from '../report/golangcilint'
 import { FailureReportImpl } from '../report/failure'
 

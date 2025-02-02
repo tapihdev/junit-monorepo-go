@@ -1,5 +1,5 @@
-import { Result } from '../type'
-import { ReporterType, GitHubContext } from '../type'
+import { Result } from '../common/type'
+import { ReporterType, GitHubContext } from '../common/type'
 import { JUnitReporterFactory } from '../reporter/factory'
 import {
   FailureRecord,

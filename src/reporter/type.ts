@@ -4,7 +4,7 @@ import {
   FailureReport,
   SummaryReport
 } from '../report/type'
-import { Result } from '../type'
+import { Result } from '../common/type'
 
 export interface Reportable<T extends SummaryReport> {
   readonly path: string

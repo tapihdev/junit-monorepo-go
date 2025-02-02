@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as fs from 'fs'
 
-import { Result } from '../type'
+import { Result } from '../common/type'
 import {
   getGitHubToken,
   getConfig,

@@ -4,7 +4,7 @@ import YAML from 'yaml'
 
 import { ConfigSchema } from './config.generated'
 import { XmlFileGroup } from '../table/factory'
-import { GitHubContext, ReporterType } from '../type'
+import { GitHubContext, ReporterType } from '../common/type'
 
 export function getGitHubToken(): string {
   return core.getInput('github-token', { required: true })

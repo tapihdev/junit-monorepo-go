@@ -1,4 +1,4 @@
-import { Result } from '../../src/type'
+import { Result } from '../../src/common/type'
 import { makeMarkdownReport } from '../../src/main/markdown'
 
 describe('Repository#Markdown', () => {

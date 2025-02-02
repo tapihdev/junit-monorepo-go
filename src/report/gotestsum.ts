@@ -1,4 +1,4 @@
-import { Result, GitHubContext } from '../type'
+import { Result, GitHubContext } from '../common/type'
 import { Index, GotestsumSummaryReport, GotestsumSummaryRecord } from './type'
 
 export class GotestsumSummaryReportImpl implements GotestsumSummaryReport {

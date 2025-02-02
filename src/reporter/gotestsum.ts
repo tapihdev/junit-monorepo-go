@@ -1,5 +1,5 @@
 import { JUnitReport, GotestsumReporter } from './type'
-import { ReporterType, Result, GitHubContext } from '../type'
+import { ReporterType, Result, GitHubContext } from '../common/type'
 import { GotestsumSummaryReportImpl } from '../report/gotestsum'
 import { FailureReportImpl } from '../report/failure'
 

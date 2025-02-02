@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { ReporterType, GitHubContext } from '../type'
+import { ReporterType, GitHubContext } from '../common/type'
 import { FailureReport, FailureRecord, Index, AnnotationReport } from './type'
 import { AnnotationReportImpl } from './annotation'
 

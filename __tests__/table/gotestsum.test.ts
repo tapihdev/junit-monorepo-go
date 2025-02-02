@@ -1,6 +1,6 @@
 import { GotestsumTable } from '../../src/table/gotestsum'
 import { GotestsumSummaryReport } from '../../src/report/type'
-import { Result } from '../../src/type'
+import { Result } from '../../src/common/type'
 import { Align } from '../../src/table/base/type'
 
 describe('GotestsumTable', () => {
