@@ -1,11 +1,11 @@
 import { Result } from '../common/type'
 import { ReporterType, GitHubContext } from '../common/type'
-import { JUnitReporterFactory } from '../reporter/factory'
+import { JUnitReporterFactory } from '../parse/factory'
 import {
   FailureRecord,
-  AnyReport,
-  GolangCILintSummaryReport,
-  GotestsumSummaryReport
+  AnyReportable,
+  ReportableGolangCILintSummary,
+  ReportableGotestsumSummary
 } from '../report/type'
 import { UntypedTable } from './base/untyped'
 import { GolangCILintTable } from './golangcilint'
@@ -64,7 +64,7 @@ export class TableSetFactory {
   private createSummaryTable(
     type: ReporterType,
     title: string,
-    summaries: AnyReport[]
+    summaries: AnyReportable[]
   ): UntypedTable {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const assertNever = (_: never): never => {
@@ -75,12 +75,15 @@ export class TableSetFactory {
       case ReporterType.GolangCILint:
         return new GolangCILintTable(
           title,
-          summaries as GolangCILintSummaryReport[]
+          summaries as ReportableGolangCILintSummary[]
         )
           .toTable()
           .toUntyped()
       case ReporterType.Gotestsum:
-        return new GotestsumTable(title, summaries as GotestsumSummaryReport[])
+        return new GotestsumTable(
+          title,
+          summaries as ReportableGotestsumSummary[]
+        )
           .toTable()
           .toUntyped()
       default:

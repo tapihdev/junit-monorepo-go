@@ -1,5 +1,5 @@
-import { JUnitReport } from '../../src/reporter/type'
-import { GolangCILintReporterImpl } from '../../src/reporter/golangcilint'
+import { JUnitReport } from '../../src/parse/type'
+import { GolangCILintParser } from '../../src/parse/golangcilint'
 import { ReporterType, Result } from '../../src/common/type'
 
 describe('golangcilint', () => {
@@ -140,7 +140,7 @@ describe('golangcilint', () => {
   ]
 
   it.each(testCases)('%s', async ({ input, expected }) => {
-    const report = new GolangCILintReporterImpl(
+    const report = new GolangCILintParser(
       input.context,
       input.path,
       input.report

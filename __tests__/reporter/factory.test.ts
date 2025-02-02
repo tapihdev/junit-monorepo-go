@@ -1,12 +1,12 @@
 import fs from 'fs'
 
-import { JUnitReporterFactory } from '../../src/reporter/factory'
+import { JUnitReporterFactory } from '../../src/parse/factory'
 import { ReporterType } from '../../src/common/type'
-import { GolangCILintReporterImpl } from '../../src/reporter/golangcilint'
-import { GotestsumReporterImpl } from '../../src/reporter/gotestsum'
-import { JUnitXmlReader } from '../../src/reporter/reader'
+import { GolangCILintParser } from '../../src/parse/golangcilint'
+import { GotestsumParser } from '../../src/parse/gotestsum'
+import { JUnitXmlReader } from '../../src/parse/reader'
 
-describe('JUnitReporterFactoryImpl', () => {
+describe('JUnitReporterFactory', () => {
   const junixXmlReaderMock = jest
     .spyOn(JUnitXmlReader.prototype, 'safeParse')
     .mockResolvedValue({
@@ -22,14 +22,14 @@ describe('JUnitReporterFactoryImpl', () => {
 
   const testCases = [
     {
-      name: 'should return GolangCILintReporterImpl',
+      name: 'should return GolangCILintParser',
       input: ReporterType.GolangCILint,
-      expected: GolangCILintReporterImpl
+      expected: GolangCILintParser
     },
     {
-      name: 'should return GotestsumReporterImpl',
+      name: 'should return GotestsumParser',
       input: ReporterType.Gotestsum,
-      expected: GotestsumReporterImpl
+      expected: GotestsumParser
     }
   ]
 

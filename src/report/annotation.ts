@@ -1,6 +1,6 @@
-import { AnnotationRecord, Index, AnnotationReport } from './type'
+import { AnnotationRecord, Index, ReportableAnnotation } from './type'
 
-export class AnnotationReportImpl implements AnnotationReport {
+export class AnnotationReport implements ReportableAnnotation {
   constructor(
     readonly filePath: string,
     readonly line: number,

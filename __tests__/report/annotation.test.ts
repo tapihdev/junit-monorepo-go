@@ -1,4 +1,4 @@
-import { AnnotationReportImpl } from '../../src/report/annotation'
+import { AnnotationReport } from '../../src/report/annotation'
 
 describe('Annotation', () => {
   const testCases = [
@@ -19,7 +19,7 @@ describe('Annotation', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const view = new AnnotationReportImpl(input.path, input.line, input.message)
+    const view = new AnnotationReport(input.path, input.line, input.message)
     expect(view.index).toEqual(expected.index)
     expect(view.record).toEqual(expected.record)
   })

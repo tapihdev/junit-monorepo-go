@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-import { JUnitXmlReader } from '../../src/reporter/reader'
+import { JUnitXmlReader } from '../../src/parse/reader'
 
 describe('JUnitXmlReader', () => {
   const directory = 'path/to'

@@ -1,10 +1,15 @@
 import * as path from 'path'
 
 import { ReporterType, GitHubContext } from '../common/type'
-import { FailureReport, FailureRecord, Index, AnnotationReport } from './type'
-import { AnnotationReportImpl } from './annotation'
+import {
+  ReportableFailure,
+  FailureRecord,
+  Index,
+  ReportableAnnotation
+} from './type'
+import { AnnotationReport } from './annotation'
 
-export class FailureReportImpl implements FailureReport {
+export class FailureReport implements ReportableFailure {
   constructor(
     readonly context: GitHubContext,
     readonly type: ReporterType,
@@ -33,8 +38,8 @@ export class FailureReportImpl implements FailureReport {
     }
   }
 
-  get annotation(): AnnotationReport {
-    return new AnnotationReportImpl(
+  get annotation(): ReportableAnnotation {
+    return new AnnotationReport(
       path.join(this.moduleDir, this.subDir, this.file),
       this.line,
       this.message

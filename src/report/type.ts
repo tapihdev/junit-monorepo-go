@@ -1,27 +1,30 @@
 export type Index = string
 
 // Reports
-export interface Report<T extends AnyRecord> {
+export interface Reportable<T extends AnyRecord> {
   readonly index: Index
   readonly record: T
 }
 
-export interface TransformableToAnnotation {
-  readonly annotation: AnnotationReport
+interface Annotatable {
+  readonly annotation: ReportableAnnotation
 }
 
-export type AnyReport =
-  | GotestsumSummaryReport
-  | GolangCILintSummaryReport
-  | FailureReport
-  | AnnotationReport
+export type AnyReportable =
+  | ReportableGotestsumSummary
+  | ReportableGolangCILintSummary
+  | ReportableFailure
+  | ReportableAnnotation
 
-export type SummaryReport = GotestsumSummaryReport | GolangCILintSummaryReport
-export type GotestsumSummaryReport = Report<GotestsumSummaryRecord>
-export type GolangCILintSummaryReport = Report<GolangCILintSummaryRecord>
+export type ReportableSummary =
+  | ReportableGotestsumSummary
+  | ReportableGolangCILintSummary
+export type ReportableGotestsumSummary = Reportable<GotestsumSummaryRecord>
+export type ReportableGolangCILintSummary =
+  Reportable<GolangCILintSummaryRecord>
 
-export type FailureReport = Report<FailureRecord> & TransformableToAnnotation
-export type AnnotationReport = Report<AnnotationRecord>
+export type ReportableFailure = Reportable<FailureRecord> & Annotatable
+export type ReportableAnnotation = Reportable<AnnotationRecord>
 
 // Records
 export type AnyRecord =

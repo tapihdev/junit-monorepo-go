@@ -1,10 +1,10 @@
 import { FailureTable } from '../../src/table/failure'
-import { FailureReport } from '../../src/report/type'
+import { ReportableFailure } from '../../src/report/type'
 import { ReporterType } from '../../src/common/type'
 import { Align } from '../../src/table/base/type'
 
-describe('TableComposerImpl#toFailuresTable', () => {
-  const failureReportMock = jest.fn<FailureReport, []>(() => ({
+describe('FailureTable', () => {
+  const failureReportMock = jest.fn<ReportableFailure, []>(() => ({
     index: 'path/to/app/foo.goResult, :12',
     record: {
       type: ReporterType.GolangCILint,

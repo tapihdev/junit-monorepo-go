@@ -1,5 +1,5 @@
 import { Result } from '../../src/common/type'
-import { GotestsumSummaryReportImpl } from '../../src/report/gotestsum'
+import { GotestsumSummaryReport } from '../../src/report/gotestsum'
 
 describe('GotestsumSummary', () => {
   const context = {
@@ -80,7 +80,7 @@ describe('GotestsumSummary', () => {
   ]
 
   it.each(testCases)('%s', ({ input, expected }) => {
-    const summary = new GotestsumSummaryReportImpl(
+    const summary = new GotestsumSummaryReport(
       context,
       input.moduleDir,
       input.result,

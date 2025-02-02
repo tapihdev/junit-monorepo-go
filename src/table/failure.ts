@@ -1,11 +1,11 @@
 import { Table } from './base/typed'
 import { Align } from './base/type'
-import { FailureReport, FailureRecord } from '../report/type'
+import { ReportableFailure, FailureRecord } from '../report/type'
 
 export class FailureTable {
   private _table: Table<FailureRecord>
 
-  constructor(reports: FailureReport[]) {
+  constructor(reports: ReportableFailure[]) {
     this._table = new Table(
       {
         index: 'File',

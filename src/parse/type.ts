@@ -1,22 +1,22 @@
 import {
-  GotestsumSummaryReport,
-  GolangCILintSummaryReport,
-  FailureReport,
-  SummaryReport
+  ReportableGotestsumSummary,
+  ReportableGolangCILintSummary,
+  ReportableFailure,
+  ReportableSummary
 } from '../report/type'
 import { Result } from '../common/type'
 
-export interface Reportable<T extends SummaryReport> {
+export interface Parsable<T extends ReportableSummary> {
   readonly path: string
   readonly result: Result
   readonly summary: T
-  readonly failures: FailureReport[]
+  readonly failures: ReportableFailure[]
 }
 
-export type AnyReporter = GotestsumReporter | GolangCILintReporter
+export type AnyParsable = ParsableGotestsum | ParsableGolangCILint
 
-export type GotestsumReporter = Reportable<GotestsumSummaryReport>
-export type GolangCILintReporter = Reportable<GolangCILintSummaryReport>
+export type ParsableGotestsum = Parsable<ReportableGotestsumSummary>
+export type ParsableGolangCILint = Parsable<ReportableGolangCILintSummary>
 
 // Raw schema of a JUnit report
 export type JUnitReport = {

@@ -1,9 +1,9 @@
-import { JUnitReport, GotestsumReporter } from './type'
+import { JUnitReport, ParsableGotestsum } from './type'
 import { ReporterType, Result, GitHubContext } from '../common/type'
-import { GotestsumSummaryReportImpl } from '../report/gotestsum'
-import { FailureReportImpl } from '../report/failure'
+import { GotestsumSummaryReport } from '../report/gotestsum'
+import { FailureReport } from '../report/failure'
 
-export class GotestsumReporterImpl implements GotestsumReporter {
+export class GotestsumParser implements ParsableGotestsum {
   // gotestsum reports failures in the following format:
   // 1. === RUN   Test&#xA;    baz_test.go:1: error;
   // 2. === RUN   Test&#xA;--- FAIL: Test (0.00s)&#xA;
@@ -36,8 +36,8 @@ export class GotestsumReporterImpl implements GotestsumReporter {
     return Result.Passed
   }
 
-  get summary(): GotestsumSummaryReportImpl {
-    return new GotestsumSummaryReportImpl(
+  get summary(): GotestsumSummaryReport {
+    return new GotestsumSummaryReport(
       this.context,
       this.path,
       this.result,
@@ -48,7 +48,7 @@ export class GotestsumReporterImpl implements GotestsumReporter {
     )
   }
 
-  get failures(): FailureReportImpl[] {
+  get failures(): FailureReport[] {
     if (this._junit.testsuites.testsuite === undefined) {
       return []
     }
@@ -63,8 +63,7 @@ export class GotestsumReporterImpl implements GotestsumReporter {
         const macthedFailures =
           testcase.failure
             ?.map(
-              failure =>
-                failure._?.match(GotestsumReporterImpl.failureRegex) ?? null
+              failure => failure._?.match(GotestsumParser.failureRegex) ?? null
             )
             .filter(match => match !== null) ?? []
 
@@ -79,7 +78,7 @@ export class GotestsumReporterImpl implements GotestsumReporter {
           const file = match[1]
           const line = parseInt(match[2])
           const message = match[0]
-          return new FailureReportImpl(
+          return new FailureReport(
             this.context,
             ReporterType.Gotestsum,
             this.path,
@@ -143,7 +142,7 @@ export class GotestsumReporterImpl implements GotestsumReporter {
     }
 
     const property = filtered[0]
-    const match = property.value.match(GotestsumReporterImpl.goVersoinRegex)
+    const match = property.value.match(GotestsumParser.goVersoinRegex)
     if (match === null) {
       throw new Error(`go.version does not match the regex: ${property.value}`)
     }
