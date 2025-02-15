@@ -6,8 +6,8 @@
 
 # junit-monorepo-go
 
-This action clearly displays the results of multi-module monorepos in Go by
-commenting CI results to PRs and Actons summary pages.
+This action displays the CI results of multi-module monorepos in Go by
+commenting on a PR and an Actions summary page.
 
 | <img src="https://github.com/user-attachments/assets/e3638734-63df-48a7-8910-ab1fb37ae600"/> |
 | :------------------------------------------------------------------------------------------: |
