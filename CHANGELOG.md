@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.5.4](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.3...v0.5.4) - 2025-03-10
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/130
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/132
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/133
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/134
+
 ## [v0.5.3](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.2...v0.5.3) - 2025-02-15
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/125
 - ci: pin major versions by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/127
