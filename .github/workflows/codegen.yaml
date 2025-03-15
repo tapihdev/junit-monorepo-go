@@ -1,17 +1,14 @@
-name: Transpile JavaScript
+name: Transpile
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
     branches:
       - main
 
 jobs:
   codegen:
     name: Generate
-    if: github.actor != vars.BOT_USERNAME
+    if: github.actor != vars.BOT_USERNAME && github.actor != vars.APP_NAME_TAGPR
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -27,9 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
-          ref:
-            ${{ github.event == 'pull_request' && github.head_ref || github.sha
-            }}
+          ref: ${{ github.head_ref }}
           token: ${{ steps.token.outputs.token }}
 
       - name: Setup Node.js
@@ -60,7 +55,8 @@ jobs:
         env:
           BOT_EMAIL: ${{ vars.BOT_EMAIL }}
           BOT_USERNAME: ${{ vars.BOT_USERNAME }}
-        if: github.event == 'pull_request' && steps.diff.outcome == 'failure'
+        if:
+          github.event_name == 'pull_request' && steps.diff.outcome == 'failure'
         run: |
           git config --global user.email "${BOT_EMAIL}"
           git config --global user.name "${BOT_USERNAME}"
