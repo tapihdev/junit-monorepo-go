@@ -18,7 +18,7 @@ jobs:
           private-key: ${{ secrets.PRIVATE_KEY_TAGPR }}
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           token: ${{ steps.token.outputs.token }}
 
@@ -30,6 +30,6 @@ jobs:
 
       - name: Annotate major and minor tags
         if: steps.tagpr.outputs.tag != ''
-        uses: tapihdev/tag-major-minor-semver@v1
+        uses: tapihdev/tag-major-minor-semver@7b86820b4c4e796f6703c551c55ff8f42e165e3a # v1
         with:
           tag: ${{ steps.tagpr.outputs.tag }}
