@@ -30,6 +30,6 @@ jobs:
 
       - name: Annotate major and minor tags
         if: steps.tagpr.outputs.tag != ''
-        uses: tapihdev/tag-major-minor-semver@7b86820b4c4e796f6703c551c55ff8f42e165e3a # v1
+        uses: tapihdev/tag-major-minor-semver@7b86820b4c4e796f6703c551c55ff8f42e165e3a # v1.0.5
         with:
           tag: ${{ steps.tagpr.outputs.tag }}
