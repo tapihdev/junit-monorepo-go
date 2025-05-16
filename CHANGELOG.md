@@ -1,5 +1,30 @@
 # Changelog
 
+## [v0.5.5](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.4...v0.5.5) - 2025-05-16
+- chore(deps): update pnpm to v9.15.9 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/136
+- chore(deps): update typescript-eslint monorepo to v8.26.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/137
+- chore(deps): update actions/create-github-app-token action to v1.11.6 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/138
+- chore(deps): update node.js to v22.14.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/139
+- chore(deps): pin dependencies by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/135
+- fix: codegen.yaml by @tapih in https://github.com/tapihdev/junit-monorepo-go/pull/141
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/142
+- fix(deps): update dependency zod to v3.24.4 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/149
+- chore(deps): update pnpm to v10 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/161
+- chore(deps): update actions/create-github-app-token action to v2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/160
+- chore(deps): update typescript-eslint monorepo to v8.32.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/159
+- chore(deps): update node.js to v22.15.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/158
+- chore(deps): update dependency ts-json-schema-generator to v2.4.0 - autoclosed by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/157
+- chore(deps): update dependency ts-jest to v29.3.2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/156
+- chore(deps): update dependency @types/node to v22.15.17 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/152
+- chore(deps): update dependency prettier-eslint to v16.4.2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/155
+- chore(deps): update dependency json-schema-to-zod to v2.6.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/145
+- chore(deps): update actions/setup-node action to v4.4.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/151
+- chore(deps): update dependency eslint-plugin-jsonc to v2.20.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/153
+- chore(deps): update dependency eslint-plugin-prettier to v5.4.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/154
+- chore(deps): update dependency typescript to v5.8.3 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/146
+- fix(deps): update dependency yaml to v2.7.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/148
+- chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/143
+
 ## [v0.5.4](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.3...v0.5.4) - 2025-03-10
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/130
 - chore(deps): lock file maintenance by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/132
