@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.5.6](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.5...v0.5.6) - 2025-05-17
+- chore(deps): update tapihdev/tag-major-minor-semver action to v1.0.5 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/164
+- chore(deps): update actions/checkout action to v4.2.2 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/165
+- chore(deps): update pnpm to v10.11.0 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/167
+- chore(deps): update node.js to v22.15.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/163
+
 ## [v0.5.5](https://github.com/tapihdev/junit-monorepo-go/compare/v0.5.4...v0.5.5) - 2025-05-16
 - chore(deps): update pnpm to v9.15.9 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/136
 - chore(deps): update typescript-eslint monorepo to v8.26.1 by @renovate in https://github.com/tapihdev/junit-monorepo-go/pull/137
